@@ -1,0 +1,178 @@
+// Variables de Bootstrap que quieres personalizar
+$primary: #2F4597;
+$body-bg: #f8f9fa;
+$info: #2AA1DB;
+
+// Importar Bootstrap con configuraciones personalizadas
+@use 'bootstrap/scss/bootstrap' with (
+  $primary: $primary,
+  $body-bg: $body-bg,
+  $info: $info
+);
+
+@use 'bootstrap-icons/font/bootstrap-icons.css';
+
+.custom-auth-container {
+  background-color: $primary;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.custom-login-container {
+  max-width: 400px;
+  padding: 15px;
+  margin: auto;
+}
+
+.custom-auth-card {
+  background-color: $body-bg;
+  border-radius: 1rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.form-floating:focus-within {
+    z-index: 2;
+}
+
+.custom-toggle-password {
+  cursor: pointer;
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+}
+
+.auth-register-container{
+    background-color: $primary;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
+.register-container {
+    max-width: 500px;
+    padding: 15px;
+    margin: auto;
+}
+
+.password-strength {
+    height: 5px;
+    margin-top: 5px;
+    border-radius: 5px;
+}
+
+.strength-weak {
+    background-color: #dc3545;
+    width: 25%;
+}
+
+.strength-medium {
+    background-color: #fd7e14;
+    width: 50%;
+}
+
+.strength-strong {
+    background-color: #198754;
+    width: 100%;
+}
+
+.signature-pad-container {
+    border: 2px dashed #007bff;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    position: relative;
+    width: 100%;
+    height: 200px;
+    touch-action: none;
+}
+.signature-pad {
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+    display: block;
+}
+.tools-section {
+    background-color: #e9ecef;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+.color-option {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: inline-block;
+    cursor: pointer;
+    margin: 0 5px;
+    border: 2px solid transparent;
+}
+.color-option.active {
+    border: 2px solid #212529;
+}
+.signature-actions {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.signature-preview {
+  max-width: 100%;
+  max-height: 200px; /* o el alto que necesites */
+  border: 1px solid #ccc;
+  overflow: hidden;
+  object-fit: contain;
+}
+.svg-preview-container {
+    max-width: 100%;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    max-height: 100px;
+    overflow: hidden;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5px;
+}
+.svg-preview svg{
+    width: 100%;
+    height: auto;
+    max-height: 90px;
+}
+.btn-action {
+    margin: 0 5px;
+}
+.cursor-position-fix {
+    position: relative;
+    overflow: hidden;
+}
+
+#charges-tabs.nav-tabs {
+    border-bottom-color: rgba(255, 255, 255, 0.35);
+}
+
+#charges-tabs .nav-link {
+    color: #f8f9fa;
+}
+
+#charges-tabs .nav-link:not(.active) {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+#charges-tabs .nav-link:not(.active):hover,
+#charges-tabs .nav-link:not(.active):focus {
+    background-color: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: #ffffff;
+}
+
+#charges-tabs .nav-link.active {
+    color: #212529;
+}
