@@ -255,7 +255,7 @@
                     </div>
 
                     <div class="card-body p-0">
-                        @if (request()->filled('search'))
+                        @if (request()->filled('search') || request()->filled('periodo'))
                             <!-- Tabla de Resoluciones -->
                             <div class="d-md-none">
                                 @php

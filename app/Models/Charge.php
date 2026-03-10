@@ -45,4 +45,37 @@ class Charge extends Model
     {
         return $this->hasOne(Signature::class);
     }
+
+    /* Accessors para optimizar vistas */
+
+    public function getInteresadoLabelAttribute(): string
+    {
+        switch ($this->tipo_interesado) {
+            case 'Persona Juridica':
+                return $this->legalEntity?->razon_social ?: $this->legalEntity?->ruc ?: '---';
+            case 'Persona Natural':
+                $person = $this->naturalPerson;
+                $fullName = trim(($person->nombres ?? '') . ' ' . ($person->apellido_paterno ?? '') . ' ' . ($person->apellido_materno ?? ''));
+                return $fullName !== '' ? $fullName : ($person->dni ?: '---');
+            case 'Trabajador UGEL':
+                return $this->user?->name . ' ' . $this->user?->last_name ?: '---';
+            default:
+                return '---';
+        }
+    }
+
+    public function getHasSignatureAttribute(): bool
+    {
+        return (bool) ($this->signature?->signature_root);
+    }
+
+    public function getHasCartaPoderAttribute(): bool
+    {
+        return (bool) ($this->signature?->carta_poder_path);
+    }
+
+    public function getHasEvidenceAttribute(): bool
+    {
+        return (bool) ($this->signature?->evidence_root);
+    }
 }

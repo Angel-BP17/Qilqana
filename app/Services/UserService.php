@@ -20,7 +20,8 @@ class UserService implements UserServiceInterface
 
     public function getAll(array $data): array
     {
-        $cacheKey = 'users_index_' . md5(serialize($data));
+        $version = Cache::get('users_cache_version', 1);
+        $cacheKey = "users_v{$version}_index_" . md5(serialize($data));
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($data) {
             $users = $this->filter->applyFilters($data)->paginate(10);
@@ -93,9 +94,9 @@ class UserService implements UserServiceInterface
 
     private function clearCache(): void
     {
-        // Limpiamos caché de asignación para que los cambios en nombres/usuarios se reflejen en cargos
-        // Dado que no podemos borrar por prefijo fácilmente en 'file', los índices expirarán por TTL
-        // o se pueden limpiar todas las claves si es crítico.
-        Cache::forget('users_to_assign_0'); // Ejemplo para invitado
+        Cache::increment('users_cache_version');
+        Cache::forget('users_to_assign_0');
+        // También invalidamos la caché de cargos porque los nombres de usuarios pueden haber cambiado
+        Cache::increment('charges_cache_version');
     }
 }

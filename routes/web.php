@@ -42,6 +42,9 @@ Route::middleware(['auth'])->group(function () {
     Route::put('charges/{charge}/sign', [ChargeController::class, 'signStore'])->name('charges.sign.store');
     Route::put('charges/{charge}/reject', [ChargeController::class, 'reject'])->name('charges.reject');
     Route::get('charges/refresh', [ChargeController::class, 'refresh'])->name('charges.refresh');
+    Route::get('charges/{charge}/signature', [ChargeController::class, 'getSignature'])->name('charges.file.signature');
+    Route::get('charges/{charge}/evidence', [ChargeController::class, 'getEvidence'])->name('charges.file.evidence');
+    Route::get('charges/{charge}/carta-poder', [ChargeController::class, 'getCartaPoder'])->name('charges.file.carta-poder');
     Route::resource('charges', ChargeController::class)->except('show');
 
     // Otros recursos

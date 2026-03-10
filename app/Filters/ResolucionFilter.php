@@ -19,6 +19,8 @@ class ResolucionFilter
                         ->orWhere('dni', 'like', "%$search%");
                 })
             )
-            ->when($filters['periodo'] ?? null, fn($q, $periodo) => $q->where('periodo', $periodo));
+            ->when($filters['periodo'] ?? null, fn($q, $periodo) => $q->where('periodo', $periodo))
+            ->orderByDesc('fecha')
+            ->orderByDesc('id');
     }
 }

@@ -24,6 +24,18 @@ class ResolucionService implements ResolucionServiceInterface
 
     public function getAll(array $data): array
     {
+        // Si no hay búsqueda ni periodo, devolvemos una estructura vacía para evitar consultas pesadas
+        if (empty($data['search']) && empty($data['periodo'])) {
+            return [
+                'resoluciones' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 20),
+                'ultimoRegistro' => Resolucion::latest('id')->value('rd'),
+                'periodos' => Resolucion::select('periodo')->distinct()->orderBy('periodo', 'asc')->pluck('periodo'),
+                'chargePeriod' => $this->getChargePeriod(),
+                'totalResolucionesPeriodo' => 0,
+                'pendientesResolucionesPeriodo' => 0
+            ];
+        }
+
         // Versionamiento: si la versión cambia, la llave de caché cambia.
         $version = Cache::get('resoluciones_cache_version', 1);
         $cacheKey = "resoluciones_v{$version}_index_" . md5(serialize($data));

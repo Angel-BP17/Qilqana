@@ -83,6 +83,40 @@ class ChargeController extends Controller
         return redirect()->route('charges.index')->with('success', 'Cargo rechazado correctamente.');
     }
 
+    public function getSignature(Charge $charge)
+    {
+        if (!$charge->signature?->signature_root) abort(404);
+        
+        $path = $charge->signature->signature_root;
+        if (!\Storage::disk('local')->exists($path)) abort(404);
+
+        $content = \Storage::disk('local')->get($path);
+
+        return response($content)
+            ->header('Content-Type', 'image/svg+xml')
+            ->header('Cache-Control', 'public, max-age=3600');
+    }
+
+    public function getEvidence(Charge $charge)
+    {
+        if (!$charge->signature?->evidence_root) abort(404);
+        
+        $path = $charge->signature->evidence_root;
+        if (!\Storage::disk('local')->exists($path)) abort(404);
+
+        return response()->file(\Storage::disk('local')->path($path));
+    }
+
+    public function getCartaPoder(Charge $charge)
+    {
+        if (!$charge->signature?->carta_poder_path) abort(404);
+        
+        $path = $charge->signature->carta_poder_path;
+        if (!\Storage::disk('local')->exists($path)) abort(404);
+
+        return response()->file(\Storage::disk('local')->path($path));
+    }
+
     // Reportes delegados al ReportService
     public function reportSent(Request $request)
     {

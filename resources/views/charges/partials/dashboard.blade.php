@@ -23,10 +23,6 @@
         ->count();
 
     $createdTotal = $createdCharges->count();
-
-    $signedResolutionCharges = $resolutionCharges->filter(
-        fn($charge) => $charge->signature?->signature_status === 'firmado',
-    );
 @endphp
 
 <div class="row g-3 mb-4">
@@ -99,7 +95,7 @@
             <button class="nav-link active d-flex align-items-center gap-2" id="resolution-tab" data-bs-toggle="tab"
                 data-bs-target="#resolution-tab-pane" type="button" role="tab" aria-controls="resolution-tab-pane"
                 aria-selected="true">
-                Resoluciones <span class="badge bg-secondary ms-1">{{ $signedResolutionCharges->count() }}</span>
+                Resoluciones <span class="badge bg-secondary ms-1">{{ $resolutionChargesCount ?? 0 }}</span>
             </button>
         </li>
     @endif

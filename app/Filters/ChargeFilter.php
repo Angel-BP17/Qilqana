@@ -8,7 +8,7 @@ class ChargeFilter
 {
     public function getAllSentCharges($searchfilters, $user)
     {
-        return Charge::with(['user', 'naturalPerson', 'legalEntity', 'signature', 'signature.signer', 'signature.assignedTo'])
+        return Charge::with(['user', 'naturalPerson', 'legalEntity', 'signature', 'signature.signer', 'signature.assignedTo', 'resolucion'])
             ->where('user_id', $user?->id)
             ->whereNull('resolucion_id')
             ->when($searchfilters['period'], fn($q) => $q->where('charge_period', $searchfilters['period']))
@@ -37,6 +37,7 @@ class ChargeFilter
             'signature',
             'signature.signer',
             'signature.assignedTo',
+            'resolucion',
         ])
             ->whereNull('resolucion_id')
             ->whereHas('signature', fn($q) => $q->where('assigned_to', $user?->id))
@@ -67,7 +68,7 @@ class ChargeFilter
 
     public function getAllCreatedCharges($searchfilters, $user)
     {
-        return Charge::with(['user', 'naturalPerson', 'legalEntity', 'signature', 'signature.signer', 'signature.assignedTo'])
+        return Charge::with(['user', 'naturalPerson', 'legalEntity', 'signature', 'signature.signer', 'signature.assignedTo', 'resolucion'])
             ->where('user_id', $user?->id)
             ->whereNull('resolucion_id')
             ->whereIn('tipo_interesado', ['Persona Juridica', 'Persona Natural'])
@@ -90,21 +91,17 @@ class ChargeFilter
 
     public function getAllResolutionCharges($searchfilters, $user)
     {
-        return Charge::with(['user', 'naturalPerson', 'legalEntity', 'signature', 'signature.signer', 'signature.assignedTo'])
-            ->where('user_id', $user?->id)
+        return Charge::with(['user', 'naturalPerson', 'legalEntity', 'signature', 'signature.signer', 'signature.assignedTo', 'resolucion'])
             ->whereNotNull('resolucion_id')
-            ->when($searchfilters['period'], fn($q) => $q->where('charge_period', $searchfilters['period']))
+            ->when($searchfilters['period'], function ($q, $period) {
+                $q->where(function ($q2) use ($period) {
+                    $q2->where('charge_period', $period)
+                       ->orWhereNull('charge_period');
+                });
+            })
             ->when(
                 $searchfilters['search'],
-                fn($q, $search) =>
-                $this->applySearchFilter($q, $search)
-            )
-            ->when(
-                $this->isValidSignatureStatus($searchfilters['signature_status']),
-                fn($q) => $q->whereHas(
-                    'signature',
-                    fn($s) => $s->where('signature_status', $searchfilters['signature_status'])
-                )
+                fn($q, $search) => $this->applySearchFilter($q, $search)
             )
             ->orderByDesc('created_at')
             ->get();
