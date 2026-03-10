@@ -10,7 +10,19 @@
 @endphp
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-info border-0 py-3">
-        <h5 class="mb-0 fw-bold text-white">Personas naturales</h5>
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+            <h5 class="mb-0 fw-bold text-white">Personas naturales</h5>
+            <form action="{{ route('natural-people.index') }}" method="GET" class="d-flex gap-2">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                    </span>
+                    <input type="text" name="search" class="form-control border-start-0 ps-0" 
+                        placeholder="Buscar..." value="{{ request('search') }}" style="min-width: 200px;">
+                </div>
+                <button type="submit" class="btn btn-light btn-sm fw-bold text-info">Buscar</button>
+            </form>
+        </div>
     </div>
     <div class="card-body p-0">
         <div class="d-md-none">

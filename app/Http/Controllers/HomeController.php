@@ -27,7 +27,7 @@ class HomeController extends Controller
         $user = Auth::user();
 
         // Si el usuario puede ver resoluciones, redirigir a resoluciones
-        if ($user->can('modulo resoluciones')) {
+        if ($user->can('modulo resoluciones') && !$user->hasRole('ADMINISTRADOR')) {
             return redirect()->route('resolucions.index');
         }
 

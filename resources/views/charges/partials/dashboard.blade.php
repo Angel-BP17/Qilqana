@@ -1,5 +1,7 @@
 @php
     $currentUserId = Auth::id();
+
+    // Totales y filtrados para las badges de las pestañas
     $sentChargesFiltered = $sentCharges->filter(fn($charge) => $charge->signature?->assigned_to !== $currentUserId);
     $sentTotal = $sentChargesFiltered->count();
     $sentPending = $sentChargesFiltered
@@ -8,6 +10,7 @@
     $sentSigned = $sentChargesFiltered
         ->filter(fn($charge) => $charge->signature?->signature_status === 'firmado')
         ->count();
+
     $receivedTotal = $receivedCharges->count();
     $receivedPending = $receivedCharges
         ->filter(fn($charge) => $charge->signature?->signature_status === 'pendiente')
@@ -18,7 +21,12 @@
     $receivedRejected = $receivedCharges
         ->filter(fn($charge) => $charge->signature?->signature_status === 'rechazado')
         ->count();
+
     $createdTotal = $createdCharges->count();
+
+    $signedResolutionCharges = $resolutionCharges->filter(
+        fn($charge) => $charge->signature?->signature_status === 'firmado',
+    );
 @endphp
 
 <div class="row g-3 mb-4">
@@ -74,7 +82,7 @@
             <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
                     <p class="mb-1 text-muted">Nuevo cargo</p>
-                    <h6 class="mb-0">Registrar rapidamente</h6>
+                    <h6 class="mb-0">Registrar rápidamente</h6>
                 </div>
                 <button type="button" class="btn btn-success" data-bs-toggle="modal"
                     data-bs-target="#createChargeModal" @disabled(!$defaultPeriod)
@@ -91,14 +99,14 @@
             <button class="nav-link active d-flex align-items-center gap-2" id="resolution-tab" data-bs-toggle="tab"
                 data-bs-target="#resolution-tab-pane" type="button" role="tab" aria-controls="resolution-tab-pane"
                 aria-selected="true">
-                Resoluciones <span class="badge bg-secondary ms-1">{{ $resolutionCharges->count() }}</span>
+                Resoluciones <span class="badge bg-secondary ms-1">{{ $signedResolutionCharges->count() }}</span>
             </button>
         </li>
     @endif
     <li class="nav-item" role="presentation">
-        <button class="nav-link {{ !$canViewResolutionCharges ? 'active' : '' }} d-flex align-items-center gap-2" id="received-tab" data-bs-toggle="tab"
-            data-bs-target="#received-tab-pane" type="button" role="tab" aria-controls="received-tab-pane"
-            aria-selected="{{ !$canViewResolutionCharges ? 'true' : 'false' }}">
+        <button class="nav-link {{ !$canViewResolutionCharges ? 'active' : '' }} d-flex align-items-center gap-2"
+            id="received-tab" data-bs-toggle="tab" data-bs-target="#received-tab-pane" type="button" role="tab"
+            aria-controls="received-tab-pane" aria-selected="{{ !$canViewResolutionCharges ? 'true' : 'false' }}">
             Recibidos <span class="badge bg-secondary ms-1">{{ $receivedTotal }}</span>
         </button>
     </li>

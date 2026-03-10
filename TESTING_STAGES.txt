@@ -1,0 +1,68 @@
+================================================================================
+ESTÁNDAR DE PRUEBAS PARA API LLAPIY - SUITE DE TESTEO DE 8 ETAPAS
+================================================================================
+
+1. ETAPA DE CONTRATO DE VISTA (INERTIA PROPS)
+--------------------------------------------------------------------------------
+Objetivo: Garantizar que el componente de React reciba siempre las "props" con la 
+estructura y nombres esperados.
+* Qué probar: Que el controlador devuelva el componente correcto
+  y que las propiedades (ej.'filters', 'pagination') tengan las llaves 
+  exactas y no sean nulas.
+* Evita: Errores de "Cannot read properties of undefined" o ".map is not a function" 
+  en el frontend al cargar la página.
+
+2. ETAPA DE VALIDACIÓN (GATEKEEPING)
+--------------------------------------------------------------------------------
+Objetivo: Probar exhaustivamente los FormRequests.
+* Qué probar: Enviar campos vacíos, tipos de datos erróneos (letras en lugar de IDs), 
+  o strings demasiado largos (SQL Truncation prevention).
+* Evita: Que la base de datos lance errores de SQL de bajo nivel porque la 
+  validación de Laravel falló.
+
+3. ETAPA DE SEGURIDAD Y ROLES (RBAC)
+--------------------------------------------------------------------------------
+Objetivo: Verificar que las Policies y Middlewares de permisos funcionen.
+* Qué probar: ¿Puede un "OPERADOR" eliminar un documento? (Debe dar 403). 
+  ¿Puede un usuario ver documentos de otra área si no tiene el rol necesario?
+* Evita: Fugas de información y errores 403 inesperados en la consola del cliente.
+
+4. ETAPA DE INTEGRIDAD DE MODELOS (RELACIONES)
+--------------------------------------------------------------------------------
+Objetivo: Validar que los modelos y sus relaciones existan y sean consistentes.
+* Qué probar: Que al crear un registro, los foreign_keys asociados realmente 
+  pertenezcan a registros existentes.
+* Evita: Errores de "Class not found" o "Integrity constraint violation" en tiempo 
+  de ejecución.
+
+5. ETAPA DE REGLAS DE NEGOCIO (SERVICE LAYER)
+--------------------------------------------------------------------------------
+Objetivo: Probar la lógica compleja fuera de los controladores.
+* Qué probar: Cálculos estadísticos, conteos de tiempo real (ej. Dashboard), 
+  filtros de visibilidad por grupo y jerarquías de áreas.
+* Evita: Que los gráficos o contadores muestren datos erróneos ("0" o nulos).
+
+6. ETAPA DE MANEJO DE ARCHIVOS (STORAGE)
+--------------------------------------------------------------------------------
+Objetivo: Probar la integridad de la subida, descarga y visualización de archivos.
+* Qué probar: Subida de extensiones no permitidas, manejo de discos llenos, 
+  y que el streaming del archivo (response()->file()) funcione con token.
+* Evita: Errores de "File not found" o archivos corruptos en el visor del frontend.
+
+7. ETAPA DE RESILIENCIA (EDGE CASES)
+--------------------------------------------------------------------------------
+Objetivo: Estresar la API y probar su robustez ante datos inusuales.
+* Qué probar: Peticiones concurrentes sobre el mismo registro, términos con 
+  caracteres especiales (tildes, ñ, emojis), y paginación masiva.
+* Evita: Caídas del servidor por consumo de memoria o errores de codificación (UTF-8).
+
+8. ETAPA DE RENDIMIENTO (N+1 QUERIES)
+--------------------------------------------------------------------------------
+Objetivo: Optimizar las consultas a la base de datos.
+* Qué probar: Usar logs de queries para asegurar que al listar N registros no 
+  se realicen N consultas adicionales a tablas relacionadas (Eager Loading).
+* Evita: Que la API se vuelva lenta conforme crece la base de datos (Timeouts).
+
+================================================================================
+FIN DEL DOCUMENTO
+================================================================================
