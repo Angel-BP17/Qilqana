@@ -4,8 +4,6 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-use function Laravel\Prompts\table;
-
 return new class extends Migration {
     /**
      * Run the migrations.
@@ -14,8 +12,7 @@ return new class extends Migration {
     {
         Schema::create('representatives', function (Blueprint $table) {
             $table->id();
-            $table->string('dni')->nullable();
-            $table->string('nombre')->nullable();
+            $table->foreignId('natural_person_id')->constrained('natural_people')->onDelete('cascade');
             $table->string('cargo')->nullable();
             $table->date('fecha_desde')->nullable();
             $table->timestamps();

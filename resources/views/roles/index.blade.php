@@ -3,6 +3,15 @@
 @section('title', 'Roles y permisos')
 @section('content')
     <div class="container" id="roles-page" data-permission-labels='@json($permissionLabels)'>
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h3 class="fw-bold text-white mb-0">
+                    <i class="fa-solid fa-user-shield me-2"></i>Módulo de Roles y Permisos
+                </h3>
+                <p class="text-white-50 mb-0">Configuración de perfiles de usuario y niveles de acceso</p>
+            </div>
+        </div>
+
         @if ($errors->any())
             <div class="alert alert-danger shadow-sm">
                 <ul class="mb-0">

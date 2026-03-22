@@ -51,8 +51,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('users', UserController::class)->except('show');
     Route::resource('roles', RoleController::class)->except('show');
     Route::post('natural-people/import', [NaturalPersonController::class, 'import'])->name('natural-people.import');
+    Route::get('natural-people/download-template', [NaturalPersonController::class, 'downloadTemplate'])->name('natural-people.download-template');
     Route::resource('natural-people', NaturalPersonController::class)->except('show');
     Route::post('legal-entities/import', [LegalEntityController::class, 'import'])->name('legal-entities.import');
+    Route::get('legal-entities/download-template', [LegalEntityController::class, 'downloadTemplate'])->name('legal-entities.download-template');
     Route::resource('legal-entities', LegalEntityController::class)->except('show');
     
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');

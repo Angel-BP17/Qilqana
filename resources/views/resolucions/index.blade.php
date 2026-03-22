@@ -3,6 +3,15 @@
 @section('title', 'Resoluciones')
 @section('content')
     <div class="container">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h3 class="fw-bold text-white mb-0">
+                    <i class="fa-solid fa-file-contract me-2"></i>Módulo de Resoluciones
+                </h3>
+                <p class="text-white-50 mb-0">Registro y vinculación de resoluciones directorales</p>
+            </div>
+        </div>
+
         @if ($errors->any())
             <div class="alert alert-danger">
                 <ul>
@@ -158,28 +167,27 @@
                 @if (Auth::user()->hasRole('ADMINISTRADOR') || Auth::user()->can('resolucion importar excel'))
                     <div class="col-12 col-xl-6">
                         <div class="card border-0 shadow-sm h-100">
-                            <div class="card-body py-3">
-                                <div class="fw-semibold mb-2"><i class="fa-solid fa-file-import me-1"></i>Importar
-                                    resoluciones
+                            <div class="card-body py-3 d-flex flex-column">
+                                <div class="fw-semibold mb-3">
+                                    <i class="fa-solid fa-file-import me-1"></i>Importar resoluciones
                                 </div>
-                                <form method="POST" action="{{ route('index.import') }}" enctype="multipart/form-data">
+                                <form method="POST" action="{{ route('index.import') }}" enctype="multipart/form-data" class="mt-auto">
                                     @csrf
-                                    <div class="row g-2 align-items-stretch">
-                                        <div class="col-12 col-lg-7">
-                                            <input type="file" class="form-control h-100" id="archivo_excel"
+                                    <div class="row g-2">
+                                        <div class="col-12 col-md-6">
+                                            <input type="file" class="form-control" id="archivo_excel"
                                                 data-import-input="1" name="archivo_excel" accept=".xlsx,.xls">
                                         </div>
-                                        <div class="col-12 col-lg-5">
-                                            <div class="d-flex flex-wrap gap-2 h-100 align-items-stretch">
+                                        <div class="col-12 col-md-6">
+                                            <div class="d-flex gap-2 h-100">
                                                 <a href="{{ route('download.template') }}"
-                                                    class="btn btn-info h-100 d-flex align-items-center">
+                                                    class="btn btn-info flex-grow-1 d-flex align-items-center justify-content-center text-white">
                                                     <i class="fas fa-file-download me-1"></i>Plantilla
                                                 </a>
                                                 <button type="submit"
-                                                    class="btn btn-success h-100 d-flex align-items-center"
+                                                    class="btn btn-success flex-grow-1 d-flex align-items-center justify-content-center"
                                                     id="importExcelButton" disabled>
-                                                    <i class="fa-solid fa-file-csv me-1"></i> o <i
-                                                        class="fa-solid fa-file-excel ms-1 me-1"></i> Importar
+                                                    <i class="fa-solid fa-file-import me-1"></i> Importar
                                                 </button>
                                             </div>
                                         </div>
@@ -256,6 +264,25 @@
 
                     <div class="card-body p-0">
                         @if (request()->filled('search') || request()->filled('periodo'))
+                            <div class="px-3 py-3 border-bottom bg-light bg-opacity-50">
+                                <div class="row align-items-center">
+                                    <div class="col-12 col-md-4">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text bg-white border-end-0">
+                                                <i class="fa-solid fa-filter text-muted"></i>
+                                            </span>
+                                            <input type="text" id="subfilter-input" class="form-control border-start-0 ps-0" 
+                                                placeholder="Sub-filtrar resultados actuales...">
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-8 mt-2 mt-md-0">
+                                        <small class="text-muted">
+                                            <i class="fa-solid fa-circle-info me-1"></i>
+                                            Este filtro busca instantáneamente sobre los {{ $resoluciones->count() }} resultados de esta página.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
                             <!-- Tabla de Resoluciones -->
                             <div class="d-md-none">
                                 @php

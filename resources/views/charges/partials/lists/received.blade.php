@@ -27,9 +27,18 @@
                                         placeholder="No de cargo, RUC, DNI..." value="{{ request('received_search') }}">
                                 </div>
                             </div>
+                            <div class="col-2">
+                                <select name="received_period" class="form-select" onchange="this.form.submit()">
+                                    <option value="">Todos los periodos</option>
+                                    @foreach ($periodOptions ?? [] as $period)
+                                        <option value="{{ $period }}" @selected(($receivedPeriod ?? request('received_period')) === $period)>
+                                            {{ $period }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div class="col-auto">
-                                <button class="btn btn-primary" type="submit"><i class="fas fa-filter"></i>
-                                    Filtrar</button>
+                                <button class="btn btn-primary" type="submit"><i class="fas fa-filter"></i> Filtrar</button>
                             </div>
                         </form>
                         <form action="{{ route('charges.reports.received') }}" method="GET">

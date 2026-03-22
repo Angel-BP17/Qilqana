@@ -1,17 +1,32 @@
-// Variables de Bootstrap que quieres personalizar
+// Variables de Bootstrap personalizadas
 $primary: #2F4597;
 $body-bg: #f8f9fa;
 $info: #2AA1DB;
 
-// Importar Bootstrap con configuraciones personalizadas
-@use 'bootstrap/scss/bootstrap' with (
-  $primary: $primary,
-  $body-bg: $body-bg,
-  $info: $info
-);
+// Importar Bootstrap
+@import 'bootstrap/scss/bootstrap';
 
-@use 'bootstrap-icons/font/bootstrap-icons.css';
+// --- ESTILOS PARA CAMPOS DE BÚSQUEDA ESPECIALES ---
+.input-lookup-special {
+    border-color: #2F4597 !important;
+    border-width: 1.5px !important;
+}
 
+.btn-lookup-special {
+    background-color: #2F4597 !important;
+    color: white !important;
+    border-color: #2F4597 !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease;
+}
+
+.btn-lookup-special:hover {
+    background-color: #1e2d6b !important;
+    border-color: #1e2d6b !important;
+    box-shadow: 0 0 8px rgba(47, 69, 151, 0.4);
+}
+
+// Estilos personalizados existentes
 .custom-auth-container {
   background-color: $primary;
   height: 100vh;
@@ -61,27 +76,6 @@ $info: #2AA1DB;
     margin: auto;
 }
 
-.password-strength {
-    height: 5px;
-    margin-top: 5px;
-    border-radius: 5px;
-}
-
-.strength-weak {
-    background-color: #dc3545;
-    width: 25%;
-}
-
-.strength-medium {
-    background-color: #fd7e14;
-    width: 50%;
-}
-
-.strength-strong {
-    background-color: #198754;
-    width: 100%;
-}
-
 .signature-pad-container {
     border: 2px dashed #007bff;
     border-radius: 5px;
@@ -96,61 +90,6 @@ $info: #2AA1DB;
     height: 100%;
     cursor: crosshair;
     display: block;
-}
-.tools-section {
-    background-color: #e9ecef;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 15px;
-}
-.color-option {
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    display: inline-block;
-    cursor: pointer;
-    margin: 0 5px;
-    border: 2px solid transparent;
-}
-.color-option.active {
-    border: 2px solid #212529;
-}
-.signature-actions {
-    margin-top: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.signature-preview {
-  max-width: 100%;
-  max-height: 200px; /* o el alto que necesites */
-  border: 1px solid #ccc;
-  overflow: hidden;
-  object-fit: contain;
-}
-.svg-preview-container {
-    max-width: 100%;
-    border: 1px solid #dee2e6;
-    border-radius: 5px;
-    max-height: 100px;
-    overflow: hidden;
-    background-color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 5px;
-}
-.svg-preview svg{
-    width: 100%;
-    height: auto;
-    max-height: 90px;
-}
-.btn-action {
-    margin: 0 5px;
-}
-.cursor-position-fix {
-    position: relative;
-    overflow: hidden;
 }
 
 #charges-tabs.nav-tabs {

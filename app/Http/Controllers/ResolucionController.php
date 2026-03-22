@@ -90,19 +90,16 @@ class ResolucionController extends Controller
 
     public function downloadTemplate(): BinaryFileResponse
     {
-        $templatePath = storage_path('app/public/templates/Plantilla.xlsx');
+        $templatePath = storage_path('app/public/templates/Plantilla_Resoluciones.xlsx');
         $templateDir = dirname($templatePath);
         if (!is_dir($templateDir)) {
-            // Asegurar directorio para evitar errores al guardar la plantilla.
             mkdir($templateDir, 0755, true);
         }
 
-        // Si el archivo no existe, lo creamos
         if (!file_exists($templatePath)) {
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
 
-            // Encabezados
             $sheet->setCellValue('A1', 'RD');
             $sheet->setCellValue('B1', 'Fecha');
             $sheet->setCellValue('C1', 'DNI');
@@ -115,7 +112,7 @@ class ResolucionController extends Controller
             $writer->save($templatePath);
         }
 
-        return response()->download($templatePath, 'Plantilla_Resoluciones.xlsx');
+        return response()->download($templatePath, 'Plantilla_Importacion_Resoluciones.xlsx');
     }
 
     public function generatePDF(Request $request)

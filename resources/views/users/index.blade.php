@@ -3,6 +3,15 @@
 @section('title', 'Usuarios')
 @section('content')
     <div class="container">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h3 class="fw-bold text-white mb-0">
+                    <i class="fa-solid fa-users-gear me-2"></i>Módulo de Usuarios
+                </h3>
+                <p class="text-white-50 mb-0">Administración de accesos, perfiles y seguridad del sistema</p>
+            </div>
+        </div>
+
         @php
             $canCreateUser = Auth::user()->hasRole('ADMINISTRADOR') || Auth::user()->can('users.create');
         @endphp

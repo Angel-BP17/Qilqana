@@ -10,11 +10,15 @@ class Representative extends Model
     use HasFactory;
 
     protected $fillable = [
-        'dni',
-        'nombre',
+        'natural_person_id',
         'cargo',
         'fecha_desde',
     ];
+
+    public function naturalPerson()
+    {
+        return $this->belongsTo(NaturalPerson::class);
+    }
 
     public function legalEntities()
     {

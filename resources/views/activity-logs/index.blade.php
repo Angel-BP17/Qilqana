@@ -3,6 +3,15 @@
 @section('title', 'Registro de actividades')
 @section('content')
     <div class="container">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h3 class="fw-bold text-white mb-0">
+                    <i class="fa-solid fa-clock-rotate-left me-2"></i>Módulo de Registro de Actividades
+                </h3>
+                <p class="text-white-50 mb-0">Auditoría detallada de cambios, accesos y acciones en el sistema</p>
+            </div>
+        </div>
+
         @if ($errors->any())
             <div class="alert alert-danger shadow-sm">
                 <ul class="mb-0">

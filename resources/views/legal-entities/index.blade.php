@@ -3,6 +3,15 @@
 @section('title', 'Personas juridicas')
 @section('content')
     <div class="container">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h3 class="fw-bold text-white mb-0">
+                    <i class="fa-solid fa-building-user me-2"></i>Personas Jurídicas
+                </h3>
+                <p class="text-white-50 mb-0">Gestión de empresas, instituciones y sus representantes</p>
+            </div>
+        </div>
+
         @php
             $canCreateLegalEntity = Auth::user()->hasRole('ADMINISTRADOR') || Auth::user()->can('legal-entities.create');
         @endphp
@@ -23,38 +32,36 @@
         @endif
 
         <div class="row g-3 mb-4">
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-lg-6">
                 <div class="card shadow-sm border-0 h-100">
-                    <div class="card-body d-flex align-items-center gap-3">
-                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-3">
+                    <div class="card-body d-flex align-items-center p-4 gap-3">
+                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-3 flex-shrink-0">
                             <i class="fa-solid fa-building fs-4"></i>
                         </div>
                         <div>
-                            <p class="mb-0 text-muted">Total de personas juridicas</p>
-                            <h4 class="mb-0 fw-bold">{{ $legalEntities->total() ?? $legalEntities->count() }}</h4>
+                            <p class="mb-0 text-muted small text-uppercase fw-bold">Total entidades</p>
+                            <h3 class="mb-0 fw-bold">{{ $legalEntities->total() ?? $legalEntities->count() }}</h3>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-lg-6">
                 <div class="card shadow-sm border-0 h-100">
-                    <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-                        <div>
-                            <p class="mb-1 text-muted">Nueva persona juridica</p>
-                            <h6 class="mb-0">Registra una persona juridica rapida</h6>
-                        </div>
-                        <div class="d-flex flex-column flex-md-row gap-2 w-100 w-md-auto">
-                            <a class="btn btn-outline-primary w-100 w-md-auto"
-                                href="{{ asset('storage/templates/Plantilla_entidades.xlsx') }}" download>
-                                <i class="bi bi-download"></i>
-                                <span class="ms-1">Descargar plantilla</span>
-                            </a>
-                            <button type="button" class="btn btn-success w-100 w-md-auto" data-bs-toggle="modal"
-                                data-bs-target="#createLegalEntityModal" @disabled(!$canCreateLegalEntity)
-                                @unless ($canCreateLegalEntity) title="No tienes permiso para crear personas juridicas" @endunless>
-                                <i class="bi bi-plus-circle"></i>
-                                <span class="ms-1">Registrar</span>
-                            </button>
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                            <div>
+                                <p class="mb-1 text-muted small text-uppercase fw-bold">Nueva persona jurídica</p>
+                                <h6 class="mb-0 text-muted">Registro de empresas e instituciones</h6>
+                            </div>
+                            <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-md-auto">
+                                <a class="btn btn-outline-primary" href="{{ route('legal-entities.download-template') }}">
+                                    <i class="bi bi-download me-1"></i> Plantilla
+                                </a>
+                                <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                                    data-bs-target="#createLegalEntityModal" @disabled(!$canCreateLegalEntity)>
+                                    <i class="bi bi-plus-circle me-1"></i> Registrar
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -64,36 +71,36 @@
         @if ($canCreateLegalEntity)
             <div class="row g-3 mb-4">
                 <div class="col-12">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body py-3">
-                            <div class="fw-semibold mb-2">
-                                <i class="fa-solid fa-file-import me-1"></i>Importar personas juridicas
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="fw-bold text-uppercase small text-muted mb-3">
+                                <i class="fa-solid fa-file-import me-1"></i>Importación masiva
                             </div>
                             <form method="POST" action="{{ route('legal-entities.import') }}"
                                 enctype="multipart/form-data">
                                 @csrf
-                                <div class="row g-2 align-items-stretch">
-                                    <div class="col-12 col-lg-7">
-                                        <input type="file" class="form-control h-100" id="archivo_excel_legal_entities"
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-7 col-xl-8">
+                                        <input type="file" class="form-control" id="archivo_excel_legal_entities"
                                             data-import-input="legal-entities" name="archivo_excel" accept=".xlsx,.xls">
                                     </div>
-                                    <div class="col-12 col-lg-5">
-                                        <div class="d-flex flex-wrap gap-2 h-100 align-items-stretch">
-                                            <a href="{{ asset('storage/templates/Plantilla_entidades.xlsx') }}"
-                                                class="btn btn-info h-100 d-flex align-items-center" download>
+                                    <div class="col-12 col-md-5 col-xl-4">
+                                        <div class="d-flex gap-2">
+                                            <a href="{{ route('legal-entities.download-template') }}"
+                                                class="btn btn-info text-white flex-grow-1">
                                                 <i class="fas fa-file-download me-1"></i>Plantilla
                                             </a>
                                             <button type="submit"
-                                                class="btn btn-success h-100 d-flex align-items-center"
+                                                class="btn btn-success flex-grow-1"
                                                 id="importLegalEntitiesButton" disabled>
-                                                <i class="fa-solid fa-file-excel me-1"></i> Importar
+                                                <i class="fa-solid fa-upload me-1"></i> Importar
                                             </button>
                                         </div>
                                     </div>
                                 </div>
                             </form>
-                            <div class="text-muted small mt-2">
-                                Usa la plantilla indicada para cargar los datos.
+                            <div class="text-muted small mt-3">
+                                <i class="fa-solid fa-circle-info me-1"></i> Use la plantilla oficial para asegurar la integridad de los datos.
                             </div>
                         </div>
                     </div>

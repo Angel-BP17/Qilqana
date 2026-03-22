@@ -13,8 +13,7 @@ class CreateChargeRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $user = $this->user();
-        return $user?->can('modulo cargos') ?? false;
+        return $this->user()->can('create', \App\Models\Charge::class);
     }
 
     /**
@@ -37,6 +36,12 @@ class CreateChargeRequest extends FormRequest
             'asunto' => ['required', 'string', 'max:255'],
             'document_date' => ['nullable', 'date'],
             'assigned_to' => ['required_if:tipo_interesado,Trabajador UGEL', 'nullable', Rule::exists('users', 'id')],
+            'representative_dni' => ['nullable', 'string', 'max:10'],
+            'representative_nombres' => ['nullable', 'string', 'max:255'],
+            'representative_apellido_paterno' => ['nullable', 'string', 'max:255'],
+            'representative_apellido_materno' => ['nullable', 'string', 'max:255'],
+            'representative_cargo' => ['nullable', 'string', 'max:255'],
+            'representative_since' => ['nullable', 'date'],
         ];
     }
 

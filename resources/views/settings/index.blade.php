@@ -3,6 +3,15 @@
 @section('title', 'Configuración')
 @section('content')
     <div class="container">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h3 class="fw-bold text-white mb-0">
+                    <i class="fa-solid fa-gears me-2"></i>Configuración del Sistema
+                </h3>
+                <p class="text-white-50 mb-0">Ajustes generales, gestión de periodos y mantenimiento de datos</p>
+            </div>
+        </div>
+
         @if (session('success'))
             <div class="alert alert-success shadow-sm">
                 {{ session('success') }}

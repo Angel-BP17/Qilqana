@@ -29,9 +29,18 @@ export const NaturalPeopleManagement = {
 
     setupLookup: function() {
         const bindLookup = (btnId, inputId, targets) => {
-            document.getElementById(btnId)?.addEventListener('click', async () => {
-                const data = await ApiLookup.dni(document.getElementById(inputId)?.value);
+            const btn = document.getElementById(btnId);
+            btn?.addEventListener('click', async () => {
+                const val = document.getElementById(inputId)?.value;
+                if (!val) return;
+                
+                this.setLoading(btn, true);
+                const data = await ApiLookup.dni(val);
+                this.setLoading(btn, false);
+
                 if (data) {
+                    alert(`Atención: La persona con DNI ${val} ya se encuentra registrada como ${data.nombres} ${data.apellido_paterno}.`);
+                    
                     Object.keys(targets).forEach(key => {
                         const el = document.getElementById(targets[key]);
                         if (el) el.value = data[key] || '';
@@ -42,6 +51,18 @@ export const NaturalPeopleManagement = {
 
         bindLookup('lookup_dni_btn', 'dni', { nombres: 'nombres', apellido_paterno: 'apellido_paterno', apellido_materno: 'apellido_materno' });
         bindLookup('lookup_dni_btn_edit', 'edit_dni', { nombres: 'edit_nombres', apellido_paterno: 'edit_apellido_paterno', apellido_materno: 'edit_apellido_materno' });
+    },
+
+    setLoading: function(btn, loading) {
+        if (!btn) return;
+        if (loading) {
+            btn.dataset.originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+        } else {
+            btn.innerHTML = btn.dataset.originalHtml || 'Buscar';
+            btn.disabled = false;
+        }
     },
 
     setupDeleteModal: function() {

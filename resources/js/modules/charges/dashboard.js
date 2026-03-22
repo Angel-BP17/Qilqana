@@ -44,9 +44,23 @@ export const DashboardModule = {
         // Abrir Modal Firma
         container.querySelectorAll('.btn-sign-charge').forEach(btn => {
             btn.onclick = () => {
-                document.getElementById('signChargeForm').action = btn.dataset.action;
+                const form = document.getElementById('signChargeForm');
+                form.action = btn.dataset.action;
                 const chargeData = JSON.parse(btn.dataset.charge);
-                document.getElementById('sign_external_fields')?.classList.toggle('d-none', !['Persona Natural', 'Persona Juridica'].includes(chargeData.tipo_interesado));
+                
+                // Mostrar campos de titularidad solo para externos
+                const isExternal = ['Persona Natural', 'Persona Juridica'].includes(chargeData.tipo_interesado);
+                const externalFields = document.getElementById('sign_external_fields');
+                if (externalFields) {
+                    externalFields.classList.toggle('d-none', !isExternal);
+                    // Resetear a "Soy titular" por defecto
+                    const titularYes = document.getElementById('sign_titularidad_yes');
+                    if (titularYes) {
+                        titularYes.checked = true;
+                        titularYes.dispatchEvent(new Event('change'));
+                    }
+                }
+
                 new bootstrap.Modal(document.getElementById('signChargeModal')).show();
                 setTimeout(() => SignatureModule.resize(), 300);
             };
@@ -61,6 +75,31 @@ export const DashboardModule = {
                 document.getElementById('edit_asunto').value = charge.asunto || '';
                 document.getElementById('edit_document_date').value = charge.document_date || '';
                 document.getElementById('edit_tipo_interesado').value = charge.tipo_interesado || '';
+                
+                // Llenar datos específicos si existen
+                if (charge.natural_person) {
+                    document.getElementById('edit_dni').value = charge.natural_person.dni || '';
+                    document.getElementById('edit_nombres').value = charge.natural_person.nombres || '';
+                    document.getElementById('edit_apellido_paterno').value = charge.natural_person.apellido_paterno || '';
+                    document.getElementById('edit_apellido_materno').value = charge.natural_person.apellido_materno || '';
+                }
+                if (charge.legal_entity) {
+                    document.getElementById('edit_ruc').value = charge.legal_entity.ruc || '';
+                    document.getElementById('edit_razon_social').value = charge.legal_entity.razon_social || '';
+                    document.getElementById('edit_district').value = charge.legal_entity.district || '';
+                    
+                    if (charge.legal_entity.representative) {
+                        const rep = charge.legal_entity.representative;
+                        const p = 'edit_representative_';
+                        document.getElementById(p + 'dni').value = rep.natural_person?.dni || '';
+                        document.getElementById(p + 'nombres').value = rep.natural_person?.nombres || '';
+                        document.getElementById(p + 'apellido_paterno').value = rep.natural_person?.apellido_paterno || '';
+                        document.getElementById(p + 'apellido_materno').value = rep.natural_person?.apellido_materno || '';
+                        document.getElementById('edit_representative_cargo').value = rep.cargo || '';
+                        document.getElementById('edit_representative_since').value = rep.fecha_desde || '';
+                    }
+                }
+
                 document.getElementById('edit_tipo_interesado').dispatchEvent(new Event('change'));
                 new bootstrap.Modal(document.getElementById('editChargeModal')).show();
             };

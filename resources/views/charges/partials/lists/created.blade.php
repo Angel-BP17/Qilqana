@@ -18,6 +18,16 @@
                                         placeholder="No de cargo, RUC, DNI..." value="{{ request('created_search') }}">
                                 </div>
                             </div>
+                            <div class="col-2">
+                                <select name="created_period" class="form-select" onchange="this.form.submit()">
+                                    <option value="">Todos los periodos</option>
+                                    @foreach ($periodOptions ?? [] as $period)
+                                        <option value="{{ $period }}" @selected(($createdPeriod ?? request('created_period')) === $period)>
+                                            {{ $period }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div class="col-auto">
                                 <button class="btn btn-light" type="submit"><i class="fas fa-filter"></i> Filtrar</button>
                             </div>

@@ -8,7 +8,7 @@ class DeleteResolucionRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->hasRole('ADMINISTRADOR') ?? false;
+        return $this->user()->can('delete', $this->route('resolucion'));
     }
 
     public function rules(): array

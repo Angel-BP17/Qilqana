@@ -41,6 +41,14 @@ class Charge extends Model
         return $this->belongsTo(LegalEntity::class);
     }
 
+    /**
+     * Obtener el representante a través de la entidad legal.
+     */
+    public function getRepresentativeAttribute()
+    {
+        return $this->legalEntity?->representative;
+    }
+
     public function signature()
     {
         return $this->hasOne(Signature::class);

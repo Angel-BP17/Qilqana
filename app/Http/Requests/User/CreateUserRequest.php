@@ -11,9 +11,7 @@ class CreateUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $user = $this->user();
-        return $user?->can('users.create')
-            || $user?->hasRole('ADMINISTRADOR');
+        return $this->user()->can('create', \App\Models\User::class);
     }
 
     /**

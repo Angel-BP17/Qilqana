@@ -13,7 +13,7 @@ class NaturalPersonController extends Controller
 {
     public function index(Request $request, NaturalPersonFilter $filter)
     {
-        $this->ensureAllowed($request->user(), ['modulo personas naturales', 'natural-people.view']);
+        $this->authorize('viewAny', NaturalPerson::class);
 
         $query = NaturalPerson::query();
         $filter->apply($query, $request->only('search'));
@@ -25,7 +25,7 @@ class NaturalPersonController extends Controller
 
     public function store(Request $request)
     {
-        $this->ensureAllowed($request->user(), ['natural-people.create']);
+        $this->authorize('create', NaturalPerson::class);
 
         $data = $this->validateData($request);
         NaturalPerson::create($data);
@@ -35,7 +35,7 @@ class NaturalPersonController extends Controller
 
     public function update(Request $request, NaturalPerson $naturalPerson)
     {
-        $this->ensureAllowed($request->user(), ['natural-people.edit']);
+        $this->authorize('update', $naturalPerson);
 
         $data = $this->validateData($request);
         $naturalPerson->update($data);
@@ -45,7 +45,7 @@ class NaturalPersonController extends Controller
 
     public function destroy(Request $request, NaturalPerson $naturalPerson)
     {
-        $this->ensureAllowed($request->user(), ['natural-people.delete']);
+        $this->authorize('delete', $naturalPerson);
 
         $request->validate([
             'reason' => ['required', 'string', 'max:1000'],
@@ -64,12 +64,28 @@ class NaturalPersonController extends Controller
 
     public function import(ImportNaturalPersonRequest $request)
     {
-        $this->ensureAllowed($request->user(), ['natural-people.create']);
+        $this->authorize('create', NaturalPerson::class);
 
         $updateExisting = $request->boolean('update_existing', true);
         Excel::import(new NaturalPeopleImport($updateExisting), $request->file('archivo_excel'));
 
         return redirect()->route('natural-people.index')->with('success', 'Personas naturales importadas correctamente');
+    }
+
+    public function downloadTemplate()
+    {
+        $this->authorize('viewAny', NaturalPerson::class);
+
+        $filePath = storage_path('app/public/templates/Plantilla_Personas_Naturales.xlsx');
+
+        if (!file_exists($filePath)) {
+            if (!is_dir(dirname($filePath))) {
+                mkdir(dirname($filePath), 0755, true);
+            }
+            return redirect()->back()->withErrors(['La plantilla de personas naturales no se encuentra disponible en el servidor.']);
+        }
+
+        return response()->download($filePath, 'Plantilla_Importacion_Personas_Naturales.xlsx');
     }
 
     protected function validateData(Request $request): array
@@ -80,20 +96,5 @@ class NaturalPersonController extends Controller
             'apellido_paterno' => ['nullable', 'string', 'max:255'],
             'apellido_materno' => ['nullable', 'string', 'max:255'],
         ]);
-    }
-
-    protected function ensureAllowed(?object $user, array $permissions): void
-    {
-        $allowed = $user?->hasRole('ADMINISTRADOR') ?? false;
-        if (!$allowed) {
-            foreach ($permissions as $permission) {
-                if ($user?->can($permission)) {
-                    $allowed = true;
-                    break;
-                }
-            }
-        }
-
-        abort_unless($allowed, 403);
     }
 }

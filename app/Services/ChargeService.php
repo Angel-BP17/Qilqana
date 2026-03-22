@@ -11,7 +11,6 @@ use App\Models\User;
 use App\Services\Contracts\ChargeServiceInterface;
 use App\Traits\HasChargeLogic;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -19,9 +18,6 @@ use Illuminate\Support\Facades\Storage;
 class ChargeService implements ChargeServiceInterface
 {
     use HasChargeLogic;
-
-    protected const CACHE_TTL = 3600; 
-    protected const REF_CACHE_TTL = 3600;
 
     public function __construct(
         protected ChargeFilter $filter,
@@ -32,40 +28,34 @@ class ChargeService implements ChargeServiceInterface
     public function getAll(array $data): array
     {
         $user = $data['user'];
-        $userId = $user?->id ?? 0;
         
-        $version = Cache::get('charges_cache_version', 1);
-        $cacheKey = "charges_v{$version}_index_{$userId}_" . md5(serialize($data));
+        $resolutionCharges = ($user?->hasRole('ADMINISTRADOR') || $user?->can('modulo resoluciones'))
+            ? $this->filter->getAllResolutionCharges($data['resolucion'], $user) 
+            : collect();
 
-        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($data, $user) {
-            $resolutionCharges = ($user?->hasRole('ADMINISTRADOR') || $user?->can('modulo resoluciones'))
-                ? $this->filter->getAllResolutionCharges($data['resolucion'], $user) 
-                : collect();
-
-            return [
-                'sentCharges' => $this->filter->getAllSentCharges($data['sent'], $user),
-                'receivedCharges' => $this->filter->getAllReceivedCharges($data['received'], $user),
-                'createdCharges' => $this->filter->getAllCreatedCharges($data['created'], $user),
-                'resolutionCharges' => $resolutionCharges,
-                'resolutionChargesCount' => $resolutionCharges->count(),
-                'signedCount' => $this->countSignedCharges(),
-                'unsignedCount' => $this->countUnsignedCharges(),
-                'users' => $this->usersToAssign($user),
-                'periodOptions' => $this->getPeriodOptions($data['default_period']),
-                'refreshIntervalSeconds' => (int) Setting::getValue('charges_refresh_interval', '5'),
-                'canViewResolutionCharges' => ($user?->hasRole('ADMINISTRADOR') || $user?->can('modulo resoluciones')),
-                'defaultPeriod' => $data['default_period'],
-                'sentPeriod' => $data['sent']['period'],
-                'receivedPeriod' => $data['received']['period'],
-                'resolutionPeriod' => $data['resolucion']['period'],
-                'createdPeriod' => $data['created']['period'],
-            ];
-        });
+        return [
+            'sentCharges' => $this->filter->getAllSentCharges($data['sent'], $user),
+            'receivedCharges' => $this->filter->getAllReceivedCharges($data['received'], $user),
+            'createdCharges' => $this->filter->getAllCreatedCharges($data['created'], $user),
+            'resolutionCharges' => $resolutionCharges,
+            'resolutionChargesCount' => $resolutionCharges->count(),
+            'signedCount' => $this->countSignedCharges(),
+            'unsignedCount' => $this->countUnsignedCharges(),
+            'users' => $this->usersToAssign($user),
+            'periodOptions' => $this->getPeriodOptions($data['default_period']),
+            'refreshIntervalSeconds' => (int) Setting::getValue('charges_refresh_interval', '5'),
+            'canViewResolutionCharges' => ($user?->hasRole('ADMINISTRADOR') || $user?->can('modulo resoluciones')),
+            'defaultPeriod' => $data['default_period'],
+            'sentPeriod' => $data['sent']['period'],
+            'receivedPeriod' => $data['received']['period'],
+            'resolutionPeriod' => $data['resolucion']['period'],
+            'createdPeriod' => $data['created']['period'],
+        ];
     }
 
     public function create(array $data): bool
     {
-        $result = DB::transaction(function () use ($data) {
+        return DB::transaction(function () use ($data) {
             $user = $data['user'];
             $assignedTo = ($data['tipo_interesado'] === 'Trabajador UGEL') ? ($data['assigned_to'] ?? null) : $user->id;
 
@@ -88,19 +78,16 @@ class ChargeService implements ChargeServiceInterface
 
             return true;
         });
-
-        if ($result) {
-            $this->clearChargesCache($data['user']->id);
-        }
-
-        return $result;
     }
 
     public function update(array $data, int $id): bool
     {
         $model = Charge::findOrFail($id);
-        
-        $result = DB::transaction(function () use ($data, $model) {
+        if ($model->user_id === $data['user']->id && in_array($model->signature?->signature_status, ['firmado', 'rechazado'], true)) {
+            return false;
+        }
+
+        return DB::transaction(function () use ($data, $model) {
             $assignedTo = $data['assigned_to'] ?? null;
             if ($model->signature?->signature_status === 'pendiente') {
                 if ($data['tipo_interesado'] !== 'Trabajador UGEL') $assignedTo = $data['user']->id;
@@ -119,38 +106,23 @@ class ChargeService implements ChargeServiceInterface
             $this->syncInteresado($model, $data);
             return true;
         });
-
-        if ($result) {
-            $this->clearChargesCache($data['user']->id, $model->signature?->assigned_to);
-        }
-
-        return $result;
     }
 
     public function delete(array $data, int $id): bool
     {
-        $model = Charge::findOrFail($id);
-        $userId = $model->user_id;
-        $assignedTo = $model->signature?->assigned_to;
-
-        $result = DB::transaction(function () use ($model) {
+        return DB::transaction(function () use ($id) {
+            $model = Charge::findOrFail($id);
             if ($model->signature) {
                 $this->imageService->deleteIfExists($model->signature->signature_root);
                 $this->imageService->deleteIfExists($model->signature->evidence_root);
             }
             return (bool) $model->delete();
         });
-
-        if ($result) {
-            $this->clearChargesCache($userId, $assignedTo);
-        }
-
-        return $result;
     }
 
     public function signStore(array $data, array $files, int $chargeId, int $userId): bool
     {
-        $result = DB::transaction(function () use ($data, $files, $chargeId, $userId) {
+        return DB::transaction(function () use ($data, $files, $chargeId, $userId) {
             $charge = Charge::with('signature')->findOrFail($chargeId);
             $isTitular = (bool) ($data['titularidad'] ?? false);
 
@@ -181,17 +153,11 @@ class ChargeService implements ChargeServiceInterface
 
             return true;
         });
-
-        if ($result) {
-            $this->clearChargesCache($userId);
-        }
-
-        return $result;
     }
 
     public function reject(array $data, int $chargeId, int $userId): bool
     {
-        $result = DB::transaction(function () use ($data, $chargeId, $userId) {
+        return DB::transaction(function () use ($data, $chargeId, $userId) {
             $charge = Charge::findOrFail($chargeId);
             $charge->signature()->updateOrCreate(['charge_id' => $chargeId], [
                 'signature_status' => 'rechazado',
@@ -201,27 +167,6 @@ class ChargeService implements ChargeServiceInterface
             ]);
             return true;
         });
-
-        if ($result) {
-            $this->clearChargesCache($userId);
-        }
-
-        return $result;
-    }
-
-    private function clearChargesCache(?int $userId = null, ?int $assignedTo = null): void
-    {
-        // Aseguramos que la versión exista antes de incrementar
-        if (!Cache::has('charges_cache_version')) {
-            Cache::put('charges_cache_version', 1, self::CACHE_TTL);
-        }
-        Cache::increment('charges_cache_version');
-        
-        Cache::forget('charges_signed_count');
-        Cache::forget('charges_unsigned_count');
-        Cache::forget('period_options_none');
-        if ($userId) Cache::forget("users_to_assign_{$userId}");
-        if ($assignedTo) Cache::forget("users_to_assign_{$assignedTo}");
     }
 
     private function resolveNaturalPerson(array $data): ?int
@@ -235,9 +180,47 @@ class ChargeService implements ChargeServiceInterface
     private function resolveLegalEntity(array $data): ?int
     {
         if ($data['tipo_interesado'] !== 'Persona Juridica') return null;
-        $payload = ['ruc' => $data['ruc'] ?? null, 'razon_social' => $data['razon_social'] ?? null, 'district' => $data['district'] ?? null, 'contact_number' => $data['contact_number'] ?? null];
+        
+        $payload = [
+            'ruc' => $data['ruc'] ?? null,
+            'razon_social' => $data['razon_social'] ?? null,
+            'district' => $data['district'] ?? null,
+        ];
+
         $ruc = trim((string) ($payload['ruc'] ?? ''));
-        return ($ruc !== '') ? LegalEntity::firstOrCreate(['ruc' => $ruc], $payload)->id : LegalEntity::create($payload)->id;
+        $entity = ($ruc !== '') 
+            ? LegalEntity::firstOrCreate(['ruc' => $ruc], $payload)
+            : LegalEntity::create($payload);
+
+        // Resolver representante
+        if (!empty($data['representative_dni'])) {
+            $person = NaturalPerson::updateOrCreate(
+                ['dni' => $data['representative_dni']],
+                [
+                    'nombres' => $data['representative_nombres'] ?? '',
+                    'apellido_paterno' => $data['representative_apellido_paterno'] ?? '',
+                    'apellido_materno' => $data['representative_apellido_materno'] ?? '',
+                ]
+            );
+
+            $representative = $entity->representative;
+            if ($representative) {
+                $representative->update([
+                    'natural_person_id' => $person->id,
+                    'cargo' => $data['representative_cargo'] ?? null,
+                    'fecha_desde' => $data['representative_since'] ?? null,
+                ]);
+            } else {
+                $representative = Representative::create([
+                    'natural_person_id' => $person->id,
+                    'cargo' => $data['representative_cargo'] ?? null,
+                    'fecha_desde' => $data['representative_since'] ?? null,
+                ]);
+                $entity->update(['representative_id' => $representative->id]);
+            }
+        }
+
+        return $entity->id;
     }
 
     private function syncInteresado(Charge $model, array $data): void
@@ -248,10 +231,8 @@ class ChargeService implements ChargeServiceInterface
             $person->update($payload);
             $model->update(['natural_person_id' => $person->id, 'legal_entity_id' => null]);
         } elseif ($data['tipo_interesado'] === 'Persona Juridica') {
-            $payload = ['ruc' => $data['ruc'] ?? null, 'razon_social' => $data['razon_social'] ?? null, 'district' => $data['district'] ?? null, 'contact_number' => $data['contact_number'] ?? null];
-            $entity = $model->legalEntity ?: LegalEntity::create($payload);
-            $entity->update($payload);
-            $model->update(['natural_person_id' => null, 'legal_entity_id' => $entity->id]);
+            $legalEntityId = $this->resolveLegalEntity($data);
+            $model->update(['natural_person_id' => null, 'legal_entity_id' => $legalEntityId]);
         }
     }
 

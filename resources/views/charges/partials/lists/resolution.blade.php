@@ -21,13 +21,21 @@
                                         <i class="fa-solid fa-search text-muted"></i>
                                     </span>
                                     <input type="text" class="form-control border-start-0" name="resolution_search"
-                                        placeholder="No. cargo, RD, nombres..."
-                                        value="{{ request('resolution_search') }}">
+                                        placeholder="No. cargo, RD, nombres..." value="{{ request('resolution_search') }}">
                                 </div>
                             </div>
+                            <div class="col-2">
+                                <select name="resolution_period" class="form-select" onchange="this.form.submit()">
+                                    <option value="">Todos los periodos</option>
+                                    @foreach ($periodOptions ?? [] as $period)
+                                        <option value="{{ $period }}" @selected(($resolutionPeriod ?? request('resolution_period')) === $period)>
+                                            {{ $period }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div class="col-auto">
-                                <button class="btn btn-light" type="submit"><i class="fas fa-filter"></i>
-                                    Filtrar</button>
+                                <button class="btn btn-light" type="submit"><i class="fas fa-filter"></i> Filtrar</button>
                             </div>
                         </form>
                         <form action="{{ route('charges.reports.resolution') }}" method="GET">

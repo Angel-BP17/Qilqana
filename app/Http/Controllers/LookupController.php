@@ -89,18 +89,23 @@ class LookupController extends Controller
             ->first();
 
         if ($entity) {
+            $rep = $entity->representative;
+            $person = $rep?->naturalPerson;
+            
             return response()->json([
                 'data' => [
                     'id' => $entity->id,
                     'ruc' => $entity->ruc,
                     'razon_social' => $entity->razon_social,
                     'district' => $entity->district,
-                    'representative' => $entity->representative ? [
-                        'id' => $entity->representative->id,
-                        'dni' => $entity->representative->dni,
-                        'nombre' => $entity->representative->nombre,
-                        'cargo' => $entity->representative->cargo,
-                        'fecha_desde' => $entity->representative->fecha_desde,
+                    'representative' => $rep ? [
+                        'id' => $rep->id,
+                        'dni' => $person?->dni ?? null,
+                        'nombres' => $person?->nombres ?? null,
+                        'apellido_paterno' => $person?->apellido_paterno ?? null,
+                        'apellido_materno' => $person?->apellido_materno ?? null,
+                        'cargo' => $rep->cargo,
+                        'fecha_desde' => $rep->fecha_desde,
                     ] : null,
                 ],
             ]);

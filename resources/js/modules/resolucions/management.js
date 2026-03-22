@@ -7,6 +7,29 @@ export const ResolucionsManagement = {
         this.setupDeleteModal();
         this.setupImport();
         this.setupFileLabel();
+        this.setupSubfilter();
+    },
+
+    setupSubfilter: function() {
+        const input = document.getElementById('subfilter-input');
+        if (!input) return;
+
+        input.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            
+            // Filtrar Filas de Tabla (Escritorio)
+            document.querySelectorAll('.table tbody tr').forEach(row => {
+                if (row.cells.length <= 1) return; // Ignorar filas de "sin resultados"
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+
+            // Filtrar Tarjetas (Móvil)
+            document.querySelectorAll('.d-md-none .card.border-0.shadow-sm').forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(query) ? '' : 'none';
+            });
+        });
     },
 
     setupDetailsModal: function() {

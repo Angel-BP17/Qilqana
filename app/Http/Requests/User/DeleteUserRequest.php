@@ -8,7 +8,7 @@ class DeleteUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth()->user()?->hasRole('ADMINISTRADOR');
+        return $this->user()->can('delete', $this->route('user'));
     }
 
     public function rules(): array

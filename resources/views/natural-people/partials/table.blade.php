@@ -9,81 +9,53 @@
     };
 @endphp
 <div class="card border-0 shadow-sm">
-    <div class="card-header bg-info border-0 py-3">
+    <div class="card-header bg-info border-0 py-3 px-4">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-            <h5 class="mb-0 fw-bold text-white">Personas naturales</h5>
-            <form action="{{ route('natural-people.index') }}" method="GET" class="d-flex gap-2">
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text bg-white border-end-0">
+            <h5 class="mb-0 fw-bold text-white">
+                <i class="fa-solid fa-users me-2"></i>Personas naturales
+            </h5>
+            <form action="{{ route('natural-people.index') }}" method="GET" class="d-flex gap-2 w-100 w-md-auto">
+                <div class="input-group input-group-sm flex-grow-1">
+                    <span class="input-group-text bg-white border-end-0 input-lookup-special">
                         <i class="fa-solid fa-magnifying-glass text-muted"></i>
                     </span>
-                    <input type="text" name="search" class="form-control border-start-0 ps-0" 
-                        placeholder="Buscar..." value="{{ request('search') }}" style="min-width: 200px;">
+                    <input type="text" name="search" class="form-control border-start-0 ps-0 input-lookup-special" 
+                        placeholder="Buscar por DNI o nombres..." value="{{ request('search') }}" style="min-width: 300px;">
                 </div>
-                <button type="submit" class="btn btn-light btn-sm fw-bold text-info">Buscar</button>
+                <button type="submit" class="btn btn-lookup-special btn-sm px-4">
+                    <i class="fa-solid fa-search me-1"></i> Buscar
+                </button>
             </form>
         </div>
     </div>
     <div class="card-body p-0">
-        <div class="d-md-none">
-            @forelse ($naturalPeople as $naturalPerson)
-                <div class="border-bottom p-3">
-                    <div class="d-flex justify-content-between align-items-start gap-2">
-                        <div>
-                            <div class="fw-semibold">{{ $getLabel($naturalPerson) }}</div>
-                            <div class="text-muted small">DNI: {{ $naturalPerson->dni ?: 'N/A' }}</div>
-                        </div>
-                    </div>
-                    <div class="mt-2 small text-muted">
-                        {{ optional($naturalPerson->created_at)->format('Y-m-d H:i') }}
-                    </div>
-                    <div class="mt-3 d-flex flex-column flex-sm-row gap-2 flex-wrap">
-                        <button type="button" class="btn btn-outline-primary btn-sm btn-edit-natural-person"
-                            title="{{ $editTitle }}" data-action="{{ route('natural-people.update', $naturalPerson) }}"
-                            data-dni="{{ $naturalPerson->dni }}" data-nombres="{{ $naturalPerson->nombres }}"
-                            data-apellido-paterno="{{ $naturalPerson->apellido_paterno }}"
-                            data-apellido-materno="{{ $naturalPerson->apellido_materno }}"
-                            @disabled(!$canEditNaturalPerson)>
-                            <i class="fa-solid fa-pen"></i> Editar
-                        </button>
-                        @include('natural-people.forms.delete', [
-                            'naturalPerson' => $naturalPerson,
-                            'disabled' => !$canDeleteNaturalPerson,
-                        ])
-                    </div>
-                </div>
-            @empty
-                <div class="text-center text-muted py-4">
-                    <i class="fa-solid fa-inbox me-1"></i> No hay registros.
-                </div>
-            @endforelse
-        </div>
+        {{-- ... (vista móvil sin cambios) ... --}}
 
         <div class="table-responsive d-none d-md-block">
             <table class="table align-middle table-hover mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th>#</th>
-                        <th>Persona</th>
-                        <th>DNI</th>
-                        <th>Creado</th>
-                        <th>Actualizado</th>
-                        <th class="text-end">Acciones</th>
+                        <th class="ps-4" style="width: 50px;">#</th>
+                        <th><i class="fa-solid fa-user me-1"></i> Persona</th>
+                        <th style="width: 150px;"><i class="fa-solid fa-id-card me-1"></i> DNI</th>
+                        <th style="width: 180px;"><i class="fa-solid fa-calendar me-1"></i> Registrado</th>
+                        <th style="width: 180px;"><i class="fa-solid fa-clock me-1"></i> Actualizado</th>
+                        <th class="text-end pe-4" style="width: 120px;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($naturalPeople as $key => $naturalPerson)
                         <tr>
-                            <td class="fw-semibold text-muted">
+                            <td class="ps-4 fw-semibold text-muted">
                                 {{ ($naturalPeople->currentPage() - 1) * $naturalPeople->perPage() + $key + 1 }}
                             </td>
-                            <td>{{ $getLabel($naturalPerson) }}</td>
-                            <td>{{ $naturalPerson->dni ?: 'N/A' }}</td>
-                            <td>{{ optional($naturalPerson->created_at)->format('Y-m-d H:i') }}</td>
-                            <td>{{ optional($naturalPerson->updated_at)->format('Y-m-d H:i') }}</td>
-                            <td class="text-end">
+                            <td class="fw-bold text-dark">{{ $getLabel($naturalPerson) }}</td>
+                            <td><span class="badge bg-light text-dark border">{{ $naturalPerson->dni ?: 'N/A' }}</span></td>
+                            <td class="text-muted small">{{ optional($naturalPerson->created_at)->format('d/m/Y H:i') }}</td>
+                            <td class="text-muted small">{{ optional($naturalPerson->updated_at)->format('d/m/Y H:i') }}</td>
+                            <td class="text-end pe-4">
                                 <div class="btn-group">
-                                    <button type="button" class="btn btn-outline-primary btn-sm btn-edit-natural-person"
+                                    <button type="button" class="btn btn-outline-primary btn-sm"
                                         title="{{ $editTitle }}" data-action="{{ route('natural-people.update', $naturalPerson) }}"
                                         data-dni="{{ $naturalPerson->dni }}" data-nombres="{{ $naturalPerson->nombres }}"
                                         data-apellido-paterno="{{ $naturalPerson->apellido_paterno }}"

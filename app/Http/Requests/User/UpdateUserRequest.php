@@ -12,9 +12,7 @@ class UpdateUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $user = $this->user();
-        return $user?->can('users.edit')
-            || $user?->hasRole('ADMINISTRADOR');
+        return $this->user()->can('update', $this->route('user'));
     }
 
     /**

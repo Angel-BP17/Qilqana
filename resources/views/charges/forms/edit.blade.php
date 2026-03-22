@@ -33,8 +33,8 @@
                         <div class="col-md-6">
                             <label for="edit_ruc" class="form-label">RUC</label>
                             <div class="input-group">
-                                <input type="text" class="form-control" id="edit_ruc" name="ruc">
-                                <button class="btn btn-outline-secondary" type="button" id="lookup_charge_ruc_btn_edit">Buscar</button>
+                                <input type="text" class="form-control input-lookup-special" id="edit_ruc" name="ruc">
+                                <button class="btn btn-lookup-special" type="button" id="lookup_charge_ruc_btn_edit">Buscar</button>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -49,11 +49,24 @@
                         </div>
                         <div class="col-md-6">
                             <label for="edit_representative_dni" class="form-label">DNI representante</label>
-                            <input type="text" class="form-control" id="edit_representative_dni" name="representative_dni" maxlength="10">
+                            <div class="input-group">
+                                <input type="text" class="form-control input-lookup-special" id="edit_representative_dni" name="representative_dni" maxlength="10">
+                                <button class="btn btn-lookup-special" type="button" id="lookup_representative_dni_btn_edit">Buscar</button>
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <label for="edit_representative_name" class="form-label">Nombre representante</label>
-                            <input type="text" class="form-control" id="edit_representative_name" name="representative_name"
+                            <label for="edit_representative_nombres" class="form-label">Nombres representante</label>
+                            <input type="text" class="form-control" id="edit_representative_nombres" name="representative_nombres"
+                                style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase();">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_representative_apellido_paterno" class="form-label">Apellido paterno rep.</label>
+                            <input type="text" class="form-control" id="edit_representative_apellido_paterno" name="representative_apellido_paterno"
+                                style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase();">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_representative_apellido_materno" class="form-label">Apellido materno rep.</label>
+                            <input type="text" class="form-control" id="edit_representative_apellido_materno" name="representative_apellido_materno"
                                 style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase();">
                         </div>
                         <div class="col-md-6">
@@ -70,9 +83,9 @@
                         <div class="col-md-3">
                             <label for="edit_dni" class="form-label">DNI</label>
                             <div class="input-group">
-                                <input type="text" class="form-control" id="edit_dni" name="dni" minlength="8" maxlength="10"
+                                <input type="text" class="form-control input-lookup-special" id="edit_dni" name="dni" minlength="8" maxlength="10"
                                     inputmode="numeric" pattern="\d{8,10}">
-                                <button class="btn btn-outline-secondary" type="button" id="lookup_charge_dni_btn_edit">Buscar</button>
+                                <button class="btn btn-lookup-special" type="button" id="lookup_charge_dni_btn_edit">Buscar</button>
                             </div>
                         </div>
                         <div class="col-md-3">

@@ -7,7 +7,7 @@ class ResolucionFilter
 {
     public function applyFilters($filters)
     {
-        return Resolucion::with(['charge.signature', 'charge.signature.signer', 'charge.signature.assignedTo'])
+        return Resolucion::with(['charge.signature', 'charge.signature.signer', 'charge.signature.assignedTo', 'charge.naturalPerson', 'charge.legalEntity'])
             ->when(
                 $filters['search'] ?? null,
                 // Agrupar OR para no romper el resto de filtros.
