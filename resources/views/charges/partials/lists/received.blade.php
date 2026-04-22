@@ -13,7 +13,7 @@
                     <div class="d-md-none d-flex gap-2">
                         <button class="btn btn-light" type="button" data-bs-toggle="collapse"
                             data-bs-target="#received-filters">
-                            <i class="fa-solid fa-filter me-1"></i> Filtros
+                            <span class="material-symbols-outlined me-1">filter_alt</span> Filtros
                         </button>
                     </div>
                     <div class="d-none d-md-flex gap-2 align-items-center">
@@ -21,7 +21,7 @@
                             <div class="col">
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-end-0">
-                                        <i class="fa-solid fa-search text-muted"></i>
+                                        <span class="material-symbols-outlined text-muted">search</span>
                                     </span>
                                     <input type="text" class="form-control border-start-0" name="received_search"
                                         placeholder="No de cargo, RUC, DNI..." value="{{ request('received_search') }}">
@@ -38,7 +38,7 @@
                                 </select>
                             </div>
                             <div class="col-auto">
-                                <button class="btn btn-primary" type="submit"><i class="fas fa-filter"></i> Filtrar</button>
+                                <button class="btn btn-primary" type="submit"><span class="material-symbols-outlined">filter_alt</span> Filtrar</button>
                             </div>
                         </form>
                         <form action="{{ route('charges.reports.received') }}" method="GET">
@@ -49,7 +49,7 @@
                                 <input type="hidden" name="received_period" value="{{ $receivedPeriod }}">
                             @endif
                             <button class="btn btn-light" type="submit">
-                                <i class="fa-solid fa-file-pdf me-1"></i> Reporte PDF
+                                <span class="material-symbols-outlined me-1">picture_as_pdf</span> Reporte PDF
                             </button>
                         </form>
                     </div>

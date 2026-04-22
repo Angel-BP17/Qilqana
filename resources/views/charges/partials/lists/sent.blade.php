@@ -13,11 +13,11 @@
                     <div class="d-md-none d-flex gap-2">
                         <button class="btn btn-light" type="button" data-bs-toggle="collapse"
                             data-bs-target="#sent-filters">
-                            <i class="fa-solid fa-filter me-1"></i> Filtros
+                            <span class="material-symbols-outlined me-1">filter_alt</span> Filtros
                         </button>
                         <button class="btn btn-light" type="button" data-bs-toggle="collapse"
                             data-bs-target="#sent-pdf">
-                            <i class="fa-solid fa-file-pdf me-1"></i> PDF
+                            <span class="material-symbols-outlined me-1">picture_as_pdf</span> PDF
                         </button>
                     </div>
                     <div class="d-none d-md-flex gap-2 align-items-center">
@@ -33,7 +33,7 @@
                                 <input type="hidden" name="period" value="{{ $sentPeriod }}">
                             @endif
                             <button class="btn btn-light" type="submit">
-                                <i class="fa-solid fa-file-pdf me-1"></i> Reporte PDF
+                                <span class="material-symbols-outlined me-1">picture_as_pdf</span> Reporte PDF
                             </button>
                         </form>
                     </div>
@@ -57,7 +57,7 @@
                     <input type="hidden" name="period" value="{{ $sentPeriod }}">
                 @endif
                 <button class="btn btn-light w-100" type="submit">
-                    <i class="fa-solid fa-file-pdf me-1"></i> Reporte PDF
+                    <span class="material-symbols-outlined me-1">picture_as_pdf</span> Reporte PDF
                 </button>
             </form>
         </div>

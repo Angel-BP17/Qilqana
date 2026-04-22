@@ -1,4 +1,4 @@
-<div class="modal fade" id="signChargeModal" tabindex="-1" aria-labelledby="signChargeModalLabel" aria-hidden="true">
+<div class="modal fade" id="signChargeModal" tabindex="-1" aria-labelledby="signChargeModalLabel">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
@@ -53,10 +53,10 @@
                             <p class="mb-0 fw-semibold">Panel de firma</p>
                             <div class="d-flex gap-2">
                                 <button class="btn btn-sm btn-outline-danger" id="clear-signature" type="button">
-                                    <i class="fa-solid fa-eraser"></i> Limpiar
+                                    <span class="material-symbols-outlined">ink_eraser</span> Limpiar
                                 </button>
                                 <button class="btn btn-sm btn-outline-secondary" id="undo" type="button">
-                                    <i class="fa-solid fa-undo"></i> Deshacer
+                                    <span class="material-symbols-outlined">undo</span> Deshacer
                                 </button>
                             </div>
                         </div>
@@ -78,13 +78,13 @@
                         <div id="signaturePreview" class="p-2 border rounded bg-white"></div>
                     </div>
                     <div class="alert alert-info mt-3 mb-3">
-                        <i class="fa-solid fa-circle-info"></i> Asegurese de que la firma sea clara y legible.
+                        <span class="material-symbols-outlined">info</span> Asegurese de que la firma sea clara y legible.
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-success" id="confirm-signature" disabled>
-                        <i class="fa-solid fa-pen-to-square me-1"></i> Confirmar firma y guardar
+                        <span class="material-symbols-outlined me-1">edit</span> Confirmar firma y guardar
                     </button>
                 </div>
             </form>

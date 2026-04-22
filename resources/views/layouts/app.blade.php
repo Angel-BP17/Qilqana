@@ -11,16 +11,17 @@
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 
     <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}">
 
     <!-- Styles -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    @vite(['resources/scss/app.scss', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
 
-<body class="bg-primary">
+<body class="bg-primary" data-page="{{ Route::currentRouteName() }}">
     <div id="app">
         <nav class="navbar navbar-expand-md shadow-sm bg-white">
             <div class="container">
@@ -134,14 +135,14 @@
                     <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
                         <li class="nav-item">
                             <span class="nav-link text-muted px-lg-2">
-                                <i class="fa-solid fa-user me-1"></i>{{ Auth::user()->name }}
+                                <span class="material-symbols-outlined me-1">person</span>{{ Auth::user()->name }}
                             </span>
                         </li>
                         <li class="nav-item">
                             <a href="{{ route('logout') }}"
                                 onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
                                 class="nav-link logout px-lg-2">
-                                <span class="d-none d-sm-inline">Logout</span> <i class="fa fa-sign-out"></i>
+                                <span class="d-none d-sm-inline">Logout</span> <span class="material-symbols-outlined">logout</span>
                             </a>
                             <form class="d-flex" id="logout-form" action="{{ route('logout') }}" method="POST"
                                 style="display: none;">

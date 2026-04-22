@@ -40,11 +40,6 @@ class ChargeController extends Controller
         return redirect()->route('charges.index')->with('success', 'Cargo creado correctamente.');
     }
 
-    public function show(Charge $charge)
-    {
-        return view('charges.show', compact('charge'));
-    }
-
     public function update(UpdateChargeRequest $request, Charge $charge)
     {
         $data = $request->validated();
@@ -85,10 +80,12 @@ class ChargeController extends Controller
 
     public function getSignature(Charge $charge)
     {
-        if (!$charge->signature?->signature_root) abort(404);
-        
+        if (!$charge->signature?->signature_root)
+            abort(404);
+
         $path = $charge->signature->signature_root;
-        if (!\Storage::disk('local')->exists($path)) abort(404);
+        if (!\Storage::disk('local')->exists($path))
+            abort(404);
 
         $content = \Storage::disk('local')->get($path);
 
@@ -99,20 +96,24 @@ class ChargeController extends Controller
 
     public function getEvidence(Charge $charge)
     {
-        if (!$charge->signature?->evidence_root) abort(404);
-        
+        if (!$charge->signature?->evidence_root)
+            abort(404);
+
         $path = $charge->signature->evidence_root;
-        if (!\Storage::disk('local')->exists($path)) abort(404);
+        if (!\Storage::disk('local')->exists($path))
+            abort(404);
 
         return response()->file(\Storage::disk('local')->path($path));
     }
 
     public function getCartaPoder(Charge $charge)
     {
-        if (!$charge->signature?->carta_poder_path) abort(404);
-        
+        if (!$charge->signature?->carta_poder_path)
+            abort(404);
+
         $path = $charge->signature->carta_poder_path;
-        if (!\Storage::disk('local')->exists($path)) abort(404);
+        if (!\Storage::disk('local')->exists($path))
+            abort(404);
 
         return response()->file(\Storage::disk('local')->path($path));
     }

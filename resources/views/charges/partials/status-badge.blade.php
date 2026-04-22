@@ -1,13 +1,13 @@
 @if ($status === 'firmado')
     <span class="badge bg-primary">
-        <i class="fa-solid fa-circle-check me-1"></i>Firmado
+        <span class="material-symbols-outlined me-1">check_circle</span>Firmado
     </span>
 @elseif ($status === 'rechazado')
     <span class="badge bg-danger">
-        <i class="fa-solid fa-circle-xmark me-1"></i>Rechazado
+        <span class="material-symbols-outlined me-1">cancel</span>Rechazado
     </span>
 @else
     <span class="badge bg-warning text-dark">
-        <i class="fa-solid fa-hourglass-half me-1"></i>Pendiente
+        <span class="material-symbols-outlined me-1">hourglass_empty</span>Pendiente
     </span>
 @endif

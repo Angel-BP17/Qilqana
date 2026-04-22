@@ -3,7 +3,7 @@
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-info text-white py-3">
                 <h5 class="modal-title fw-bold" id="editNaturalPersonModalLabel">
-                    <i class="bi bi-pencil-square me-2"></i>Editar persona natural
+                    <span class="material-symbols-outlined me-2">edit_square</span>Editar persona natural
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -16,12 +16,12 @@
                             <label for="edit_dni" class="form-label fw-semibold">DNI</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-end-0">
-                                    <i class="bi bi-card-text"></i>
+                                    <span class="material-symbols-outlined">article</span>
                                 </span>
                                 <input type="text" class="form-control input-lookup-special border-start-0" id="edit_dni" name="dni"
                                     minlength="8" maxlength="10" inputmode="numeric" pattern="\d{8,10}" placeholder="DNI">
                                 <button class="btn btn-lookup-special px-4" type="button" id="lookup_dni_btn_edit">
-                                    <i class="bi bi-search me-1"></i> Buscar
+                                    <span class="material-symbols-outlined me-1">search</span> Buscar
                                 </button>
                             </div>
                         </div>
@@ -52,7 +52,7 @@
                 <div class="modal-footer bg-light border-top-0 p-3">
                     <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-success px-4 fw-bold">
-                        <i class="bi bi-check-circle me-1"></i> Actualizar cambios
+                        <span class="material-symbols-outlined me-1">check_circle</span> Actualizar cambios
                     </button>
                 </div>
             </form>

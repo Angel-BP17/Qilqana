@@ -6,7 +6,7 @@
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div>
                 <h3 class="fw-bold text-white mb-0">
-                    <i class="fa-solid fa-file-contract me-2"></i>Módulo de Resoluciones
+                    <span class="material-symbols-outlined me-2">description</span>Módulo de Resoluciones
                 </h3>
                 <p class="text-white-50 mb-0">Registro y vinculación de resoluciones directorales</p>
             </div>
@@ -45,17 +45,17 @@
                 <div class="col-12 col-md-6 col-lg-3">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body py-3">
-                            <div class="text-muted small text-uppercase mb-2"><i class="fa-solid fa-plus me-1"></i>Nuevo
+                            <div class="text-muted small text-uppercase mb-2"><span class="material-symbols-outlined me-1">add</span>Nuevo
                                 registro</div>
                             @if ($hasChargePeriod)
                                 <button type="button" class="btn btn-success w-100" data-bs-toggle="modal"
                                     data-bs-target="#createResolutionModal">
-                                    <i class="bi bi-file-earmark"></i> Registrar resolucion
+                                    <span class="material-symbols-outlined">description</span> Registrar resolucion
                                 </button>
                             @else
                                 <button type="button" class="btn btn-success w-100" disabled
                                     title="Configura el periodo en el modulo de configuracion">
-                                    <i class="bi bi-file-earmark"></i> Registrar resolucion
+                                    <span class="material-symbols-outlined">description</span> Registrar resolucion
                                 </button>
                                 <div class="text-muted small mt-2 text-danger">Falta configurar periodo</div>
                             @endif
@@ -70,8 +70,7 @@
                         <div class="card-body py-3">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <div class="text-muted small text-uppercase"><i
-                                            class="fa-solid fa-file-signature me-1"></i>Ultimo RD</div>
+                                    <div class="text-muted small text-uppercase"><span class="material-symbols-outlined me-1">history_edu</span>Ultimo RD</div>
                                     <div class="fs-3 fw-bold mb-1">{{ $ultimoRegistro }}</div>
                                     <div class="text-muted small">Registro mas reciente</div>
                                 </div>
@@ -83,8 +82,7 @@
                 <div class="col-12 col-md-6 col-lg-2">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body py-3">
-                            <div class="text-muted small text-uppercase"><i
-                                    class="fa-solid fa-calendar-days me-1"></i>Periodo</div>
+                            <div class="text-muted small text-uppercase"><span class="material-symbols-outlined me-1">calendar_today</span>Periodo</div>
                             @if ($hasChargePeriod)
                                 <div class="fs-3 fw-bold mb-1">{{ $chargePeriod }}</div>
                                 <div class="text-muted small">Actual</div>
@@ -97,7 +95,7 @@
                 <div class="col-12 col-md-6 col-lg-2">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body py-3">
-                            <div class="text-muted small text-uppercase"><i class="fa-solid fa-list-check me-1"></i>Total
+                            <div class="text-muted small text-uppercase"><span class="material-symbols-outlined me-1">fact_check</span>Total
                             </div>
                             @if ($hasChargePeriod)
                                 <div class="fs-3 fw-bold mb-1">{{ $totalResolucionesPeriodo }}</div>
@@ -111,7 +109,7 @@
                 <div class="col-12 col-md-6 col-lg-2">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body py-3">
-                            <div class="text-muted small text-uppercase"><i class="fa-solid fa-pen-nib me-1"></i>Por firmar
+                            <div class="text-muted small text-uppercase"><span class="material-symbols-outlined me-1">history_edu</span>Por firmar
                             </div>
                             @if ($hasChargePeriod)
                                 <div class="fs-3 fw-bold mb-1">{{ $pendientesResolucionesPeriodo }}</div>
@@ -135,7 +133,7 @@
                             <div class="card-body py-3">
                                 <div class="row g-2 align-items-center">
                                     <div class="col-12">
-                                        <div class="fw-semibold"><i class="fa-solid fa-file-lines me-1"></i>Reportes</div>
+                                        <div class="fw-semibold"><span class="material-symbols-outlined me-1">description</span>Reportes</div>
                                     </div>
                                 </div>
                                 <div class="row g-2 align-items-center mt-1">
@@ -149,12 +147,12 @@
                                                 <input type="hidden" name="search" value="{{ request('search') }}">
                                                 <input type="hidden" name="periodo" value="{{ request('periodo') }}">
                                                 <button type="submit" class="btn btn-danger">
-                                                    <i class="fas fa-file-pdf"></i> PDF
+                                                    <span class="material-symbols-outlined">picture_as_pdf</span> PDF
                                                 </button>
                                             </form>
                                             <a href="{{ route('resoluciones.excel') }}?search={{ request('search') }}&periodo={{ request('periodo') }}"
                                                 class="btn btn-success d-flex align-items-center">
-                                                <i class="fas fa-file-excel me-1"></i> Excel
+                                                <span class="material-symbols-outlined me-1">table_chart</span> Excel
                                             </a>
                                         </div>
                                     </div>
@@ -169,7 +167,7 @@
                         <div class="card border-0 shadow-sm h-100">
                             <div class="card-body py-3 d-flex flex-column">
                                 <div class="fw-semibold mb-3">
-                                    <i class="fa-solid fa-file-import me-1"></i>Importar resoluciones
+                                    <span class="material-symbols-outlined me-1">upload</span>Importar resoluciones
                                 </div>
                                 <form method="POST" action="{{ route('index.import') }}" enctype="multipart/form-data" class="mt-auto">
                                     @csrf
@@ -182,12 +180,12 @@
                                             <div class="d-flex gap-2 h-100">
                                                 <a href="{{ route('download.template') }}"
                                                     class="btn btn-info flex-grow-1 d-flex align-items-center justify-content-center text-white">
-                                                    <i class="fas fa-file-download me-1"></i>Plantilla
+                                                    <span class="material-symbols-outlined me-1">download</span>Plantilla
                                                 </a>
                                                 <button type="submit"
                                                     class="btn btn-success flex-grow-1 d-flex align-items-center justify-content-center"
                                                     id="importExcelButton" disabled>
-                                                    <i class="fa-solid fa-file-import me-1"></i> Importar
+                                                    <span class="material-symbols-outlined me-1">upload</span> Importar
                                                 </button>
                                             </div>
                                         </div>
@@ -207,13 +205,13 @@
                         <div class="row g-2 align-items-center">
                             <div class="col-12 col-lg-3">
                                 <div class="h-100 d-flex flex-column justify-content-center">
-                                    <h5 class="mb-1 fw-bold"><i class="fa-solid fa-folder-open me-2"></i>Resoluciones</h5>
+                                    <h5 class="mb-1 fw-bold"><span class="material-symbols-outlined me-2">folder_open</span>Resoluciones</h5>
                                     <small class="opacity-75">Gestione resoluciones, cargos y firmas</small>
                                     <div class="d-flex gap-2 mt-3 d-md-none">
                                         <button type="button" class="btn btn-outline-light w-100"
                                             data-bs-toggle="collapse" data-bs-target="#resolutionFilters"
                                             aria-expanded="false" aria-controls="resolutionFilters">
-                                            <i class="fa-solid fa-sliders"></i> Filtros
+                                            <span class="material-symbols-outlined">tune</span> Filtros
                                         </button>
                                     </div>
                                 </div>
@@ -246,12 +244,12 @@
                                                 <label class="form-label mb-1 d-none d-md-block">Acciones</label>
                                                 <div
                                                     class="d-flex flex-wrap gap-2 justify-content-md-end justify-content-lg-start">
-                                                    <button type="submit" class="btn btn-primary">
-                                                        <i class="fas fa-filter"></i> Filtrar
+                                                    <button type="submit" class="btn btn-dark shadow-sm">
+                                                        <span class="material-symbols-outlined">filter_alt</span> Filtrar
                                                     </button>
                                                     <a href="{{ route('resolucions.index') }}?{{ http_build_query(request()->query()) }}"
-                                                        class="btn btn-outline-primary">
-                                                        <i class="fas fa-sync-alt"></i> Limpiar
+                                                        class="btn btn-light shadow-sm text-dark">
+                                                        <span class="material-symbols-outlined">refresh</span> Limpiar
                                                     </a>
                                                 </div>
                                             </div>
@@ -267,22 +265,36 @@
                             <div class="px-3 py-3 border-bottom bg-light bg-opacity-50">
                                 <div class="row align-items-center">
                                     <div class="col-12 col-md-4">
-                                        <div class="input-group input-group-sm">
+                                        <div class="input-group input-group-sm shadow-sm">
                                             <span class="input-group-text bg-white border-end-0">
-                                                <i class="fa-solid fa-filter text-muted"></i>
+                                                <span class="material-symbols-outlined text-muted">filter_alt</span>
                                             </span>
                                             <input type="text" id="subfilter-input" class="form-control border-start-0 ps-0" 
                                                 placeholder="Sub-filtrar resultados actuales...">
                                         </div>
                                     </div>
-                                    <div class="col-12 col-md-8 mt-2 mt-md-0">
-                                        <small class="text-muted">
-                                            <i class="fa-solid fa-circle-info me-1"></i>
-                                            Este filtro busca instantáneamente sobre los {{ $resoluciones->count() }} resultados de esta página.
+                                    <div class="col-12 col-md-8 mt-2 mt-md-0 d-flex align-items-center justify-content-between">
+                                        <small class="text-muted" id="subfilter-info">
+                                            <span class="material-symbols-outlined me-1">info</span>
+                                            Buscando en los {{ $resoluciones->count() }} resultados de esta página.
                                         </small>
+                                        <div id="subfilter-results-info" class="d-none">
+                                            <span class="badge bg-info rounded-pill" id="subfilter-counter">0</span>
+                                            <small class="text-info fw-semibold ms-1">coincidencias</small>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                            
+                            <!-- Contenedor para "Sin resultados locales" -->
+                            <div id="local-no-results" class="text-center py-5 d-none">
+                                <span class="material-symbols-outlined fs-1 text-muted mb-2">search_off</span>
+                                <p class="text-muted">No hay coincidencias en esta página.</p>
+                                <button type="button" class="btn btn-warning btn-sm shadow-sm" id="btn-search-global">
+                                    <span class="material-symbols-outlined">public</span> Buscar en todo el sistema
+                                </button>
+                            </div>
+
                             <!-- Tabla de Resoluciones -->
                             <div class="d-md-none">
                                 @php
@@ -352,7 +364,7 @@
                                                     action="{{ route('resolucions.charge.create', $resolucion) }}">
                                                     @csrf
                                                     <button type="submit" class="btn btn-outline-primary btn-sm">
-                                                        <i class="fa-solid fa-plus"></i> Crear cargo
+                                                        <span class="material-symbols-outlined">add</span> Crear cargo
                                                     </button>
                                                 </form>
                                             @endif
@@ -363,7 +375,7 @@
                                                 data-signature='@json($signatureContent ?? '')'
                                                 data-signer="{{ $charge?->signature?->signer?->name ?? '' }}"
                                                 data-show-external="1" @disabled(!$charge || $signatureStatus !== 'pendiente' || !$canSignResolution)>
-                                                <i class="fa-solid fa-signature"></i> Firmar
+                                                <span class="material-symbols-outlined">history_edu</span> Firmar
                                             </button>
                                             @if (!Auth::user()->hasRole('VISUALIZADOR'))
                                                 <button type="button" class="btn btn-warning btn-sm btn-edit-resolution"
@@ -374,13 +386,13 @@
                                                     data-nombres="{{ $resolucion->nombres_apellidos }}"
                                                     data-procedencia="{{ $resolucion->procedencia ?? '' }}"
                                                     data-asunto="{{ $resolucion->asunto }}">
-                                                    <i class="fa-solid fa-pen"></i> Editar
+                                                    <span class="material-symbols-outlined">edit</span> Editar
                                                 </button>
                                                 <button type="button" class="btn btn-danger btn-sm btn-delete-resolution"
                                                     data-action="{{ route('resolucions.destroy', $resolucion) }}"
                                                     title="{{ $canDeleteResolution ? 'Eliminar' : 'Solo administradores' }}"
                                                     @disabled(!$canDeleteResolution)>
-                                                    <i class="fa-solid fa-trash"></i> Eliminar
+                                                    <span class="material-symbols-outlined">delete</span> Eliminar
                                                 </button>
                                             @endif
                                         </div>
@@ -463,7 +475,7 @@
                                                                 @csrf
                                                                 <button type="submit"
                                                                     class="btn btn-outline-primary btn-sm">
-                                                                    <i class="fa-solid fa-plus"></i> Crear cargo
+                                                                    <span class="material-symbols-outlined">add</span> Crear cargo
                                                                 </button>
                                                             </form>
                                                         @endif
@@ -475,7 +487,7 @@
                                                             data-signature='@json($signatureContent ?? '')'
                                                             data-signer="{{ $charge?->signature?->signer?->name ?? '' }}"
                                                             data-show-external="1" @disabled(!$charge || $signatureStatus !== 'pendiente' || !$canSignResolution)>
-                                                            <i class="fa-solid fa-signature"></i>
+                                                            <span class="material-symbols-outlined">history_edu</span>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -491,14 +503,13 @@
                                                                 data-nombres="{{ $resolucion->nombres_apellidos }}"
                                                                 data-procedencia="{{ $resolucion->procedencia ?? '' }}"
                                                                 data-asunto="{{ $resolucion->asunto }}">
-                                                                <i class="fa-solid fa-pen"></i>
+                                                                <span class="material-symbols-outlined">edit</span>
                                                             </button>
                                                             <button type="button"
                                                                 class="btn btn-danger btn-delete-resolution"
                                                                 data-action="{{ route('resolucions.destroy', $resolucion) }}"
                                                                 title="{{ $canDeleteResolution ? 'Eliminar' : 'Solo administradores' }}"
-                                                                @disabled(!$canDeleteResolution)><i
-                                                                    class="fa-solid fa-trash"></i></button>
+                                                                @disabled(!$canDeleteResolution)><span class="material-symbols-outlined">delete</span></button>
                                                         </div>
                                                     </td>
                                                 @endif
@@ -515,8 +526,8 @@
                                     </tbody>
                                 </table>
                             </div>
-                            <!-- Paginaci�n -->
-                            <div class="d-flex justify-content-between align-items-center mt-3">
+                            <!-- Paginacin -->
+                            <div id="pagination-container" class="d-flex justify-content-between align-items-center mt-3">
                                 <div class="text-muted">
                                     Mostrando {{ $resoluciones->firstItem() }} a {{ $resoluciones->lastItem() }} de
                                     {{ $resoluciones->total() }} resultados
@@ -597,8 +608,4 @@
         @include('charges.forms.sign')
 
         <!-- Modal de Detalles (igual que antes) -->
-    @endsection
-
-    @section('scripts')
-        @vite(['resources/js/resolucions.js'])
     @endsection

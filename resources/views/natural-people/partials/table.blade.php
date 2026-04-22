@@ -12,18 +12,18 @@
     <div class="card-header bg-info border-0 py-3 px-4">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
             <h5 class="mb-0 fw-bold text-white">
-                <i class="fa-solid fa-users me-2"></i>Personas naturales
+                <span class="material-symbols-outlined me-2">group</span>Personas naturales
             </h5>
             <form action="{{ route('natural-people.index') }}" method="GET" class="d-flex gap-2 w-100 w-md-auto">
                 <div class="input-group input-group-sm flex-grow-1">
                     <span class="input-group-text bg-white border-end-0 input-lookup-special">
-                        <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                        <span class="material-symbols-outlined text-muted">search</span>
                     </span>
                     <input type="text" name="search" class="form-control border-start-0 ps-0 input-lookup-special" 
                         placeholder="Buscar por DNI o nombres..." value="{{ request('search') }}" style="min-width: 300px;">
                 </div>
                 <button type="submit" class="btn btn-lookup-special btn-sm px-4">
-                    <i class="fa-solid fa-search me-1"></i> Buscar
+                    <span class="material-symbols-outlined me-1">search</span> Buscar
                 </button>
             </form>
         </div>
@@ -36,10 +36,10 @@
                 <thead class="table-light">
                     <tr>
                         <th class="ps-4" style="width: 50px;">#</th>
-                        <th><i class="fa-solid fa-user me-1"></i> Persona</th>
-                        <th style="width: 150px;"><i class="fa-solid fa-id-card me-1"></i> DNI</th>
-                        <th style="width: 180px;"><i class="fa-solid fa-calendar me-1"></i> Registrado</th>
-                        <th style="width: 180px;"><i class="fa-solid fa-clock me-1"></i> Actualizado</th>
+                        <th><span class="material-symbols-outlined me-1">person</span> Persona</th>
+                        <th style="width: 150px;"><span class="material-symbols-outlined me-1">badge</span> DNI</th>
+                        <th style="width: 180px;"><span class="material-symbols-outlined me-1">calendar_today</span> Registrado</th>
+                        <th style="width: 180px;"><span class="material-symbols-outlined me-1">schedule</span> Actualizado</th>
                         <th class="text-end pe-4" style="width: 120px;">Acciones</th>
                     </tr>
                 </thead>
@@ -61,7 +61,7 @@
                                         data-apellido-paterno="{{ $naturalPerson->apellido_paterno }}"
                                         data-apellido-materno="{{ $naturalPerson->apellido_materno }}"
                                         @disabled(!$canEditNaturalPerson)>
-                                        <i class="fa-solid fa-pen"></i>
+                                        <span class="material-symbols-outlined">edit</span>
                                     </button>
                                     @include('natural-people.forms.delete', [
                                         'naturalPerson' => $naturalPerson,
@@ -73,7 +73,7 @@
                     @empty
                         <tr>
                             <td colspan="6" class="text-center text-muted py-4">
-                                <i class="fa-solid fa-inbox me-1"></i> No hay registros.
+                                <span class="material-symbols-outlined me-1">inbox</span> No hay registros.
                             </td>
                         </tr>
                     @endforelse

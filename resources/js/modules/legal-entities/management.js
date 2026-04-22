@@ -12,25 +12,31 @@ export const LegalEntitiesManagement = {
     setupEditModal: function() {
         const modalEl = document.getElementById('editLegalEntityModal');
         if (!modalEl) return;
-        const modal = new bootstrap.Modal(modalEl);
         const form = document.getElementById('editLegalEntityForm');
 
-        document.querySelectorAll('.btn-edit-legal-entity').forEach(btn => {
-            btn.onclick = () => {
-                form.action = btn.dataset.action;
-                document.getElementById('edit_ruc').value = btn.dataset.ruc || '';
-                document.getElementById('edit_razon_social').value = btn.dataset.razon || '';
-                document.getElementById('edit_district').value = btn.dataset.district || '';
-                
-                const p = 'edit_representative_';
-                document.getElementById(p + 'dni').value = btn.dataset.representativeDni || '';
-                document.getElementById(p + 'nombres').value = btn.dataset.representativeNombres || '';
-                document.getElementById(p + 'apellido_paterno').value = btn.dataset.representativeApellidoPaterno || '';
-                document.getElementById(p + 'apellido_materno').value = btn.dataset.representativeApellidoMaterno || '';
-                document.getElementById(p + 'cargo').value = btn.dataset.representativeCargo || '';
-                document.getElementById(p + 'since').value = btn.dataset.representativeSince || '';
-                modal.show();
-            };
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn-edit-legal-entity');
+            if (!btn) return;
+
+            form.action = btn.dataset.action;
+            document.getElementById('edit_ruc').value = btn.dataset.ruc || '';
+            document.getElementById('edit_razon_social').value = btn.dataset.razon || '';
+            document.getElementById('edit_district').value = btn.dataset.district || '';
+            
+            const p = 'edit_representative_';
+            document.getElementById(p + 'dni').value = btn.dataset.representativeDni || '';
+            document.getElementById(p + 'nombres').value = btn.dataset.representativeNombres || '';
+            document.getElementById(p + 'apellido_paterno').value = btn.dataset.representativeApellidoPaterno || '';
+            document.getElementById(p + 'apellido_materno').value = btn.dataset.representativeApellidoMaterno || '';
+            document.getElementById(p + 'cargo').value = btn.dataset.representativeCargo || '';
+            document.getElementById(p + 'since').value = btn.dataset.representativeSince || '';
+            
+            const bootstrapInstance = window.bootstrap || bootstrap;
+            let modal = bootstrapInstance.Modal.getInstance(modalEl);
+            if (!modal) {
+                modal = new bootstrapInstance.Modal(modalEl);
+            }
+            modal.show();
         });
     },
 
@@ -119,7 +125,7 @@ export const LegalEntitiesManagement = {
         if (!btn) return;
         if (loading) {
             btn.dataset.originalHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            btn.innerHTML = '<span class="material-symbols-outlined fa-spin">progress_activity</span>';
             btn.disabled = true;
         } else {
             btn.innerHTML = btn.dataset.originalHtml || 'Buscar';
@@ -130,15 +136,22 @@ export const LegalEntitiesManagement = {
     setupDeleteModal: function() {
         const modalEl = document.getElementById('deleteLegalEntityModal');
         if (!modalEl) return;
-        const modal = new bootstrap.Modal(modalEl);
         const form = document.getElementById('deleteLegalEntityForm');
 
-        document.querySelectorAll('.btn-delete-legal-entity').forEach(btn => {
-            btn.onclick = () => {
-                form.action = btn.dataset.action;
-                document.getElementById('delete_legal_entity_reason').value = '';
-                modal.show();
-            };
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn-delete-legal-entity');
+            if (!btn) return;
+
+            form.action = btn.dataset.action;
+            const reasonEl = document.getElementById('delete_legal_entity_reason');
+            if (reasonEl) reasonEl.value = '';
+            
+            const bootstrapInstance = window.bootstrap || bootstrap;
+            let modal = bootstrapInstance.Modal.getInstance(modalEl);
+            if (!modal) {
+                modal = new bootstrapInstance.Modal(modalEl);
+            }
+            modal.show();
         });
     },
 

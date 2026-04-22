@@ -35,7 +35,7 @@ export const LookupModule = {
         this.setLoading(btn, true);
 
         try {
-            const res = await fetch(`/api/natural-people/by-dni/${encodeURIComponent(clean)}`);
+            const res = await fetch(`api/natural-people/by-dni/${encodeURIComponent(clean)}`);
             const payload = await res.json();
             
             details.forEach(el => el.classList.remove('d-none'));
@@ -81,7 +81,7 @@ export const LookupModule = {
         this.setLoading(btn, true);
 
         try {
-            const res = await fetch(`/api/legal-entities/by-ruc/${encodeURIComponent(clean)}`);
+            const res = await fetch(`api/legal-entities/by-ruc/${encodeURIComponent(clean)}`);
             const payload = await res.json();
 
             entityDetails.forEach(el => el.classList.remove('d-none'));
@@ -131,7 +131,7 @@ export const LookupModule = {
         if (!btn) return;
         if (loading) {
             btn.dataset.originalHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            btn.innerHTML = '<span class="material-symbols-outlined fa-spin">progress_activity</span>';
             btn.disabled = true;
         } else {
             btn.innerHTML = btn.dataset.originalHtml || 'Buscar';

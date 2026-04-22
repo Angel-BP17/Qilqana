@@ -6,10 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="{{ asset('img/favicon.ico') }}">
     <title>Login</title>
-    @vite(['resources/scss/app.scss', 'resources/js/app.js'])
+
+    <!-- Fonts -->
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="custom-auth-container">
+<body class="custom-auth-container" data-page="login">
     <div class="custom-login-container">
         <div class="custom-auth-card">
             <div class="card-body p-4 p-sm-5">
@@ -45,8 +51,8 @@
                         <input type="password" class="form-control" id="password" name="password"
                             placeholder="Contraseña">
                         <label for="password">Contraseña</label>
-                        <i class="bi bi-eye-slash position-absolute top-50 end-0 translate-middle-y me-3"
-                            id="togglePassword" style="cursor: pointer; z-index: 5;"></i>
+                        <span class="material-symbols-outlined position-absolute top-50 end-0 translate-middle-y me-3"
+                                                    id="togglePassword" style="cursor: pointer; user-select: none;">visibility_off</span>
                         @error('password')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>
@@ -68,7 +74,6 @@
             </div>
         </div>
     </div>
-    @vite(['resources/js/auth-login.js'])
 </body>
 
 </html>

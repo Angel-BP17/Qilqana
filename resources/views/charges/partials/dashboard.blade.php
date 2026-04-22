@@ -30,7 +30,7 @@
         <div class="card shadow-sm border-0 h-100">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="rounded-circle bg-info bg-opacity-10 text-info p-3">
-                    <i class="fa-solid fa-calendar-days fs-4"></i>
+                    <span class="material-symbols-outlined fs-4">calendar_today</span>
                 </div>
                 <div>
                     <p class="mb-0 text-muted">Periodo asignado</p>
@@ -51,7 +51,7 @@
         <div class="card shadow-sm border-0 h-100">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="rounded-circle bg-success bg-opacity-10 text-success p-3">
-                    <i class="fa-solid fa-check fs-4"></i>
+                    <span class="material-symbols-outlined fs-4">check</span>
                 </div>
                 <div>
                     <p class="mb-0 text-muted">Cargos firmados</p>
@@ -64,7 +64,7 @@
         <div class="card shadow-sm border-0 h-100">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="rounded-circle bg-warning bg-opacity-10 text-warning p-3">
-                    <i class="fa-solid fa-pen-to-square fs-4"></i>
+                    <span class="material-symbols-outlined fs-4">edit</span>
                 </div>
                 <div>
                     <p class="mb-0 text-muted">Pendientes de firma</p>
@@ -83,7 +83,7 @@
                 <button type="button" class="btn btn-success" data-bs-toggle="modal"
                     data-bs-target="#createChargeModal" @disabled(!$defaultPeriod)
                     @if (!$defaultPeriod) title="Configura el periodo para crear cargos" @endif>
-                    <i class="bi bi-plus-circle"></i> Crear
+                    <span class="material-symbols-outlined">add_circle</span> Crear
                 </button>
             </div>
         </div>

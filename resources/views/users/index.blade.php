@@ -6,7 +6,7 @@
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div>
                 <h3 class="fw-bold text-white mb-0">
-                    <i class="fa-solid fa-users-gear me-2"></i>Módulo de Usuarios
+                    <span class="material-symbols-outlined me-2">group</span>Módulo de Usuarios
                 </h3>
                 <p class="text-white-50 mb-0">Administración de accesos, perfiles y seguridad del sistema</p>
             </div>
@@ -36,7 +36,7 @@
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body d-flex align-items-center gap-3">
                         <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-3">
-                            <i class="fa-solid fa-users fs-4"></i>
+                            <span class="material-symbols-outlined fs-4">group</span>
                         </div>
                         <div>
                             <p class="mb-0 text-muted">Total de usuarios</p>
@@ -55,7 +55,7 @@
                         <button type="button" class="btn btn-success" data-bs-toggle="modal"
                             data-bs-target="#createUserModal" @disabled(!$canCreateUser)
                             @unless ($canCreateUser) title="No tienes permiso para crear usuarios" @endunless>
-                            <i class="bi bi-person"></i> Registrar
+                            <span class="material-symbols-outlined">person</span> Registrar
                         </button>
                     </div>
                 </div>
@@ -96,13 +96,10 @@
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-danger">Eliminar</button>
                     </div>
-                </form>
-            </div>
-        </div>
-    </div>
+                    </form>
+                    </div>
+                    </div>
+                    </div>
 
-@endsection
+                    @endsection
 
-@section('scripts')
-    @vite(['resources/js/users.js'])
-@endsection

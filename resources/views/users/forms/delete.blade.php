@@ -2,5 +2,5 @@
     data-action="{{ route('users.destroy', $user) }}"
     title="{{ ($disabled ?? false) ? 'No tienes permiso para eliminar usuarios' : 'Eliminar' }}"
     @disabled($disabled ?? false)>
-    <i class="fa-solid fa-trash"></i>
+    <span class="material-symbols-outlined">delete</span>
 </button>

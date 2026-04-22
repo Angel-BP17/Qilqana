@@ -2,5 +2,5 @@
     data-action="{{ route('interesados.destroy', $interesado) }}"
     title="{{ ($disabled ?? false) ? 'No tienes permiso para eliminar interesados' : 'Eliminar' }}"
     @disabled($disabled ?? false)>
-    <i class="fa-solid fa-trash"></i>
+    <span class="material-symbols-outlined">delete</span>
 </button>

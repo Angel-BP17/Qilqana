@@ -2,5 +2,5 @@
     data-action="{{ route('legal-entities.destroy', $legalEntity) }}"
     title="{{ ($disabled ?? false) ? 'No tienes permiso para eliminar personas juridicas' : 'Eliminar' }}"
     @disabled($disabled ?? false)>
-    <i class="fa-solid fa-trash"></i>
+    <span class="material-symbols-outlined">delete</span>
 </button>

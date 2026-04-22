@@ -38,7 +38,7 @@
                             data-contact="{{ $entity->contact_number }}"
                             data-type="{{ $entity->school_type }}"
                             @disabled(!$canEditEntity)>
-                            <i class="fa-solid fa-pen"></i> Editar
+                            <span class="material-symbols-outlined">edit</span> Editar
                         </button>
                         @include('entities.forms.delete', [
                             'entity' => $entity,
@@ -48,7 +48,7 @@
                 </div>
             @empty
                 <div class="text-center text-muted py-4">
-                    <i class="fa-solid fa-inbox me-1"></i> No hay registros.
+                    <span class="material-symbols-outlined me-1">inbox</span> No hay registros.
                 </div>
             @endforelse
         </div>
@@ -98,7 +98,7 @@
                                         data-contact="{{ $entity->contact_number }}"
                                         data-type="{{ $entity->school_type }}"
                                         @disabled(!$canEditEntity)>
-                                        <i class="fa-solid fa-pen"></i>
+                                        <span class="material-symbols-outlined">edit</span>
                                     </button>
                                     @include('entities.forms.delete', [
                                         'entity' => $entity,
@@ -110,7 +110,7 @@
                     @empty
                         <tr>
                             <td colspan="9" class="text-center text-muted py-4">
-                                <i class="fa-solid fa-inbox me-1"></i> No hay registros.
+                                <span class="material-symbols-outlined me-1">inbox</span> No hay registros.
                             </td>
                         </tr>
                     @endforelse

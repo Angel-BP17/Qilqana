@@ -33,7 +33,9 @@ class CreateResolucionRequest extends FormRequest
             ],
             'fecha' => 'required|date',
             'asunto' => 'required|string|max:255',
-            'nombres_apellidos' => 'required|string|max:255',
+            'nombres' => 'required|string|max:255',
+            'apellido_paterno' => 'required|string|max:255',
+            'apellido_materno' => 'required|string|max:255',
             'dni' => 'required|string|min:8|max:10|regex:/^\d{8,10}$/',
             'procedencia' => 'nullable|string|max:255',
         ];

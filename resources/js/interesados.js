@@ -34,32 +34,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const editModalElement = document.getElementById('editInteresadoModal');
-    const editModal = editModalElement ? new bootstrap.Modal(editModalElement) : null;
     const editForm = document.getElementById('editInteresadoForm');
     const tipoEdit = document.getElementById('edit_tipo_interesado');
     const juridicaEdit = document.querySelector('.persona-juridica-fields-edit');
     const naturalEdit = document.querySelector('.persona-natural-fields-edit');
     const cargoEdit = document.querySelector('.cargo-fields-edit');
 
-    document.querySelectorAll('.btn-edit-interesado').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            if (!editForm) return;
-            editForm.action = btn.dataset.action || '';
-            if (tipoEdit) tipoEdit.value = btn.dataset.tipo || '';
-            const setValue = (id, value) => {
-                const el = document.getElementById(id);
-                if (el) el.value = value || '';
-            };
-            setValue('edit_ruc', btn.dataset.ruc);
-            setValue('edit_razon_social', btn.dataset.razon);
-            setValue('edit_dni', btn.dataset.dni);
-            setValue('edit_nombres', btn.dataset.nombres);
-            setValue('edit_apellido_paterno', btn.dataset.apellidoPaterno);
-            setValue('edit_apellido_materno', btn.dataset.apellidoMaterno);
-            setValue('edit_cargo', btn.dataset.cargo);
-            toggleFields(tipoEdit?.value || '', juridicaEdit, naturalEdit, cargoEdit);
-            editModal?.show();
-        });
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-edit-interesado');
+        if (!btn || !editForm) return;
+
+        editForm.action = btn.dataset.action || '';
+        if (tipoEdit) tipoEdit.value = btn.dataset.tipo || '';
+        const setValue = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) el.value = value || '';
+        };
+        setValue('edit_ruc', btn.dataset.ruc);
+        setValue('edit_razon_social', btn.dataset.razon);
+        setValue('edit_dni', btn.dataset.dni);
+        setValue('edit_nombres', btn.dataset.nombres);
+        setValue('edit_apellido_paterno', btn.dataset.apellidoPaterno);
+        setValue('edit_apellido_materno', btn.dataset.apellidoMaterno);
+        setValue('edit_cargo', btn.dataset.cargo);
+        toggleFields(tipoEdit?.value || '', juridicaEdit, naturalEdit, cargoEdit);
+        
+        const bootstrapInstance = window.bootstrap || bootstrap;
+        let modal = bootstrapInstance.Modal.getInstance(editModalElement);
+        if (!modal) {
+            modal = new bootstrapInstance.Modal(editModalElement);
+        }
+        modal.show();
     });
 
     if (tipoEdit) {
@@ -69,16 +74,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const deleteModalElement = document.getElementById('deleteInteresadoModal');
-    const deleteModal = deleteModalElement ? new bootstrap.Modal(deleteModalElement) : null;
     const deleteForm = document.getElementById('deleteInteresadoForm');
     const deleteReason = document.getElementById('delete_interesado_reason');
 
-    document.querySelectorAll('.btn-delete-interesado').forEach((btn) => {
-        btn.addEventListener('click', () => {
-            if (!deleteModal || !deleteForm) return;
-            deleteForm.action = btn.dataset.action || '';
-            if (deleteReason) deleteReason.value = '';
-            deleteModal.show();
-        });
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-delete-interesado');
+        if (!btn || !deleteModalElement || !deleteForm) return;
+
+        deleteForm.action = btn.dataset.action || '';
+        if (deleteReason) deleteReason.value = '';
+
+        const bootstrapInstance = window.bootstrap || bootstrap;
+        let modal = bootstrapInstance.Modal.getInstance(deleteModalElement);
+        if (!modal) {
+            modal = new bootstrapInstance.Modal(deleteModalElement);
+        }
+        modal.show();
     });
 });

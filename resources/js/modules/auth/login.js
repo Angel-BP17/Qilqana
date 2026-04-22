@@ -15,8 +15,7 @@ export const LoginModule = {
         toggleBtn.addEventListener('click', function() {
             const isPassword = input.type === 'password';
             input.type = isPassword ? 'text' : 'password';
-            this.classList.toggle('bi-eye', !isPassword);
-            this.classList.toggle('bi-eye-slash', isPassword);
+            this.textContent = isPassword ? 'visibility' : 'visibility_off';
         });
     },
 

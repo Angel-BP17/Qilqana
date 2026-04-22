@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
                 <h5 class="modal-title fw-bold" id="createChargeModalLabel">
-                    <i class="fa-solid fa-file-circle-plus me-2"></i>Registrar cargo
+                    <span class="material-symbols-outlined me-2">note_add</span>Registrar cargo
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>

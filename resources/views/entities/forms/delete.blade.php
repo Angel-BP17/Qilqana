@@ -2,7 +2,7 @@
     data-action="{{ route('entities.destroy', $entity) }}"
     title="{{ ($disabled ?? false) ? 'No tienes permiso para eliminar entidades' : 'Eliminar' }}"
     @disabled($disabled ?? false)>
-    <i class="fa-solid fa-trash"></i>
+    <span class="material-symbols-outlined">delete</span>
 </button>
 
 

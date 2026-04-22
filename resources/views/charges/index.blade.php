@@ -6,7 +6,7 @@
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div>
                 <h3 class="fw-bold text-white mb-0">
-                    <i class="fa-solid fa-file-invoice me-2"></i>Módulo de Cargos
+                    <span class="material-symbols-outlined me-2">receipt_long</span>Módulo de Cargos
                 </h3>
                 <p class="text-white-50 mb-0">Gestione el envío, recepción y firma de cargos digitales</p>
             </div>
@@ -104,9 +104,5 @@
             </div>
         </div>
     </div>
-@endsection
-
-@section('scripts')
-    @vite(['resources/js/charges.js'])
 @endsection
 

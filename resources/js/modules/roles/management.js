@@ -12,48 +12,62 @@ export const RolesManagement = {
     setupInfoModal: function() {
         const modalEl = document.getElementById('infoRoleModal');
         if (!modalEl) return;
-        const modal = new bootstrap.Modal(modalEl);
+        
         const nameEl = document.getElementById('info_role_name');
         const permsEl = document.getElementById('info_role_permissions');
 
-        document.querySelectorAll('.btn-role-info').forEach(btn => {
-            btn.onclick = () => {
-                nameEl.textContent = btn.dataset.name || '-';
-                const perms = JSON.parse(btn.dataset.permissions || '[]');
-                permsEl.innerHTML = perms.length ? perms.map(p => `<span class="badge bg-secondary">${this.permissionLabels[p] || p}</span>`).join(' ') : '<span class="text-muted">Sin permisos</span>';
-                modal.show();
-            };
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn-role-info');
+            if (!btn) return;
+
+            nameEl.textContent = btn.dataset.name || '-';
+            const perms = JSON.parse(btn.dataset.permissions || '[]');
+            permsEl.innerHTML = perms.length ? perms.map(p => `<span class="badge bg-secondary">${this.permissionLabels[p] || p}</span>`).join(' ') : '<span class="text-muted">Sin permisos</span>';
+            
+            const bootstrapInstance = window.bootstrap || bootstrap;
+            let modal = bootstrapInstance.Modal.getInstance(modalEl);
+            if (!modal) {
+                modal = new bootstrapInstance.Modal(modalEl);
+            }
+            modal.show();
         });
     },
 
     setupEditModal: function() {
         const modalEl = document.getElementById('editRoleModal');
         if (!modalEl) return;
-        const modal = new bootstrap.Modal(modalEl);
+        
         const form = document.getElementById('editRoleForm');
         const nameInput = document.getElementById('edit_role_name');
         const adminNotice = document.getElementById('edit_role_admin_notice');
 
-        document.querySelectorAll('.btn-edit-role').forEach(btn => {
-            btn.onclick = () => {
-                const isAdmin = (btn.dataset.name || '').toUpperCase() === 'ADMINISTRADOR';
-                form.action = btn.dataset.action;
-                nameInput.value = btn.dataset.name || '';
-                nameInput.readOnly = isAdmin;
-                if (adminNotice) adminNotice.classList.toggle('d-none', !isAdmin);
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn-edit-role');
+            if (!btn) return;
 
-                const perms = JSON.parse(btn.dataset.permissions || '[]');
-                document.querySelectorAll('.edit-perm-module').forEach(cb => {
-                    cb.checked = perms.includes(cb.value);
-                    cb.disabled = isAdmin;
-                });
-                document.querySelectorAll('.edit-perm-select').forEach(select => {
-                    Array.from(select.options).forEach(opt => opt.selected = perms.includes(opt.value));
-                    if (window.jQuery) window.jQuery(select).trigger('change.select2');
-                    select.disabled = isAdmin;
-                });
-                modal.show();
-            };
+            const isAdmin = (btn.dataset.name || '').toUpperCase() === 'ADMINISTRADOR';
+            form.action = btn.dataset.action;
+            nameInput.value = btn.dataset.name || '';
+            nameInput.readOnly = isAdmin;
+            if (adminNotice) adminNotice.classList.toggle('d-none', !isAdmin);
+
+            const perms = JSON.parse(btn.dataset.permissions || '[]');
+            document.querySelectorAll('.edit-perm-module').forEach(cb => {
+                cb.checked = perms.includes(cb.value);
+                cb.disabled = isAdmin;
+            });
+            document.querySelectorAll('.edit-perm-select').forEach(select => {
+                Array.from(select.options).forEach(opt => opt.selected = perms.includes(opt.value));
+                if (window.jQuery) window.jQuery(select).trigger('change.select2');
+                select.disabled = isAdmin;
+            });
+
+            const bootstrapInstance = window.bootstrap || bootstrap;
+            let modal = bootstrapInstance.Modal.getInstance(modalEl);
+            if (!modal) {
+                modal = new bootstrapInstance.Modal(modalEl);
+            }
+            modal.show();
         });
     },
 

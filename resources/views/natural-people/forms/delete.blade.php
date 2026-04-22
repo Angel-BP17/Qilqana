@@ -2,5 +2,5 @@
     data-action="{{ route('natural-people.destroy', $naturalPerson) }}"
     title="{{ ($disabled ?? false) ? 'No tienes permiso para eliminar personas naturales' : 'Eliminar' }}"
     @disabled($disabled ?? false)>
-    <i class="fa-solid fa-trash"></i>
+    <span class="material-symbols-outlined">delete</span>
 </button>

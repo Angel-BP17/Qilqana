@@ -3,7 +3,7 @@ export const ApiLookup = {
         const clean = (dni || '').trim();
         if (!clean) return null;
         try {
-            const res = await fetch(`/api/natural-people/by-dni/${encodeURIComponent(clean)}`);
+            const res = await fetch(`api/natural-people/by-dni/${encodeURIComponent(clean)}`);
             if (!res.ok) return null;
             const payload = await res.json();
             return payload.data || null;
@@ -16,7 +16,7 @@ export const ApiLookup = {
         const clean = (ruc || '').trim();
         if (!clean) return null;
         try {
-            const res = await fetch(`/api/legal-entities/by-ruc/${encodeURIComponent(clean)}`);
+            const res = await fetch(`api/legal-entities/by-ruc/${encodeURIComponent(clean)}`);
             if (!res.ok) return null;
             const payload = await res.json();
             return payload.data || null;

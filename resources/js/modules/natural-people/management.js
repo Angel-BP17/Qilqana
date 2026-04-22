@@ -12,18 +12,24 @@ export const NaturalPeopleManagement = {
     setupEditModal: function() {
         const modalEl = document.getElementById('editNaturalPersonModal');
         if (!modalEl) return;
-        const modal = new bootstrap.Modal(modalEl);
         const form = document.getElementById('editNaturalPersonForm');
 
-        document.querySelectorAll('.btn-edit-natural-person').forEach(btn => {
-            btn.onclick = () => {
-                form.action = btn.dataset.action;
-                document.getElementById('edit_dni').value = btn.dataset.dni || '';
-                document.getElementById('edit_nombres').value = btn.dataset.nombres || '';
-                document.getElementById('edit_apellido_paterno').value = btn.dataset.apellidoPaterno || '';
-                document.getElementById('edit_apellido_materno').value = btn.dataset.apellidoMaterno || '';
-                modal.show();
-            };
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn-edit-natural-person');
+            if (!btn) return;
+
+            form.action = btn.dataset.action;
+            document.getElementById('edit_dni').value = btn.dataset.dni || '';
+            document.getElementById('edit_nombres').value = btn.dataset.nombres || '';
+            document.getElementById('edit_apellido_paterno').value = btn.dataset.apellidoPaterno || '';
+            document.getElementById('edit_apellido_materno').value = btn.dataset.apellidoMaterno || '';
+            
+            const bootstrapInstance = window.bootstrap || bootstrap;
+            let modal = bootstrapInstance.Modal.getInstance(modalEl);
+            if (!modal) {
+                modal = new bootstrapInstance.Modal(modalEl);
+            }
+            modal.show();
         });
     },
 
@@ -57,7 +63,7 @@ export const NaturalPeopleManagement = {
         if (!btn) return;
         if (loading) {
             btn.dataset.originalHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            btn.innerHTML = '<span class="material-symbols-outlined fa-spin">progress_activity</span>';
             btn.disabled = true;
         } else {
             btn.innerHTML = btn.dataset.originalHtml || 'Buscar';
@@ -68,15 +74,21 @@ export const NaturalPeopleManagement = {
     setupDeleteModal: function() {
         const modalEl = document.getElementById('deleteNaturalPersonModal');
         if (!modalEl) return;
-        const modal = new bootstrap.Modal(modalEl);
         const form = document.getElementById('deleteNaturalPersonForm');
 
-        document.querySelectorAll('.btn-delete-natural-person').forEach(btn => {
-            btn.onclick = () => {
-                form.action = btn.dataset.action;
-                document.getElementById('delete_natural_person_reason').value = '';
-                modal.show();
-            };
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn-delete-natural-person');
+            if (!btn) return;
+
+            form.action = btn.dataset.action;
+            document.getElementById('delete_natural_person_reason').value = '';
+
+            const bootstrapInstance = window.bootstrap || bootstrap;
+            let modal = bootstrapInstance.Modal.getInstance(modalEl);
+            if (!modal) {
+                modal = new bootstrapInstance.Modal(modalEl);
+            }
+            modal.show();
         });
     },
 

@@ -2,7 +2,7 @@
     <div class="col">
         <div class="input-group">
             <span class="input-group-text bg-light border-end-0">
-                <i class="fa-solid fa-search text-muted"></i>
+                <span class="material-symbols-outlined text-muted">search</span>
             </span>
             <input type="text" class="form-control border-start-0" name="search"
                 placeholder="Nombre, correo, DNI" value="{{ request('search') }}">
@@ -19,7 +19,7 @@
         </select>
     </div>
     <div class="col-auto">
-        <button class="btn btn-primary" type="submit"><i class="fas fa-filter"></i>
+        <button class="btn btn-primary" type="submit"><span class="material-symbols-outlined">filter_alt</span>
             Filtrar</button>
     </div>
 </form>

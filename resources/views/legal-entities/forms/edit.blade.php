@@ -3,7 +3,7 @@
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-info text-white py-3">
                 <h5 class="modal-title fw-bold" id="editLegalEntityModalLabel">
-                    <i class="bi bi-pencil-square me-2"></i>Editar persona jurídica
+                    <span class="material-symbols-outlined me-2">edit_square</span>Editar persona jurídica
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -16,12 +16,12 @@
                             <label for="edit_ruc" class="form-label fw-semibold">RUC</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-end-0">
-                                    <i class="bi bi-card-heading"></i>
+                                    <span class="material-symbols-outlined">featured_play_list</span>
                                 </span>
                                 <input type="text" class="form-control input-lookup-special border-start-0" id="edit_ruc" name="ruc"
                                     inputmode="numeric" minlength="11" maxlength="11" pattern="\d{11}" placeholder="RUC">
                                 <button class="btn btn-lookup-special px-4" type="button" id="lookup_ruc_btn_edit">
-                                    <i class="bi bi-search me-1"></i> Buscar
+                                    <span class="material-symbols-outlined me-1">search</span> Buscar
                                 </button>
                             </div>
                         </div>
@@ -41,7 +41,7 @@
                         <div class="col-12 mt-4">
                             <div class="border rounded-3 p-3 bg-light shadow-sm">
                                 <div class="d-flex align-items-center gap-2 mb-3">
-                                    <i class="bi bi-person-badge-fill text-primary fs-5"></i>
+                                    <span class="material-symbols-outlined text-primary fs-5">badge</span>
                                     <h6 class="mb-0 fw-bold text-primary text-uppercase small">Datos del Representante</h6>
                                 </div>
                                 <div class="row g-3">
@@ -50,7 +50,7 @@
                                         <div class="input-group">
                                             <input type="text" class="form-control input-lookup-special" id="edit_representative_dni" name="representative_dni" maxlength="10" placeholder="DNI">
                                             <button class="btn btn-lookup-special" type="button" id="lookup_representative_dni_btn_entities_edit">
-                                                <i class="bi bi-search"></i>
+                                                <span class="material-symbols-outlined">search</span>
                                             </button>
                                         </div>
                                     </div>
@@ -86,7 +86,7 @@
                 <div class="modal-footer bg-light border-top-0 p-3">
                     <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-success px-4 fw-bold">
-                        <i class="bi bi-check-circle me-1"></i> Actualizar cambios
+                        <span class="material-symbols-outlined me-1">check_circle</span> Actualizar cambios
                     </button>
                 </div>
             </form>

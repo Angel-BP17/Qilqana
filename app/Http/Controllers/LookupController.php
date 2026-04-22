@@ -21,44 +21,40 @@ class LookupController extends Controller
                 try {
                     $response = Http::withToken($apiKey)
                         ->acceptJson()
-                        ->get("https://apiperu.dev/api/dni/{$dni}");
+                        ->get("https://dniruc.apisperu.com/api/v1/dni/{$dni}");
 
                     if ($response->ok()) {
-                        $payload = $response->json();
-                        $data = $payload['data'] ?? [];
-                        $dniValue = $data['dni'] ?? $data['numero'] ?? null;
+                        $data = $response->json();
+                        $dniValue = $data['dni'] ?? null;
+
                         if (!empty($dniValue)) {
                             return response()->json([
                                 'data' => [
                                     'id' => null,
-                                    'dni' => $dniValue ?? $dni,
+                                    'dni' => $dniValue,
                                     'nombres' => $data['nombres'] ?? null,
-                                    'apellido_paterno' => $data['apellido_paterno'] ?? null,
-                                    'apellido_materno' => $data['apellido_materno'] ?? null,
-                                    'apellidos' => trim(
-                                        ($data['apellido_paterno'] ?? '') . ' ' . ($data['apellido_materno'] ?? '')
-                                    ) ?: null,
+                                    'apellido_paterno' => $data['apellidoPaterno'] ?? null,
+                                    'apellido_materno' => $data['apellidoMaterno'] ?? null,
                                 ],
                             ]);
                         }
-                        Log::warning('LookupController.naturalPersonByDni:apiperu_empty', [
+                        Log::warning('LookupController.naturalPersonByDni:apisperu_empty', [
                             'dni' => $dni,
-                            'response' => $payload,
+                            'response' => $data,
                         ]);
                     } else {
-                        Log::warning('LookupController.naturalPersonByDni:apiperu_non_ok', [
+                        Log::warning('LookupController.naturalPersonByDni:apisperu_non_ok', [
                             'dni' => $dni,
                             'status' => $response->status(),
                             'body' => $response->body(),
                         ]);
                     }
                 } catch (\Throwable $e) {
-                    Log::error('LookupController.naturalPersonByDni:apiperu_exception', [
+                    Log::error('LookupController.naturalPersonByDni:apisperu_exception', [
                         'dni' => $dni,
                         'message' => $e->getMessage(),
-                        'exception' => $e,
                     ]);
-                    return response()->json(['message' => 'Error consultando apiperu.dev'], 502);
+                    return response()->json(['message' => 'Error consultando apisperu.com'], 502);
                 }
             } else {
                 Log::warning('LookupController.naturalPersonByDni:missing_api_key', [
@@ -76,7 +72,6 @@ class LookupController extends Controller
                 'nombres' => $person->nombres,
                 'apellido_paterno' => $person->apellido_paterno,
                 'apellido_materno' => $person->apellido_materno,
-                'apellidos' => $person->apellidos,
             ],
         ]);
     }
@@ -91,7 +86,7 @@ class LookupController extends Controller
         if ($entity) {
             $rep = $entity->representative;
             $person = $rep?->naturalPerson;
-            
+
             return response()->json([
                 'data' => [
                     'id' => $entity->id,
@@ -119,52 +114,37 @@ class LookupController extends Controller
         try {
             $rucResponse = Http::withToken($apiKey)
                 ->acceptJson()
-                ->get("https://apiperu.dev/api/ruc/{$ruc}");
+                ->get("https://dniruc.apisperu.com/api/v1/ruc/{$ruc}");
 
             if (!$rucResponse->ok()) {
+                Log::warning('LookupController.legalEntityByRuc:apisperu_non_ok', [
+                    'ruc' => $ruc,
+                    'status' => $rucResponse->status(),
+                ]);
                 return response()->json(['message' => 'No encontrado'], 404);
             }
 
-            $rucPayload = $rucResponse->json();
-            $rucData = $rucPayload['data'] ?? [];
+            $rucData = $rucResponse->json();
+            
             if (empty($rucData['ruc'])) {
                 return response()->json(['message' => 'No encontrado'], 404);
-            }
-
-            $repResponse = Http::withToken($apiKey)
-                ->acceptJson()
-                ->post('https://apiperu.dev/api/ruc-representantes', [
-                    'ruc' => $ruc,
-                ]);
-
-            $representatives = null;
-            if ($repResponse->ok()) {
-                $repPayload = $repResponse->json();
-                $repData = $repPayload['data'] ?? [];
-                if (!empty($repData) && is_array($repData)) {
-                    $first = $repData[0] ?? null;
-                    if (is_array($first)) {
-                        $representatives = [
-                            'dni' => $first['numero_de_documento'] ?? null,
-                            'nombre' => $first['nombre'] ?? null,
-                            'cargo' => $first['cargo'] ?? null,
-                            'fecha_desde' => $first['fecha_desde'] ?? null,
-                        ];
-                    }
-                }
             }
 
             return response()->json([
                 'data' => [
                     'id' => null,
-                    'ruc' => $rucData['ruc'] ?? $ruc,
-                    'razon_social' => $rucData['nombre_o_razon_social'] ?? null,
+                    'ruc' => $rucData['ruc'],
+                    'razon_social' => $rucData['razonSocial'] ?? null,
                     'district' => $rucData['distrito'] ?? null,
-                    'representative' => $representatives,
+                    'representative' => null, // La nueva API no incluye representantes en esta llamada
                 ],
             ]);
         } catch (\Throwable $e) {
-            return response()->json(['message' => 'Error consultando apiperu.dev'], 502);
+            Log::error('LookupController.legalEntityByRuc:apisperu_exception', [
+                'ruc' => $ruc,
+                'message' => $e->getMessage(),
+            ]);
+            return response()->json(['message' => 'Error consultando apisperu.com'], 502);
         }
     }
 }

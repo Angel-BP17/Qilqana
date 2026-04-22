@@ -3,7 +3,7 @@
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-info text-white py-3">
                 <h5 class="modal-title fw-bold" id="createNaturalPersonModalLabel">
-                    <i class="bi bi-person-plus-fill me-2"></i>Registrar persona natural
+                    <span class="material-symbols-outlined me-2">person_add</span>Registrar persona natural
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -15,13 +15,13 @@
                             <label for="dni" class="form-label fw-semibold">DNI</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-end-0">
-                                    <i class="bi bi-card-text"></i>
+                                    <span class="material-symbols-outlined">article</span>
                                 </span>
                                 <input type="text" class="form-control input-lookup-special border-start-0" id="dni" name="dni"
                                     value="{{ old('dni') }}" minlength="8" maxlength="10" inputmode="numeric"
                                     pattern="\d{8,10}" placeholder="Ingrese DNI">
                                 <button class="btn btn-lookup-special px-4" type="button" id="lookup_dni_btn">
-                                    <i class="bi bi-search me-1"></i> Buscar
+                                    <span class="material-symbols-outlined me-1">search</span> Buscar
                                 </button>
                             </div>
                         </div>
@@ -55,7 +55,7 @@
                 <div class="modal-footer bg-light border-top-0 p-3">
                     <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn btn-success px-4 fw-bold">
-                        <i class="bi bi-save me-1"></i> Guardar datos
+                        <span class="material-symbols-outlined me-1">save</span> Guardar datos
                     </button>
                 </div>
             </form>

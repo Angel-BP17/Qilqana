@@ -6,7 +6,7 @@
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div>
                 <h3 class="fw-bold text-white mb-0">
-                    <i class="fa-solid fa-clock-rotate-left me-2"></i>Módulo de Registro de Actividades
+                    <span class="material-symbols-outlined me-2">history</span>Módulo de Registro de Actividades
                 </h3>
                 <p class="text-white-50 mb-0">Auditoría detallada de cambios, accesos y acciones en el sistema</p>
             </div>
@@ -44,7 +44,7 @@
                 <div class="mt-3">
                     <button class="btn btn-light btn-sm d-md-none w-100" type="button" data-bs-toggle="collapse"
                         data-bs-target="#activityFilters" aria-expanded="false" aria-controls="activityFilters">
-                        <i class="fa-solid fa-sliders me-1"></i> Filtros
+                        <span class="material-symbols-outlined me-1">tune</span> Filtros
                     </button>
                     <div class="collapse d-md-block mt-3" id="activityFilters">
                         <form class="row g-3 align-items-end" method="GET" action="{{ route('activity-logs.index') }}">
@@ -92,11 +92,11 @@
                             </div>
                             <div class="col-12 col-md-3 d-flex flex-wrap gap-2 align-items-end justify-content-md-end">
                                 <button class="btn btn-light h-100 d-flex align-items-center" type="submit">
-                                    <i class="fa-solid fa-filter me-1"></i> Filtrar
+                                    <span class="material-symbols-outlined me-1">filter_alt</span> Filtrar
                                 </button>
                                 <a href="{{ route('activity-logs.index') }}"
                                     class="btn btn-outline-light h-100 d-flex align-items-center">
-                                    <i class="fa-solid fa-rotate me-1"></i> Limpiar
+                                    <span class="material-symbols-outlined me-1">refresh</span> Limpiar
                                 </a>
                             </div>
                         </form>
@@ -156,7 +156,7 @@
                         </div>
                     @empty
                         <div class="text-center text-muted py-4">
-                            <i class="fa-solid fa-inbox me-1"></i> No hay registros.
+                            <span class="material-symbols-outlined me-1">inbox</span> No hay registros.
                         </div>
                     @endforelse
                 </div>
@@ -217,7 +217,7 @@
                             @empty
                                 <tr>
                                     <td colspan="7" class="text-center text-muted py-4">
-                                        <i class="fa-solid fa-inbox me-1"></i> No hay registros.
+                                        <span class="material-symbols-outlined me-1">inbox</span> No hay registros.
                                     </td>
                                 </tr>
                             @endforelse
@@ -252,8 +252,4 @@
             </div>
         </div>
     </div>
-@endsection
-
-@section('scripts')
-    @vite(['resources/js/activity-logs.js'])
 @endsection

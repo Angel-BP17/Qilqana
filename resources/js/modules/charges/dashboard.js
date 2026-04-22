@@ -18,11 +18,13 @@ export const DashboardModule = {
     },
 
     bindEvents: function(container) {
-        // Ver Firma
-        container.querySelectorAll('.btn-signature-view').forEach(btn => {
-            btn.onclick = (e) => {
+        // Usar delegación de eventos en el contenedor para todas las acciones
+        container.addEventListener('click', (e) => {
+            // Ver Firma
+            const btnSignatureView = e.target.closest('.btn-signature-view');
+            if (btnSignatureView) {
                 e.preventDefault();
-                const d = btn.dataset;
+                const d = btnSignatureView.dataset;
                 const signerEl = document.getElementById('viewSignatureSigner');
                 signerEl.textContent = d.titularidad === '1' ? `Titular: ${d.titularName}` : `Firmado por: ${d.parentesco || d.signer}`;
                 signerEl.style.display = 'block';
@@ -30,23 +32,23 @@ export const DashboardModule = {
                 else document.getElementById('viewSignatureExtra').style.display = 'none';
                 ViewerModule.load(d.url, document.getElementById('viewSignatureContent'), true);
                 ViewerModule.modals.viewSign.show();
-            };
-        });
+                return;
+            }
 
-        // Ver Carta Poder
-        container.querySelectorAll('.btn-carta-poder-view').forEach(btn => {
-            btn.onclick = () => {
-                ViewerModule.load(btn.dataset.url, document.getElementById('viewCartaPoderContent'), false);
+            // Ver Carta Poder
+            const btnCartaPoderView = e.target.closest('.btn-carta-poder-view');
+            if (btnCartaPoderView) {
+                ViewerModule.load(btnCartaPoderView.dataset.url, document.getElementById('viewCartaPoderContent'), false);
                 ViewerModule.modals.viewCarta.show();
-            };
-        });
+                return;
+            }
 
-        // Abrir Modal Firma
-        container.querySelectorAll('.btn-sign-charge').forEach(btn => {
-            btn.onclick = () => {
+            // Abrir Modal Firma
+            const btnSignCharge = e.target.closest('.btn-sign-charge');
+            if (btnSignCharge) {
                 const form = document.getElementById('signChargeForm');
-                form.action = btn.dataset.action;
-                const chargeData = JSON.parse(btn.dataset.charge);
+                form.action = btnSignCharge.dataset.action;
+                const chargeData = JSON.parse(btnSignCharge.dataset.charge);
                 
                 // Mostrar campos de titularidad solo para externos
                 const isExternal = ['Persona Natural', 'Persona Juridica'].includes(chargeData.tipo_interesado);
@@ -61,17 +63,23 @@ export const DashboardModule = {
                     }
                 }
 
-                new bootstrap.Modal(document.getElementById('signChargeModal')).show();
+                const modalEl = document.getElementById('signChargeModal');
+                const bootstrapInstance = window.bootstrap || bootstrap;
+                let modal = bootstrapInstance.Modal.getInstance(modalEl);
+                if (!modal) {
+                    modal = new bootstrapInstance.Modal(modalEl);
+                }
+                modal.show();
                 setTimeout(() => SignatureModule.resize(), 300);
-            };
-        });
+                return;
+            }
 
-        // Abrir Modal Editar
-        container.querySelectorAll('.btn-edit-charge').forEach(btn => {
-            btn.onclick = () => {
-                const charge = JSON.parse(btn.dataset.charge);
+            // Abrir Modal Editar
+            const btnEditCharge = e.target.closest('.btn-edit-charge');
+            if (btnEditCharge) {
+                const charge = JSON.parse(btnEditCharge.dataset.charge);
                 const form = document.getElementById('editChargeForm');
-                form.action = btn.dataset.action;
+                form.action = btnEditCharge.dataset.action;
                 document.getElementById('edit_asunto').value = charge.asunto || '';
                 document.getElementById('edit_document_date').value = charge.document_date || '';
                 document.getElementById('edit_tipo_interesado').value = charge.tipo_interesado || '';
@@ -101,22 +109,46 @@ export const DashboardModule = {
                 }
 
                 document.getElementById('edit_tipo_interesado').dispatchEvent(new Event('change'));
-                new bootstrap.Modal(document.getElementById('editChargeModal')).show();
-            };
-        });
+                
+                const modalEl = document.getElementById('editChargeModal');
+                const bootstrapInstance = window.bootstrap || bootstrap;
+                let modal = bootstrapInstance.Modal.getInstance(modalEl);
+                if (!modal) {
+                    modal = new bootstrapInstance.Modal(modalEl);
+                }
+                modal.show();
+                return;
+            }
 
-        // Rechazar / Eliminar
-        container.querySelectorAll('.btn-reject-charge').forEach(btn => {
-            btn.onclick = () => {
-                document.getElementById('rejectChargeForm').action = btn.dataset.action;
-                new bootstrap.Modal(document.getElementById('rejectChargeModal')).show();
-            };
-        });
-        container.querySelectorAll('.btn-delete-charge').forEach(btn => {
-            btn.onclick = () => {
-                document.getElementById('deleteChargeForm').action = btn.dataset.action;
-                new bootstrap.Modal(document.getElementById('deleteChargeModal')).show();
-            };
+            // Rechazar
+            const btnRejectCharge = e.target.closest('.btn-reject-charge');
+            if (btnRejectCharge) {
+                document.getElementById('rejectChargeForm').action = btnRejectCharge.dataset.action;
+                
+                const modalEl = document.getElementById('rejectChargeModal');
+                const bootstrapInstance = window.bootstrap || bootstrap;
+                let modal = bootstrapInstance.Modal.getInstance(modalEl);
+                if (!modal) {
+                    modal = new bootstrapInstance.Modal(modalEl);
+                }
+                modal.show();
+                return;
+            }
+
+            // Eliminar
+            const btnDeleteCharge = e.target.closest('.btn-delete-charge');
+            if (btnDeleteCharge) {
+                document.getElementById('deleteChargeForm').action = btnDeleteCharge.dataset.action;
+                
+                const modalEl = document.getElementById('deleteChargeModal');
+                const bootstrapInstance = window.bootstrap || bootstrap;
+                let modal = bootstrapInstance.Modal.getInstance(modalEl);
+                if (!modal) {
+                    modal = new bootstrapInstance.Modal(modalEl);
+                }
+                modal.show();
+                return;
+            }
         });
 
         // Persistencia de pestañas

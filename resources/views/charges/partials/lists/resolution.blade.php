@@ -18,7 +18,7 @@
                             <div class="col">
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-end-0">
-                                        <i class="fa-solid fa-search text-muted"></i>
+                                        <span class="material-symbols-outlined text-muted">search</span>
                                     </span>
                                     <input type="text" class="form-control border-start-0" name="resolution_search"
                                         placeholder="No. cargo, RD, nombres..." value="{{ request('resolution_search') }}">
@@ -35,7 +35,7 @@
                                 </select>
                             </div>
                             <div class="col-auto">
-                                <button class="btn btn-light" type="submit"><i class="fas fa-filter"></i> Filtrar</button>
+                                <button class="btn btn-light" type="submit"><span class="material-symbols-outlined">filter_alt</span> Filtrar</button>
                             </div>
                         </form>
                         <form action="{{ route('charges.reports.resolution') }}" method="GET">
@@ -47,7 +47,7 @@
                                 <input type="hidden" name="resolution_period" value="{{ $resolutionPeriod }}">
                             @endif
                             <button class="btn btn-light" type="submit">
-                                <i class="fa-solid fa-file-pdf me-1"></i> Reporte PDF
+                                <span class="material-symbols-outlined me-1">picture_as_pdf</span> Reporte PDF
                             </button>
                         </form>
                     </div>
@@ -76,7 +76,10 @@
                                 </div>
                             </div>
                             <div class="mt-3">
-                                @include('charges.partials.item-actions', ['charge' => $charge])
+                                @include('charges.partials.item-actions', [
+                                    'charge' => $charge,
+                                    'canSign' => true,
+                                ])
                             </div>
                         </div>
                     </div>
@@ -115,7 +118,10 @@
                                     'status' => $charge->signature?->signature_status,
                                 ])</td>
                                 <td class="text-end">
-                                    @include('charges.partials.item-actions', ['charge' => $charge])
+                                    @include('charges.partials.item-actions', [
+                                        'charge' => $charge,
+                                        'canSign' => true,
+                                    ])
                                 </td>
                             </tr>
                         @empty

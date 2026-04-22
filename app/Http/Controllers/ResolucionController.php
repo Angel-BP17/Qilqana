@@ -33,7 +33,6 @@ class ResolucionController extends Controller
     public function store(CreateResolucionRequest $request)
     {
         $data = $request->validated();
-
         $data['user_id'] = $request->user()?->id;
 
         $this->service->create($data);
@@ -117,25 +116,12 @@ class ResolucionController extends Controller
 
     public function generatePDF(Request $request)
     {
-        $query = Resolucion::query();
+        // Usar el filtro unificado para garantizar consistencia
+        $query = $this->service->getFilterQuery($request->all());
 
-        // Aplicar los mismos filtros que en el index
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('nombres_apellidos', 'like', "%$search%")
-                    ->orWhere('rd', 'like', "%$search%")
-                    ->orWhere('asunto', 'like', "%$search%")
-                    ->orWhere('procedencia', 'like', "%$search%")
-                    ->orWhere('dni', 'like', "%$search%");
-            });
-        }
-
-        if ($request->has('periodo') && $request->periodo !== null) {
-            $query->where('periodo', $request->periodo);
-        }
-
-        $resoluciones = $query->get();
+        // Limitar a 500 registros para PDF en hosting compartido (evita error de memoria)
+        $resoluciones = $query->limit(500)->get();
+        
         $filtros = [
             'search' => $request->search,
             'periodo' => $request->periodo
@@ -143,42 +129,23 @@ class ResolucionController extends Controller
 
         return Pdf::loadView('resolucions.report', compact('resoluciones', 'filtros'))
             ->setPaper('a4')
-            ->stream('reporte_resoluciones' . now()->format('Ymd_His') . '.pdf');
+            ->stream('reporte_resoluciones_' . now()->format('Ymd_His') . '.pdf');
     }
 
     public function exportExcel(Request $request)
     {
-        $query = Resolucion::query();
-
-        // Aplicar los mismos filtros que en el index
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('nombres_apellidos', 'like', "%$search%")
-                    ->orWhere('rd', 'like', "%$search%")
-                    ->orWhere('asunto', 'like', "%$search%")
-                    ->orWhere('procedencia', 'like', "%$search%");
-            });
-        }
-
-        if ($request->has('periodo') && $request->periodo !== null) {
-            $query->where('periodo', $request->periodo);
-        }
-
-        $resoluciones = $query->get();
+        // Usar el filtro unificado
+        $query = $this->service->getFilterQuery($request->all());
 
         // Crear nuevo documento de Excel
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
         // Encabezados
-        $sheet->setCellValue('A1', 'RD');
-        $sheet->setCellValue('B1', 'Fecha');
-        $sheet->setCellValue('C1', 'Nombres y Apellidos');
-        $sheet->setCellValue('D1', 'DNI');
-        $sheet->setCellValue('E1', 'Asunto');
-        $sheet->setCellValue('F1', 'Periodo');
-        $sheet->setCellValue('G1', 'Procedencia');
+        $headers = ['RD', 'Fecha', 'Nombres y Apellidos', 'DNI', 'Asunto', 'Periodo', 'Procedencia'];
+        foreach ($headers as $index => $header) {
+            $sheet->setCellValue([$index + 1, 1], $header);
+        }
 
         // Estilos para encabezados
         $headerStyle = [
@@ -191,42 +158,30 @@ class ResolucionController extends Controller
         ];
         $sheet->getStyle('A1:G1')->applyFromArray($headerStyle);
 
-        // Datos
+        // Datos por fragmentos (Chunks) para ahorrar memoria
         $row = 2;
-        foreach ($resoluciones as $resolucion) {
-            $sheet->setCellValue('A' . $row, $resolucion->rd);
+        $query->chunk(200, function($resoluciones) use (&$sheet, &$row) {
+            foreach ($resoluciones as $resolucion) {
+                $sheet->setCellValue('A' . $row, $resolucion->rd);
+                
+                $fechaFormateada = $resolucion->fecha ? \Carbon\Carbon::parse($resolucion->fecha)->format('d/m/Y') : '';
+                $sheet->setCellValue('B' . $row, $fechaFormateada);
 
-            // SOLUCIÓN AL ERROR: Manejo seguro de fechas
-            $fechaFormateada = '';
-            if ($resolucion->fecha) {
-                if (is_string($resolucion->fecha)) {
-                    try {
-                        $fechaFormateada = Carbon::parse($resolucion->fecha)->format('d/m/Y');
-                    } catch (\Exception $e) {
-                        $fechaFormateada = $resolucion->fecha; // Mantener el valor original si falla el parseo
-                    }
-                } else {
-                    $fechaFormateada = $resolucion->fecha->format('d/m/Y');
-                }
+                $sheet->setCellValue('C' . $row, $resolucion->nombres_apellidos);
+                $sheet->setCellValue('D' . $row, $resolucion->dni ?? '');
+                $sheet->setCellValue('E' . $row, $resolucion->asunto);
+                $sheet->setCellValue('F' . $row, $resolucion->periodo);
+                $sheet->setCellValue('G' . $row, $resolucion->procedencia);
+                $row++;
             }
-            $sheet->setCellValue('B' . $row, $fechaFormateada);
-
-            $sheet->setCellValue('C' . $row, $resolucion->nombres_apellidos);
-            $sheet->setCellValue('D' . $row, $resolucion->dni ?? '');
-            $sheet->setCellValue('E' . $row, $resolucion->asunto);
-            $sheet->setCellValue('F' . $row, $resolucion->periodo);
-            $sheet->setCellValue('G' . $row, $resolucion->procedencia);
-            $row++;
-        }
+        });
 
         // Autoajustar columnas
         foreach (range('A', 'G') as $columnID) {
             $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
 
-        // Crear respuesta
         $fileName = 'resoluciones_' . now()->format('Ymd_His') . '.xlsx';
-
         $writer = new Xlsx($spreadsheet);
 
         return new StreamedResponse(

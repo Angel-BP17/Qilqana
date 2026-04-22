@@ -7,18 +7,18 @@
     <div class="card-header bg-info border-0 py-3 px-4">
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
             <h5 class="mb-0 fw-bold text-white">
-                <i class="fa-solid fa-building me-2"></i>Personas jurídicas
+                <span class="material-symbols-outlined me-2">corporate_fare</span>Personas jurídicas
             </h5>
             <form action="{{ route('legal-entities.index') }}" method="GET" class="d-flex gap-2 w-100 w-md-auto">
                 <div class="input-group input-group-sm flex-grow-1">
                     <span class="input-group-text bg-white border-end-0 input-lookup-special">
-                        <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                        <span class="material-symbols-outlined text-muted">search</span>
                     </span>
                     <input type="text" name="search" class="form-control border-start-0 ps-0 input-lookup-special" 
                         placeholder="Buscar por RUC o razón social..." value="{{ request('search') }}" style="min-width: 300px;">
                 </div>
                 <button type="submit" class="btn btn-lookup-special btn-sm px-4">
-                    <i class="fa-solid fa-search me-1"></i> Buscar
+                    <span class="material-symbols-outlined me-1">search</span> Buscar
                 </button>
             </form>
         </div>
@@ -48,7 +48,7 @@
                             data-ruc="{{ $legalEntity->ruc }}" data-razon="{{ $legalEntity->razon_social }}"
                             data-district="{{ $legalEntity->district }}" data-representative="{{ $legalEntity->representative_id }}" data-representative-dni="{{ $legalEntity->representative?->naturalPerson?->dni }}" data-representative-name="{{ $legalEntity->representative?->naturalPerson?->nombres }}" data-representative-cargo="{{ $legalEntity->representative?->cargo }}" data-representative-since="{{ $legalEntity->representative?->fecha_desde }}"
                             @disabled(!$canEditLegalEntity)>
-                            <i class="fa-solid fa-pen me-1"></i> Editar
+                            <span class="material-symbols-outlined me-1">edit</span> Editar
                         </button>
                         @include('legal-entities.forms.delete', [
                             'legalEntity' => $legalEntity,
@@ -58,7 +58,7 @@
                 </div>
             @empty
                 <div class="text-center text-muted py-4">
-                    <i class="fa-solid fa-inbox me-1"></i> No hay registros.
+                    <span class="material-symbols-outlined me-1">inbox</span> No hay registros.
                 </div>
             @endforelse
         </div>
@@ -68,10 +68,10 @@
                 <thead class="table-light">
                     <tr>
                         <th class="ps-4" style="width: 50px;">#</th>
-                        <th><i class="fa-solid fa-building me-1"></i> Razón social</th>
-                        <th style="width: 150px;"><i class="fa-solid fa-id-badge me-1"></i> RUC</th>
-                        <th style="width: 150px;"><i class="fa-solid fa-map-location-dot me-1"></i> Distrito</th>
-                        <th style="width: 180px;"><i class="fa-solid fa-calendar me-1"></i> Registrado</th>
+                        <th><span class="material-symbols-outlined me-1">corporate_fare</span> Razón social</th>
+                        <th style="width: 150px;"><span class="material-symbols-outlined me-1">badge</span> RUC</th>
+                        <th style="width: 150px;"><span class="material-symbols-outlined me-1">distance</span> Distrito</th>
+                        <th style="width: 180px;"><span class="material-symbols-outlined me-1">calendar_today</span> Registrado</th>
                         <th class="text-end pe-4" style="width: 120px;">Acciones</th>
                     </tr>
                 </thead>
@@ -95,7 +95,7 @@
                                         data-ruc="{{ $legalEntity->ruc }}" data-razon="{{ $legalEntity->razon_social }}"
                                         data-district="{{ $legalEntity->district }}" data-representative="{{ $legalEntity->representative_id }}" data-representative-dni="{{ $legalEntity->representative?->naturalPerson?->dni }}" data-representative-name="{{ $legalEntity->representative?->naturalPerson?->nombres }}" data-representative-cargo="{{ $legalEntity->representative?->cargo }}" data-representative-since="{{ $legalEntity->representative?->fecha_desde }}"
                                         @disabled(!$canEditLegalEntity)>
-                                        <i class="fa-solid fa-pen"></i>
+                                        <span class="material-symbols-outlined">edit</span>
                                     </button>
                                     @include('legal-entities.forms.delete', [
                                         'legalEntity' => $legalEntity,
@@ -107,7 +107,7 @@
                     @empty
                         <tr>
                             <td colspan="6" class="text-center text-muted py-4">
-                                <i class="fa-solid fa-inbox me-1"></i> No hay registros.
+                                <span class="material-symbols-outlined me-1">inbox</span> No hay registros.
                             </td>
                         </tr>
                     @endforelse

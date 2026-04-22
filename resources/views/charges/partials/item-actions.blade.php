@@ -5,7 +5,7 @@
             data-charge='@json($charge)'
             data-assigned="{{ $charge->signature?->assigned_to }}"
             @disabled($charge->signature?->signature_status !== 'pendiente')>
-            <i class="fa-solid fa-pen"></i>
+            <span class="material-symbols-outlined">edit</span>
         </button>
     @endif
 
@@ -14,7 +14,7 @@
             title="Firmar" data-action="{{ route('charges.sign.store', $charge) }}"
             data-charge='@json($charge)'
             @disabled($charge->signature?->signature_status !== 'pendiente')>
-            <i class="fa-solid fa-signature"></i>
+            <span class="material-symbols-outlined">history_edu</span>
         </button>
     @endif
 
@@ -22,7 +22,7 @@
         <button type="button" class="btn btn-outline-danger btn-sm btn-reject-charge"
             title="Rechazar" data-action="{{ route('charges.reject', $charge) }}"
             data-charge-id="{{ $charge->id }}" @disabled($charge->signature?->signature_status !== 'pendiente')>
-            <i class="fa-solid fa-ban"></i>
+            <span class="material-symbols-outlined">block</span>
         </button>
     @endif
 
@@ -43,14 +43,14 @@
             data-titular-name="{{ $charge->resolucion?->nombres_apellidos ?? '' }}"
             data-titular-dni="{{ $charge->resolucion?->dni ?? '' }}"
             data-evidence="{{ $charge->has_evidence ? route('charges.file.evidence', $charge) : '' }}">
-            <i class="fa-solid fa-eye"></i>
+            <span class="material-symbols-outlined">visibility</span>
         </button>
     @endif
 
     @if ($charge->has_carta_poder)
         <button type="button" class="btn btn-outline-info btn-sm btn-carta-poder-view"
             title="Ver carta poder" data-url="{{ route('charges.file.carta-poder', $charge) }}">
-            <i class="fa-solid fa-file-image"></i>
+            <span class="material-symbols-outlined">image</span>
         </button>
     @endif
 </div>

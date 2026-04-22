@@ -6,7 +6,7 @@
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div>
                 <h3 class="fw-bold text-white mb-0">
-                    <i class="fa-solid fa-gears me-2"></i>Configuración del Sistema
+                    <span class="material-symbols-outlined me-2">settings</span>Configuración del Sistema
                 </h3>
                 <p class="text-white-50 mb-0">Ajustes generales, gestión de periodos y mantenimiento de datos</p>
             </div>
@@ -72,7 +72,7 @@
                             <form method="POST" action="{{ route('settings.backup') }}">
                                 @csrf
                                 <button type="submit" class="btn btn-outline-light bg-dark">
-                                    <i class="fa-solid fa-download me-1"></i> Descargar backup
+                                    <span class="material-symbols-outlined me-1">download</span> Descargar backup
                                 </button>
                             </form>
                         </div>
@@ -83,19 +83,19 @@
                                 <input type="file" class="form-control mb-2" id="backup_file" name="backup_file"
                                     accept=".zip" required>
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="fa-solid fa-upload me-1"></i> Importar
+                                    <span class="material-symbols-outlined me-1">upload</span> Importar
                                 </button>
                             </form>
                         </div>
                         <div class="alert alert-warning mb-3">
-                            <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                            <span class="material-symbols-outlined me-1">warning</span>
                             Importar un backup reemplazará los datos actuales.
                         </div>
                         <form method="POST" action="{{ route('settings.reset') }}"
                             onsubmit="return confirm('¿Seguro que deseas reiniciar el sistema? Se eliminarán todos los datos y se ejecutarán los seeders.');">
                             @csrf
                             <button type="submit" class="btn btn-danger">
-                                <i class="fa-solid fa-rotate me-1"></i> Reiniciar sistema
+                                <span class="material-symbols-outlined me-1">refresh</span> Reiniciar sistema
                             </button>
                         </form>
                     </div>

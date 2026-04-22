@@ -42,7 +42,7 @@
                             data-apellido-materno="{{ $interesado->apellido_materno }}"
                             data-cargo="{{ $interesado->cargo }}"
                             @disabled(!$canEditInteresado)>
-                            <i class="fa-solid fa-pen"></i> Editar
+                            <span class="material-symbols-outlined">edit</span> Editar
                         </button>
                         @include('interesados.forms.delete', [
                             'interesado' => $interesado,
@@ -52,7 +52,7 @@
                 </div>
             @empty
                 <div class="text-center text-muted py-4">
-                    <i class="fa-solid fa-inbox me-1"></i> No hay registros.
+                    <span class="material-symbols-outlined me-1">inbox</span> No hay registros.
                 </div>
             @endforelse
         </div>
@@ -91,7 +91,7 @@
                                         data-apellido-materno="{{ $interesado->apellido_materno }}"
                                         data-cargo="{{ $interesado->cargo }}"
                                         @disabled(!$canEditInteresado)>
-                                        <i class="fa-solid fa-pen"></i>
+                                        <span class="material-symbols-outlined">edit</span>
                                     </button>
                                     @include('interesados.forms.delete', [
                                         'interesado' => $interesado,
@@ -103,7 +103,7 @@
                     @empty
                         <tr>
                             <td colspan="6" class="text-center text-muted py-4">
-                                <i class="fa-solid fa-inbox me-1"></i> No hay registros.
+                                <span class="material-symbols-outlined me-1">inbox</span> No hay registros.
                             </td>
                         </tr>
                     @endforelse

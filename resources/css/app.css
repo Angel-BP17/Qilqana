@@ -1,3 +1,54 @@
+/* Importar Iconos y Bootstrap desde node_modules */
+@import "bootstrap/dist/css/bootstrap.min.css";
+/* Botones en estado de carga */
+.btn-loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+.btn-loading::after {
+    content: "progress_activity";
+    font-family: 'Material Symbols Outlined';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: white !important;
+    animation: spin 1s linear infinite;
+    font-size: 1.2rem;
+}
+
+@keyframes spin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Variables de Bootstrap personalizadas (Sobrescribiendo variables de CSS de Bootstrap 5) */
+:root {
+    --bs-primary: #2F4597;
+    --bs-primary-rgb: 47, 69, 151;
+    --bs-body-bg: #f8f9fa;
+    --bs-info: #2AA1DB;
+    --bs-info-rgb: 42, 161, 219;
+}
+
+/* Ajuste para Material Symbols para que se comporten de forma similar a los iconos de fuente */
+.material-symbols-outlined {
+    font-family: 'Material Symbols Outlined' !important;
+    vertical-align: middle;
+    font-size: 1.25rem;
+    font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24;
+}
+
+/* Clase de compatibilidad para márgenes si se usaba fa- me-X */
+.material-symbols-outlined.me-1 { margin-right: 0.25rem !important; }
+.material-symbols-outlined.me-2 { margin-right: 0.5rem !important; }
+
 .pagination {
     margin: 0;
 }
@@ -15,4 +66,114 @@
 
 .pagination .page-item.disabled .page-link {
     color: #6c757d;
+}
+
+/* --- ESTILOS PARA CAMPOS DE BÚSQUEDA ESPECIALES --- */
+.input-lookup-special {
+    border-color: #2F4597 !important;
+    border-width: 1.5px !important;
+}
+
+.btn-lookup-special {
+    background-color: #2F4597 !important;
+    color: white !important;
+    border-color: #2F4597 !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease;
+}
+
+.btn-lookup-special:hover {
+    background-color: #1e2d6b !important;
+    border-color: #1e2d6b !important;
+    box-shadow: 0 0 8px rgba(47, 69, 151, 0.4);
+}
+
+/* Estilos personalizados existentes */
+.custom-auth-container {
+  background-color: #2F4597; /* $primary */
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.custom-login-container {
+  max-width: 400px;
+  padding: 15px;
+  margin: auto;
+}
+
+.custom-auth-card {
+  background-color: #f8f9fa; /* $body-bg */
+  border-radius: 1rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.form-floating:focus-within {
+    z-index: 2;
+}
+
+.custom-toggle-password {
+  cursor: pointer;
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+}
+
+.auth-register-container{
+    background-color: #2F4597; /* $primary */
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
+.register-container {
+    max-width: 500px;
+    padding: 15px;
+    margin: auto;
+}
+
+.signature-pad-container {
+    border: 2px dashed #007bff;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    position: relative;
+    width: 100%;
+    height: 200px;
+    touch-action: none;
+}
+.signature-pad {
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+    display: block;
+}
+
+#charges-tabs.nav-tabs {
+    border-bottom-color: rgba(255, 255, 255, 0.35);
+}
+
+#charges-tabs .nav-link {
+    color: #f8f9fa;
+}
+
+#charges-tabs .nav-link:not(.active) {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+#charges-tabs .nav-link:not(.active):hover,
+#charges-tabs .nav-link:not(.active):focus {
+    background-color: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: #ffffff;
+}
+
+#charges-tabs .nav-link.active {
+    color: #212529;
 }

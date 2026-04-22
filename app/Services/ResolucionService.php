@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Filters\ResolucionFilter;
 use App\Models\Charge;
+use App\Models\NaturalPerson;
 use App\Models\Resolucion;
 use App\Models\Setting;
 use App\Services\Contracts\ResolucionServiceInterface;
@@ -32,7 +33,7 @@ class ResolucionService implements ResolucionServiceInterface
             ];
         }
 
-        $resoluciones = $this->filter->applyFilters($data)->paginate(20);
+        $resoluciones = $this->getFilterQuery($data)->paginate(20);
         $ultimoRegistro = Resolucion::latest('id')->value('rd');
         
         $periodos = Resolucion::select('periodo')
@@ -49,14 +50,48 @@ class ResolucionService implements ResolucionServiceInterface
         );
     }
 
+    /**
+     * Devuelve la consulta filtrada (útil para exportaciones y dashboard)
+     */
+    public function getFilterQuery(array $filters)
+    {
+        return $this->filter->applyFilters($filters);
+    }
+
     public function create(array $data): bool
     {
         try {
             $data['periodo'] = Carbon::parse($data['fecha'])->year;
 
             return DB::transaction(function () use ($data) {
+                // 1. Registrar o recuperar Persona Natural
+                $personId = null;
+                if (!empty($data['dni'])) {
+                    $person = NaturalPerson::updateOrCreate(
+                        ['dni' => $data['dni']],
+                        [
+                            'nombres' => $data['nombres'] ?? '',
+                            'apellido_paterno' => $data['apellido_paterno'] ?? '',
+                            'apellido_materno' => $data['apellido_materno'] ?? '',
+                        ]
+                    );
+                    $personId = $person->id;
+                }
+
+                // 2. Concatenar para la tabla resolucions (compatibilidad)
+                if (!isset($data['nombres_apellidos'])) {
+                    $data['nombres_apellidos'] = trim(
+                        ($data['nombres'] ?? '') . ' ' . 
+                        ($data['apellido_paterno'] ?? '') . ' ' . 
+                        ($data['apellido_materno'] ?? '')
+                    );
+                }
+
+                // 3. Crear Resolución
                 $resolucion = Resolucion::create($data);
-                $this->createChargeForResolucion($resolucion, $data['user_id']);
+
+                // 4. Crear Cargo vinculado a la persona
+                $this->createChargeForResolucion($resolucion, $data['user_id'], $personId);
                 return true;
             });
         } catch (\Throwable $th) {
@@ -72,7 +107,10 @@ class ResolucionService implements ResolucionServiceInterface
             if ($resolucion->charge) return true;
 
             return DB::transaction(function () use ($resolucion, $user) {
-                $this->createChargeForResolucion($resolucion, $user->id);
+                // Buscar a la persona por el DNI registrado en la resolución
+                $person = NaturalPerson::where('dni', $resolucion->dni)->first();
+                
+                $this->createChargeForResolucion($resolucion, $user->id, $person?->id);
                 return true;
             });
         } catch (\Throwable $th) {
@@ -86,6 +124,28 @@ class ResolucionService implements ResolucionServiceInterface
         try {
             $model = Resolucion::findOrFail($id);
             if (isset($data['fecha'])) $data['periodo'] = Carbon::parse($data['fecha'])->year;
+
+            // Actualizar o crear Persona Natural si viene DNI
+            if (!empty($data['dni'])) {
+                NaturalPerson::updateOrCreate(
+                    ['dni' => $data['dni']],
+                    [
+                        'nombres' => $data['nombres'] ?? '',
+                        'apellido_paterno' => $data['apellido_paterno'] ?? '',
+                        'apellido_materno' => $data['apellido_materno'] ?? '',
+                    ]
+                );
+            }
+
+            // Concatenar si vienen los campos segregados
+            if (isset($data['nombres'])) {
+                $data['nombres_apellidos'] = trim(
+                    ($data['nombres'] ?? '') . ' ' . 
+                    ($data['apellido_paterno'] ?? '') . ' ' . 
+                    ($data['apellido_materno'] ?? '')
+                );
+            }
+
             return (bool) $model->update($data);
         } catch (\Throwable $th) {
             report($th);
@@ -104,13 +164,14 @@ class ResolucionService implements ResolucionServiceInterface
         }
     }
 
-    private function createChargeForResolucion(Resolucion $resolucion, int $userId): void
+    private function createChargeForResolucion(Resolucion $resolucion, int $userId, ?int $naturalPersonId = null): void
     {
         $charge = Charge::create([
             'n_charge' => $this->nextChargeNumberForUser($userId),
             'charge_period' => $this->getChargePeriod(),
             'user_id' => $userId,
             'resolucion_id' => $resolucion->id,
+            'natural_person_id' => $naturalPersonId, // Vínculo crítico corregido
             'asunto' => $resolucion->asunto,
             'tipo_interesado' => 'Persona Natural',
         ]);

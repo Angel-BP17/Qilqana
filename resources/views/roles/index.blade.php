@@ -6,7 +6,7 @@
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div>
                 <h3 class="fw-bold text-white mb-0">
-                    <i class="fa-solid fa-user-shield me-2"></i>Módulo de Roles y Permisos
+                    <span class="material-symbols-outlined me-2">shield</span>Módulo de Roles y Permisos
                 </h3>
                 <p class="text-white-50 mb-0">Configuración de perfiles de usuario y niveles de acceso</p>
             </div>
@@ -33,7 +33,7 @@
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body d-flex align-items-center gap-3">
                         <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-3">
-                            <i class="fa-solid fa-shield-halved fs-4"></i>
+                            <span class="material-symbols-outlined fs-4">shield</span>
                         </div>
                         <div>
                             <p class="mb-0 text-muted">Total de roles</p>
@@ -51,7 +51,7 @@
                         </div>
                         <button type="button" class="btn btn-success" data-bs-toggle="modal"
                             data-bs-target="#createRoleModal">
-                            <i class="fa-solid fa-plus"></i> Nuevo rol
+                            <span class="material-symbols-outlined">add</span> Nuevo rol
                         </button>
                     </div>
                 </div>
@@ -97,20 +97,20 @@
                                             <button type="button" class="btn btn-outline-info btn-sm btn-role-info"
                                                 title="Ver detalles" data-name="{{ $role->name }}"
                                                 data-permissions='@json($rolePerms)'>
-                                                <i class="fa-solid fa-circle-info"></i>
+                                                <span class="material-symbols-outlined">info</span>
                                             </button>
                                             <button type="button" class="btn btn-outline-primary btn-sm btn-edit-role"
                                                 title="Editar" data-action="{{ route('roles.update', $role) }}"
                                                 data-name="{{ $role->name }}"
                                                 data-permissions='@json($rolePerms)'>
-                                                <i class="fa-solid fa-pen"></i>
+                                                <span class="material-symbols-outlined">edit</span>
                                             </button>
                                             <form method="POST" action="{{ route('roles.destroy', $role) }}">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-outline-danger btn-sm"
                                                     onclick="return confirm('¿Eliminar este rol?')">
-                                                    <i class="fa-solid fa-trash"></i>
+                                                    <span class="material-symbols-outlined">delete</span>
                                                 </button>
                                             </form>
                                         </div>
@@ -264,8 +264,4 @@
         </div>
     </div>
 
-@endsection
-
-@section('scripts')
-    @vite(['resources/js/roles.js'])
 @endsection

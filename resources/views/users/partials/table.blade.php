@@ -47,14 +47,14 @@
                                         data-user_type="{{ $userRoles->join(', ') }}"
                                         data-created_at="{{ optional($user->created_at)->format('Y-m-d H:i') }}"
                                         data-updated_at="{{ optional($user->updated_at)->format('Y-m-d H:i') }}">
-                                        <i class="fa-solid fa-circle-info"></i>
+                                        <span class="material-symbols-outlined">info</span>
                                     </button>
                                     <button type="button" class="btn btn-outline-primary btn-sm btn-edit-user"
                                         title="{{ $editTitle }}" data-action="{{ route('users.update', $user) }}"
                                         data-name="{{ $user->name }}" data-last_name="{{ $user->last_name }}"
                                         data-dni="{{ $user->dni }}"
                                         data-roles='@json($userRoles)' @disabled(!$canEditUser)>
-                                        <i class="fa-solid fa-pen"></i>
+                                        <span class="material-symbols-outlined">edit</span>
                                     </button>
                                     @include('users.forms.delete', [
                                         'user' => $user,

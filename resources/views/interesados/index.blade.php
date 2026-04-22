@@ -27,7 +27,7 @@
                 <div class="card shadow-sm border-0 h-100">
                     <div class="card-body d-flex align-items-center gap-3">
                         <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-3">
-                            <i class="fa-solid fa-user-tag fs-4"></i>
+                            <span class="material-symbols-outlined fs-4">person</span>
                         </div>
                         <div>
                             <p class="mb-0 text-muted">Total de interesados</p>
@@ -46,7 +46,7 @@
                         <button type="button" class="btn btn-success" data-bs-toggle="modal"
                             data-bs-target="#createInteresadoModal" @disabled(!$canCreateInteresado)
                             @unless ($canCreateInteresado) title="No tienes permiso para crear interesados" @endunless>
-                            <i class="bi bi-plus-circle"></i> Registrar
+                            <span class="material-symbols-outlined">add_circle</span> Registrar
                         </button>
                     </div>
                 </div>
@@ -82,13 +82,10 @@
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                         <button type="submit" class="btn btn-danger">Eliminar</button>
                     </div>
-                </form>
-            </div>
-        </div>
-    </div>
+                    </form>
+                    </div>
+                    </div>
+                    </div>
 
-@endsection
+                    @endsection
 
-@section('scripts')
-    @vite(['resources/js/interesados.js'])
-@endsection
