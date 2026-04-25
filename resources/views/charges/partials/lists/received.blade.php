@@ -61,19 +61,36 @@
             {{-- VISTA MÓVIL --}}
             <div class="d-md-none p-3">
                 @forelse ($receivedCharges as $charge)
-                    <div class="card border-0 shadow-sm mb-2">
-                        <div class="card-body p-3">
-                            <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="card border-0 shadow-sm mb-3 overflow-hidden">
+                        <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+                            <div class="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <div class="small text-muted">#{{ $charge->n_charge }}</div>
-                                    <div class="fw-semibold">{{ $charge->interesado_label }}</div>
-                                    <div class="small text-muted">{{ $charge->asunto }}</div>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle mb-1">Cargo #{{ $charge->n_charge }}</span>
+                                    <div class="small text-muted d-flex align-items-center">
+                                        <span class="material-symbols-outlined fs-6 me-1">calendar_today</span>
+                                        {{ optional($charge->created_at)->format('d/m/Y H:i') }}
+                                    </div>
                                 </div>
                                 @include('charges.partials.status-badge', [
                                     'status' => $charge->signature?->signature_status,
                                 ])
                             </div>
-                            <div class="mt-3">
+                        </div>
+                        <div class="card-body py-3">
+                            <div class="mb-3">
+                                <label class="text-muted small text-uppercase fw-bold d-block mb-1">Interesado</label>
+                                <div class="fw-semibold text-dark text-truncate" title="{{ $charge->interesado_label }}">
+                                    {{ $charge->interesado_label }}
+                                </div>
+                                <div class="small text-muted">{{ $charge->tipo_interesado }}</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="text-muted small text-uppercase fw-bold d-block mb-1">Asunto</label>
+                                <div class="small text-dark lh-sm">{{ Str::limit($charge->asunto, 100) }}</div>
+                            </div>
+
+                            <div class="pt-2 border-top">
                                 @include('charges.partials.item-actions', [
                                     'charge' => $charge,
                                     'canSign' => true,
@@ -83,7 +100,10 @@
                         </div>
                     </div>
                 @empty
-                    <div class="text-center text-muted py-4">No hay cargos recibidos.</div>
+                    <div class="text-center text-muted py-5 bg-white rounded-3 shadow-sm">
+                        <span class="material-symbols-outlined fs-1 d-block mb-2">inbox</span>
+                        No hay cargos recibidos.
+                    </div>
                 @endforelse
             </div>
 
@@ -105,8 +125,10 @@
                             <tr>
                                 <td>{{ $key + 1 }}</td>
                                 <td>{{ $charge->n_charge }}</td>
-                                <td>
-                                    <div class="fw-semibold">{{ $charge->interesado_label }}</div>
+                                <td style="max-width: 250px;">
+                                    <div class="fw-semibold text-truncate" title="{{ $charge->interesado_label }}">
+                                        {{ $charge->interesado_label }}
+                                    </div>
                                     <div class="small text-muted">{{ $charge->tipo_interesado }}</div>
                                 </td>
                                 <td style="max-width: 250px;" class="text-truncate">{{ $charge->asunto }}</td>

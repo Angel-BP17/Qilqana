@@ -1,12 +1,11 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Resolucion;
 
-use App\Models\Charge;
 use App\Models\Resolucion;
-use App\Models\User;
 use App\Models\Setting;
-use App\Services\ResolucionService;
+use App\Models\User;
+use App\Services\Resolucion\ResolucionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,6 +14,7 @@ class ResolucionServiceTest extends TestCase
     use RefreshDatabase;
 
     protected ResolucionService $service;
+
     protected User $user;
 
     protected function setUp(): void
@@ -22,7 +22,7 @@ class ResolucionServiceTest extends TestCase
         parent::setUp();
         $this->service = app(ResolucionService::class);
         $this->user = User::factory()->create();
-        
+
         Setting::create(['key' => 'charge_period', 'value' => '2026']);
     }
 
@@ -45,7 +45,7 @@ class ResolucionServiceTest extends TestCase
         $this->assertDatabaseHas('charges', [
             'resolucion_id' => Resolucion::where('rd', 'RD-001-2026')->first()->id,
             'user_id' => $this->user->id,
-            'charge_period' => '2026'
+            'charge_period' => '2026',
         ]);
     }
 
@@ -58,12 +58,12 @@ class ResolucionServiceTest extends TestCase
             'periodo' => '2026',
             'asunto' => 'A',
             'nombres_apellidos' => 'B',
-            'dni' => 'C'
+            'dni' => 'C',
         ]);
 
         $filters = [
             'search' => null,
-            'periodo' => '2026'
+            'periodo' => '2026',
         ];
 
         $result = $this->service->getAll($filters);

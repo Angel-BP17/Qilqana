@@ -2,22 +2,20 @@ import "bootstrap";
 import "./bootstrap";
 import * as bootstrap from "bootstrap";
 import SignaturePad from "signature_pad";
+import { runResilient } from './modules/common/resilience';
 
-// Hacer librerías disponibles globalmente
+// Globales
 window.bootstrap = bootstrap;
 window.SignaturePad = SignaturePad;
 
 /**
- * Sistema de Carga Dinámica de Módulos
- * Esto evita tener que declarar múltiples entry points en Vite
- * y mejora el rendimiento al cargar solo el código necesario.
+ * Orquestador de Módulos Frontend
  */
-document.addEventListener('DOMContentLoaded', async () => {
+const orchestrateModules = async () => {
     const pageName = document.body.getAttribute('data-page');
-
     if (!pageName) return;
 
-    // Mapa de rutas a archivos JS (relativo a resources/js/)
+    // Mapa de módulos
     const routes = {
         'charges.index': () => import('./charges.js'),
         'resolucions.index': () => import('./resolucions.js'),
@@ -33,10 +31,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (routes[pageName]) {
         try {
-            await routes[pageName]();
-            // console.debug(`[Vite] Módulo '${pageName}' cargado dinámicamente.`);
+            // Importar dinámicamente
+            const module = await routes[pageName]();
+            
+            // Ejecutar inicialización de forma resiliente
+            runResilient(() => {
+                // Si el módulo exporta un objeto con init()
+                if (module.default && typeof module.default.init === 'function') {
+                    module.default.init();
+                } 
+                // O si es un módulo autoejecutable (estilo antiguo)
+                else if (typeof module.init === 'function') {
+                    module.init();
+                }
+            });
         } catch (error) {
-            console.error(`[Vite] Error al cargar el módulo '${pageName}':`, error);
+            console.error(`[Orchestrator] Falló la carga del módulo '${pageName}':`, error);
         }
     }
-});
+};
+
+// Iniciar orquestación
+orchestrateModules();

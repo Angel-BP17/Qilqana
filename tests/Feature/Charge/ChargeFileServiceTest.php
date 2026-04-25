@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Charge;
 
 use App\Models\Charge;
 use App\Models\User;
@@ -16,16 +16,16 @@ class ChargeFileServiceTest extends TestCase
     {
         Storage::fake('local');
         $user = User::factory()->create();
-        
+
         $charge = Charge::factory()->create(['user_id' => $user->id]);
         $path = "private/charges_signatures/test_signature_{$charge->id}.svg";
         $svgContent = '<svg>signature</svg>';
-        
+
         Storage::disk('local')->put($path, $svgContent);
-        
+
         $charge->signature()->create([
             'signature_root' => $path,
-            'signature_status' => 'firmado'
+            'signature_status' => 'firmado',
         ]);
 
         $response = $this->actingAs($user)->get(route('charges.file.signature', $charge));
@@ -42,15 +42,15 @@ class ChargeFileServiceTest extends TestCase
     {
         Storage::fake('local');
         $user = User::factory()->create();
-        
+
         $charge = Charge::factory()->create(['user_id' => $user->id]);
         $path = "private/charges_evidence/test_evidence_{$charge->id}.jpg";
-        
+
         Storage::disk('local')->put($path, 'fake-image-content');
-        
+
         $charge->signature()->create([
             'evidence_root' => $path,
-            'signature_status' => 'firmado'
+            'signature_status' => 'firmado',
         ]);
 
         $response = $this->actingAs($user)->get(route('charges.file.evidence', $charge));
@@ -65,12 +65,12 @@ class ChargeFileServiceTest extends TestCase
     {
         Storage::fake('local');
         $user = User::factory()->create();
-        
+
         $charge = Charge::factory()->create(['user_id' => $user->id]);
-        
+
         $charge->signature()->create([
             'signature_root' => 'path/to/nowhere.svg',
-            'signature_status' => 'firmado'
+            'signature_status' => 'firmado',
         ]);
 
         $response = $this->actingAs($user)->get(route('charges.file.signature', $charge));

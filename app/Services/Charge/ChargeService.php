@@ -1,18 +1,19 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Charge;
 
 use App\Filters\ChargeFilter;
 use App\Models\Charge;
 use App\Models\LegalEntity;
 use App\Models\NaturalPerson;
+use App\Models\Representative;
 use App\Models\Setting;
 use App\Models\User;
-use App\Services\Contracts\ChargeServiceInterface;
+use App\Services\Charge\Contracts\ChargeServiceInterface;
+use App\Services\Support\ImageService;
 use App\Traits\HasChargeLogic;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ChargeService implements ChargeServiceInterface
@@ -22,15 +23,14 @@ class ChargeService implements ChargeServiceInterface
     public function __construct(
         protected ChargeFilter $filter,
         protected ImageService $imageService
-    ) {
-    }
+    ) {}
 
     public function getAll(array $data): array
     {
         $user = $data['user'];
-        
+
         $resolutionCharges = ($user?->hasRole('ADMINISTRADOR') || $user?->can('modulo resoluciones'))
-            ? $this->filter->getAllResolutionCharges($data['resolucion'], $user) 
+            ? $this->filter->getAllResolutionCharges($data['resolucion'], $user)
             : collect();
 
         return [
@@ -90,10 +90,12 @@ class ChargeService implements ChargeServiceInterface
         return DB::transaction(function () use ($data, $model) {
             $assignedTo = $data['assigned_to'] ?? null;
             if ($model->signature?->signature_status === 'pendiente') {
-                if ($data['tipo_interesado'] !== 'Trabajador UGEL') $assignedTo = $data['user']->id;
+                if ($data['tipo_interesado'] !== 'Trabajador UGEL') {
+                    $assignedTo = $data['user']->id;
+                }
                 $model->signature()->update([
                     'assigned_to' => $assignedTo,
-                    'signature_requested_at' => ($assignedTo && !$model->signature->signature_requested_at) ? now() : $model->signature->signature_requested_at
+                    'signature_requested_at' => ($assignedTo && ! $model->signature->signature_requested_at) ? now() : $model->signature->signature_requested_at,
                 ]);
             }
 
@@ -104,6 +106,7 @@ class ChargeService implements ChargeServiceInterface
             ]);
 
             $this->syncInteresado($model, $data);
+
             return true;
         });
     }
@@ -116,6 +119,7 @@ class ChargeService implements ChargeServiceInterface
                 $this->imageService->deleteIfExists($model->signature->signature_root);
                 $this->imageService->deleteIfExists($model->signature->evidence_root);
             }
+
             return (bool) $model->delete();
         });
     }
@@ -130,12 +134,12 @@ class ChargeService implements ChargeServiceInterface
             Storage::disk('local')->put($signaturePath, $data['firma']);
 
             $cartaPoderPath = $charge->signature?->carta_poder_path;
-            if (!$isTitular && !empty($files['carta_poder'])) {
+            if (! $isTitular && ! empty($files['carta_poder'])) {
                 $cartaPoderPath = $this->imageService->storeAndOptimize($files['carta_poder'], 'private/charges_poder', 50);
             }
 
             $evidencePath = $charge->signature?->evidence_root;
-            if (!empty($files['evidence_root'])) {
+            if (! empty($files['evidence_root'])) {
                 $this->imageService->deleteIfExists($evidencePath);
                 $evidencePath = $this->imageService->storeAndOptimize($files['evidence_root'], 'private/charges_evidence');
             }
@@ -165,22 +169,28 @@ class ChargeService implements ChargeServiceInterface
                 'signed_by' => $userId,
                 'signature_completed_at' => now(),
             ]);
+
             return true;
         });
     }
 
     private function resolveNaturalPerson(array $data): ?int
     {
-        if ($data['tipo_interesado'] !== 'Persona Natural') return null;
+        if ($data['tipo_interesado'] !== 'Persona Natural') {
+            return null;
+        }
         $payload = ['dni' => $data['dni'] ?? null, 'nombres' => $data['nombres'] ?? null, 'apellido_paterno' => $data['apellido_paterno'] ?? null, 'apellido_materno' => $data['apellido_materno'] ?? null];
         $dni = trim((string) ($payload['dni'] ?? ''));
+
         return ($dni !== '') ? NaturalPerson::firstOrCreate(['dni' => $dni], $payload)->id : NaturalPerson::create($payload)->id;
     }
 
     private function resolveLegalEntity(array $data): ?int
     {
-        if ($data['tipo_interesado'] !== 'Persona Juridica') return null;
-        
+        if ($data['tipo_interesado'] !== 'Persona Juridica') {
+            return null;
+        }
+
         $payload = [
             'ruc' => $data['ruc'] ?? null,
             'razon_social' => $data['razon_social'] ?? null,
@@ -188,12 +198,12 @@ class ChargeService implements ChargeServiceInterface
         ];
 
         $ruc = trim((string) ($payload['ruc'] ?? ''));
-        $entity = ($ruc !== '') 
+        $entity = ($ruc !== '')
             ? LegalEntity::firstOrCreate(['ruc' => $ruc], $payload)
             : LegalEntity::create($payload);
 
         // Resolver representante
-        if (!empty($data['representative_dni'])) {
+        if (! empty($data['representative_dni'])) {
             $person = NaturalPerson::updateOrCreate(
                 ['dni' => $data['representative_dni']],
                 [
@@ -239,11 +249,25 @@ class ChargeService implements ChargeServiceInterface
     private function getPeriodOptions(?string $defaultPeriod): array
     {
         $options = Charge::whereNotNull('charge_period')->distinct()->orderByDesc('charge_period')->pluck('charge_period')->all();
-        if ($defaultPeriod && !in_array($defaultPeriod, $options, true)) array_unshift($options, $defaultPeriod);
+        if ($defaultPeriod && ! in_array($defaultPeriod, $options, true)) {
+            array_unshift($options, $defaultPeriod);
+        }
+
         return $options;
     }
 
-    private function countSignedCharges(): int { return Charge::whereHas('signature', fn($q) => $q->where('signature_status', 'firmado'))->count(); }
-    private function countUnsignedCharges(): int { return Charge::whereHas('signature', fn($q) => $q->where('signature_status', 'pendiente'))->count(); }
-    private function usersToAssign($user): Collection { return User::where('id', '!=', $user?->id)->orderBy('name')->get(); }
+    private function countSignedCharges(): int
+    {
+        return Charge::whereHas('signature', fn ($q) => $q->where('signature_status', 'firmado'))->count();
+    }
+
+    private function countUnsignedCharges(): int
+    {
+        return Charge::whereHas('signature', fn ($q) => $q->where('signature_status', 'pendiente'))->count();
+    }
+
+    private function usersToAssign($user): Collection
+    {
+        return User::where('id', '!=', $user?->id)->orderBy('name')->get();
+    }
 }

@@ -31,4 +31,8 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'apisperu' => [
+        'key' => env('API_DEV_PERU_KEY'),
+    ],
+
 ];

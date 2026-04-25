@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
@@ -20,14 +20,14 @@ class HomeController extends Controller
     /**
      * Show the application dashboard based on user permissions.
      *
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function index()
     {
         $user = Auth::user();
 
         // Si el usuario puede ver resoluciones, redirigir a resoluciones
-        if ($user->can('modulo resoluciones') && !$user->hasRole('ADMINISTRADOR')) {
+        if ($user->can('modulo resoluciones') && ! $user->hasRole('ADMINISTRADOR')) {
             return redirect()->route('resolucions.index');
         }
 

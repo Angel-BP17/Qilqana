@@ -20,26 +20,11 @@ export const DashboardModule = {
     bindEvents: function(container) {
         // Usar delegación de eventos en el contenedor para todas las acciones
         container.addEventListener('click', (e) => {
-            // Ver Firma
-            const btnSignatureView = e.target.closest('.btn-signature-view');
-            if (btnSignatureView) {
+            // Ver Detalles de Cargo (Firma, Evidencia, Carta Poder)
+            const btnViewDetails = e.target.closest('.btn-view-charge-details');
+            if (btnViewDetails) {
                 e.preventDefault();
-                const d = btnSignatureView.dataset;
-                const signerEl = document.getElementById('viewSignatureSigner');
-                signerEl.textContent = d.titularidad === '1' ? `Titular: ${d.titularName}` : `Firmado por: ${d.parentesco || d.signer}`;
-                signerEl.style.display = 'block';
-                if (d.evidence) ViewerModule.load(d.evidence, document.getElementById('viewSignatureExtra'), false);
-                else document.getElementById('viewSignatureExtra').style.display = 'none';
-                ViewerModule.load(d.url, document.getElementById('viewSignatureContent'), true);
-                ViewerModule.modals.viewSign.show();
-                return;
-            }
-
-            // Ver Carta Poder
-            const btnCartaPoderView = e.target.closest('.btn-carta-poder-view');
-            if (btnCartaPoderView) {
-                ViewerModule.load(btnCartaPoderView.dataset.url, document.getElementById('viewCartaPoderContent'), false);
-                ViewerModule.modals.viewCarta.show();
+                ViewerModule.showDetails(btnViewDetails.dataset);
                 return;
             }
 

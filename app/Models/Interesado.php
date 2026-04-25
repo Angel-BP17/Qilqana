@@ -5,6 +5,4 @@ namespace App\Models;
 /**
  * @deprecated Use NaturalPerson instead.
  */
-class Interesado extends NaturalPerson
-{
-}
+class Interesado extends NaturalPerson {}

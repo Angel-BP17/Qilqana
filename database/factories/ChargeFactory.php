@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Charge;
+use App\Models\NaturalPerson;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -17,6 +18,7 @@ class ChargeFactory extends Factory
             'charge_period' => '2026',
             'user_id' => User::factory(),
             'tipo_interesado' => 'Persona Natural',
+            'natural_person_id' => NaturalPerson::factory(),
             'asunto' => $this->faker->sentence(),
             'document_date' => $this->faker->date(),
         ];

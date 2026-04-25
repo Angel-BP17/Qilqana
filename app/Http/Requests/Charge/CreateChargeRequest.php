@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests\Charge;
 
+use App\Models\Charge;
+use App\Models\Setting;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Models\Setting;
 
 class CreateChargeRequest extends FormRequest
 {
@@ -13,13 +15,13 @@ class CreateChargeRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->can('create', \App\Models\Charge::class);
+        return $this->user()->can('create', Charge::class);
     }
 
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {

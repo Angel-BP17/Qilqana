@@ -6,15 +6,12 @@ use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\DeleteUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Models\User;
-use App\Services\UserService;
+use App\Services\User\UserService;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function __construct(protected UserService $service)
-    {
-
-    }
+    public function __construct(protected UserService $service) {}
 
     /**
      * Display a listing of the resource.

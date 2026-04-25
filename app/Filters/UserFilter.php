@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Filters;
 
 use App\Models\User;
@@ -13,7 +14,7 @@ class UserFilter
         return User::with('roles')
             ->when(
                 $search,
-                fn($q, $search) => $q->where(function ($q) use ($search) {
+                fn ($q, $search) => $q->where(function ($q) use ($search) {
                     $q->where('name', 'LIKE', "%{$search}%")
                         ->orWhere('last_name', 'LIKE', "%{$search}%")
                         ->orWhere('dni', 'LIKE', "%{$search}%")
@@ -21,6 +22,6 @@ class UserFilter
                         ->orWhereRaw("CONCAT(last_name, ' ', name) LIKE ?", ["%{$search}%"]);
                 })
             )
-            ->when($roleId, fn($q, $roleId) => $q->whereHas('roles', fn($q) => $q->where('id', $roleId)));
+            ->when($roleId, fn ($q, $roleId) => $q->whereHas('roles', fn ($q) => $q->where('id', $roleId)));
     }
 }

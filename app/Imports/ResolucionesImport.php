@@ -3,29 +3,22 @@
 namespace App\Imports;
 
 use Carbon\Carbon;
+use DB;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
-use DB;
-use Maatwebsite\Excel\Concerns\{
-    WithStartRow,
-    WithChunkReading,
-    WithBatchInserts,
-    WithCalculatedFormulas
-// Removido WithHeadingRow ya que no se usa
-};
+use Maatwebsite\Excel\Concerns\WithBatchInserts;
+use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithStartRow;
+use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate; // Removido WithHeadingRow ya que no se usa
 
-class ResolucionesImport implements
-    ToCollection,
-    WithStartRow,
-    WithChunkReading,
-    WithBatchInserts,
-    WithCalculatedFormulas,
-    ShouldQueue
+class ResolucionesImport implements ShouldQueue, ToCollection, WithBatchInserts, WithCalculatedFormulas, WithChunkReading, WithStartRow
 {
     private $startRow = 2;
+
     private $startColumn = 'A';
+
     private $columnIndex = 0; // Índice numérico para la columna de inicio
 
     public function setStartRow(int $row): void
@@ -78,7 +71,7 @@ class ResolucionesImport implements
         }
 
         // Guardar en bloque si hay datos
-        if (!empty($buffer)) {
+        if (! empty($buffer)) {
             DB::table('resolucions')->upsert($buffer, ['rd']);
         }
     }
@@ -103,7 +96,7 @@ class ResolucionesImport implements
             'd.m.Y',
             'Y.m.d',
             'd M Y',
-            'd F Y'
+            'd F Y',
         ];
 
         foreach ($formats as $format) {

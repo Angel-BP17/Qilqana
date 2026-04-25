@@ -4,26 +4,18 @@ namespace App\Imports;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Concerns\{
-    ToCollection,
-    WithStartRow,
-    WithChunkReading,
-    WithBatchInserts,
-    WithCalculatedFormulas
-};
+use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\WithBatchInserts;
+use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithStartRow;
 
-class NaturalPeopleImport implements
-    ToCollection,
-    WithStartRow,
-    WithChunkReading,
-    WithBatchInserts,
-    WithCalculatedFormulas
+class NaturalPeopleImport implements ToCollection, WithBatchInserts, WithCalculatedFormulas, WithChunkReading, WithStartRow
 {
-    public function __construct(private bool $updateExisting = true)
-    {
-    }
+    public function __construct(private bool $updateExisting = true) {}
 
     private bool $headerChecked = false;
+
     private array $columnMap = [
         'dni' => 0,
         'nombres' => 1,
@@ -33,11 +25,11 @@ class NaturalPeopleImport implements
 
     public function collection(Collection $rows): void
     {
-        if (!$this->headerChecked) {
+        if (! $this->headerChecked) {
             $firstRow = $rows->first();
             if ($firstRow) {
                 $headerMap = $this->detectHeaderMap($firstRow->toArray());
-                if (!empty($headerMap)) {
+                if (! empty($headerMap)) {
                     $this->columnMap = array_merge($this->columnMap, $headerMap);
                     $rows = $rows->slice(1);
                 }
@@ -86,7 +78,7 @@ class NaturalPeopleImport implements
             ];
         }
 
-        if (!empty($buffer)) {
+        if (! empty($buffer)) {
             $buffer = $this->uniqueByDni($buffer);
             if ($this->updateExisting) {
                 DB::table('natural_people')->upsert(
@@ -103,9 +95,9 @@ class NaturalPeopleImport implements
                 $existingLookup = array_flip($existing);
                 $newRows = array_values(array_filter(
                     $buffer,
-                    fn($row) => !isset($existingLookup[$row['dni']])
+                    fn ($row) => ! isset($existingLookup[$row['dni']])
                 ));
-                if (!empty($newRows)) {
+                if (! empty($newRows)) {
                     DB::table('natural_people')->insert($newRows);
                 }
             }
@@ -141,21 +133,25 @@ class NaturalPeopleImport implements
 
             if (in_array($header, ['DNI'], true)) {
                 $map['dni'] = $index;
+
                 continue;
             }
 
             if (in_array($header, ['NOMBRE', 'NOMBRES'], true)) {
                 $map['nombres'] = $index;
+
                 continue;
             }
 
             if (in_array($header, ['APELLIDO PATERNO', 'PRIMER APELLIDO', 'APELLIDO 1', 'APELLIDO1'], true)) {
                 $map['apellido_paterno'] = $index;
+
                 continue;
             }
 
             if (in_array($header, ['APELLIDO MATERNO', 'SEGUNDO APELLIDO', 'APELLIDO 2', 'APELLIDO2'], true)) {
                 $map['apellido_materno'] = $index;
+
                 continue;
             }
 
@@ -199,7 +195,7 @@ class NaturalPeopleImport implements
         $unique = [];
         foreach ($rows as $row) {
             $dni = $row['dni'] ?? null;
-            if (!$dni || isset($unique[$dni])) {
+            if (! $dni || isset($unique[$dni])) {
                 continue;
             }
             $unique[$dni] = $row;

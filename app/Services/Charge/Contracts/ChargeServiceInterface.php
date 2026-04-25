@@ -1,5 +1,8 @@
 <?php
-namespace App\Services\Contracts;
+
+namespace App\Services\Charge\Contracts;
+
+use App\Services\Base\Contracts\ServiceInterface;
 
 interface ChargeServiceInterface extends ServiceInterface
 {

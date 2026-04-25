@@ -6,6 +6,7 @@ use App\Filters\LegalEntityFilter;
 use App\Http\Requests\LegalEntity\ImportLegalEntityRequest;
 use App\Imports\LegalEntitiesImport;
 use App\Models\LegalEntity;
+use App\Models\NaturalPerson;
 use App\Models\Representative;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -20,7 +21,7 @@ class LegalEntityController extends Controller
         $filter->apply($query, $request->only('search'));
 
         $legalEntities = $query->orderBy('razon_social')->paginate(10)->withQueryString();
-        $representatives = Representative::with('naturalPerson')->get()->sortBy(function($rep) {
+        $representatives = Representative::with('naturalPerson')->get()->sortBy(function ($rep) {
             return $rep->naturalPerson?->nombres;
         });
 
@@ -33,8 +34,8 @@ class LegalEntityController extends Controller
 
         $data = $this->validateData($request);
 
-        if (!empty($data['representative_dni'])) {
-            $person = \App\Models\NaturalPerson::firstOrCreate(
+        if (! empty($data['representative_dni'])) {
+            $person = NaturalPerson::firstOrCreate(
                 ['dni' => $data['representative_dni']],
                 ['nombres' => $data['representative_name']]
             );
@@ -59,8 +60,8 @@ class LegalEntityController extends Controller
 
         $data = $this->validateData($request, $legalEntity->id);
 
-        if (!empty($data['representative_dni'])) {
-            $person = \App\Models\NaturalPerson::updateOrCreate(
+        if (! empty($data['representative_dni'])) {
+            $person = NaturalPerson::updateOrCreate(
                 ['dni' => $data['representative_dni']],
                 ['nombres' => $data['representative_name']]
             );
@@ -104,7 +105,7 @@ class LegalEntityController extends Controller
     {
         $this->authorize('create', LegalEntity::class);
 
-        Excel::import(new LegalEntitiesImport(), $request->file('archivo_excel'));
+        Excel::import(new LegalEntitiesImport, $request->file('archivo_excel'));
 
         return redirect()->route('legal-entities.index')->with('success', 'Personas jurídicas importadas correctamente');
     }
@@ -112,13 +113,14 @@ class LegalEntityController extends Controller
     public function downloadTemplate()
     {
         $this->authorize('viewAny', LegalEntity::class);
-        
+
         $filePath = storage_path('app/public/templates/Plantilla_Personas_Juridicas.xlsx');
-        
-        if (!file_exists($filePath)) {
-            if (!is_dir(dirname($filePath))) {
+
+        if (! file_exists($filePath)) {
+            if (! is_dir(dirname($filePath))) {
                 mkdir(dirname($filePath), 0755, true);
             }
+
             return redirect()->back()->withErrors(['La plantilla de personas jurídicas no se encuentra disponible.']);
         }
 
@@ -128,8 +130,8 @@ class LegalEntityController extends Controller
     protected function validateData(Request $request, $id = null): array
     {
         return $request->validate([
-            'ruc' => ['nullable', 'string', 'max:255', 'unique:legal_entities,ruc' . ($id ? ",$id" : '')],
-            'razon_social' => ['nullable', 'string', 'max:255', 'unique:legal_entities,razon_social' . ($id ? ",$id" : '')],
+            'ruc' => ['nullable', 'string', 'max:255', 'unique:legal_entities,ruc'.($id ? ",$id" : '')],
+            'razon_social' => ['nullable', 'string', 'max:255', 'unique:legal_entities,razon_social'.($id ? ",$id" : '')],
             'district' => ['required', 'string', 'max:255'],
             'contact_number' => ['nullable', 'string', 'max:50'],
             'representative_dni' => ['nullable', 'string', 'max:10'],

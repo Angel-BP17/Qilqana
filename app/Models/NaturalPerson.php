@@ -24,7 +24,7 @@ class NaturalPerson extends Model
 
     public function getApellidosAttribute(): string
     {
-        return trim(($this->apellido_paterno ?? '') . ' ' . ($this->apellido_materno ?? ''));
+        return trim(($this->apellido_paterno ?? '').' '.($this->apellido_materno ?? ''));
     }
 
     public function charges()

@@ -4,20 +4,13 @@ namespace App\Imports;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Concerns\{
-    ToCollection,
-    WithStartRow,
-    WithChunkReading,
-    WithBatchInserts,
-    WithCalculatedFormulas
-};
+use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\WithBatchInserts;
+use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithStartRow;
 
-class LegalEntitiesImport implements
-    ToCollection,
-    WithStartRow,
-    WithChunkReading,
-    WithBatchInserts,
-    WithCalculatedFormulas
+class LegalEntitiesImport implements ToCollection, WithBatchInserts, WithCalculatedFormulas, WithChunkReading, WithStartRow
 {
     public function collection(Collection $rows): void
     {
@@ -48,7 +41,7 @@ class LegalEntitiesImport implements
             ];
         }
 
-        if (!empty($buffer)) {
+        if (! empty($buffer)) {
             DB::table('legal_entities')->upsert(
                 $buffer,
                 ['ruc'],

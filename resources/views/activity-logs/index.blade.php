@@ -139,13 +139,13 @@
                             <div class="mt-3 d-flex gap-2 flex-wrap">
                                 @if ($log->before)
                                     <button type="button" class="btn btn-outline-secondary btn-sm btn-view-changes"
-                                        data-title="Antes" data-changes='@json($log->before)'>
+                                        data-title="Antes" data-changes="{{ json_encode($log->before) }}">
                                         Ver antes
                                     </button>
                                 @endif
                                 @if ($log->after)
                                     <button type="button" class="btn btn-outline-secondary btn-sm btn-view-changes"
-                                        data-title="Después" data-changes='@json($log->after)'>
+                                        data-title="Después" data-changes="{{ json_encode($log->after) }}">
                                         Ver después
                                     </button>
                                 @endif
@@ -196,7 +196,7 @@
                                     <td>
                                         @if ($log->before)
                                             <button type="button" class="btn btn-outline-secondary btn-sm btn-view-changes"
-                                                data-title="Antes" data-changes='@json($log->before)'>
+                                                data-title="Antes" data-changes="{{ json_encode($log->before) }}">
                                                 Ver
                                             </button>
                                         @else
@@ -206,7 +206,7 @@
                                     <td>
                                         @if ($log->after)
                                             <button type="button" class="btn btn-outline-secondary btn-sm btn-view-changes"
-                                                data-title="Después" data-changes='@json($log->after)'>
+                                                data-title="Después" data-changes="{{ json_encode($log->after) }}">
                                                 Ver
                                             </button>
                                         @else

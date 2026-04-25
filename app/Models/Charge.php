@@ -63,10 +63,14 @@ class Charge extends Model
                 return $this->legalEntity?->razon_social ?: $this->legalEntity?->ruc ?: '---';
             case 'Persona Natural':
                 $person = $this->naturalPerson;
-                $fullName = trim(($person->nombres ?? '') . ' ' . ($person->apellido_paterno ?? '') . ' ' . ($person->apellido_materno ?? ''));
-                return $fullName !== '' ? $fullName : ($person->dni ?: '---');
+                if (! $person) {
+                    return '---';
+                }
+                $fullName = trim(($person->nombres ?? '').' '.($person->apellido_paterno ?? '').' '.($person->apellido_materno ?? ''));
+
+                return $fullName !== '' ? $fullName : ($person->dni ?? '---');
             case 'Trabajador UGEL':
-                return $this->user?->name . ' ' . $this->user?->last_name ?: '---';
+                return trim(($this->user?->name ?? '').' '.($this->user?->last_name ?? '')) ?: '---';
             default:
                 return '---';
         }

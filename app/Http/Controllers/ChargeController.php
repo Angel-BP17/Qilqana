@@ -3,23 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Charge\CreateChargeRequest;
-use App\Http\Requests\Charge\RejectChargeRequest;
-use App\Http\Requests\Charge\UpdateChargeRequest;
 use App\Http\Requests\Charge\DeleteChargeRequest;
+use App\Http\Requests\Charge\RejectChargeRequest;
 use App\Http\Requests\Charge\SignChargeRequest;
+use App\Http\Requests\Charge\UpdateChargeRequest;
 use App\Models\Charge;
-use App\Services\ChargeService;
-use App\Services\ChargeReportService;
+use App\Models\Setting;
+use App\Services\Charge\ChargeReportService;
+use App\Services\Charge\ChargeService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class ChargeController extends Controller
 {
     public function __construct(
         protected ChargeService $service,
         protected ChargeReportService $reportService
-    ) {
-    }
+    ) {}
 
     public function index(Request $request)
     {
@@ -37,7 +36,7 @@ class ChargeController extends Controller
         $data['user'] = $request->user();
         $this->service->create($data);
 
-        return redirect()->route('charges.index')->with('success', 'Cargo creado correctamente.');
+        return redirect()->back()->with('success', 'Cargo creado correctamente.');
     }
 
     public function update(UpdateChargeRequest $request, Charge $charge)
@@ -46,7 +45,7 @@ class ChargeController extends Controller
         $data['user'] = $request->user();
         $this->service->update($data, $charge->id);
 
-        return redirect()->route('charges.index')->with('success', 'Cargo actualizado correctamente.');
+        return redirect()->back()->with('success', 'Cargo actualizado correctamente.');
     }
 
     public function destroy(DeleteChargeRequest $request, Charge $charge)
@@ -55,7 +54,7 @@ class ChargeController extends Controller
         $data['user'] = $request->user();
         $this->service->delete($data, $charge->id);
 
-        return redirect()->route('charges.index')->with('success', 'Cargo eliminado correctamente.');
+        return redirect()->back()->with('success', 'Cargo eliminado correctamente.');
     }
 
     public function signStore(SignChargeRequest $request, Charge $charge)
@@ -67,7 +66,8 @@ class ChargeController extends Controller
         ];
 
         $this->service->signStore($data, $files, $charge->id, $request->user()->id);
-        return redirect()->route('charges.index')->with('success', 'Cargo firmado correctamente.');
+
+        return redirect()->back()->with('success', 'Cargo firmado correctamente.');
     }
 
     public function reject(RejectChargeRequest $request, Charge $charge)
@@ -75,17 +75,19 @@ class ChargeController extends Controller
         $data = $request->validated();
         $this->service->reject($data, $charge->id, $request->user()->id);
 
-        return redirect()->route('charges.index')->with('success', 'Cargo rechazado correctamente.');
+        return redirect()->back()->with('success', 'Cargo rechazado correctamente.');
     }
 
     public function getSignature(Charge $charge)
     {
-        if (!$charge->signature?->signature_root)
+        if (! $charge->signature?->signature_root) {
             abort(404);
+        }
 
         $path = $charge->signature->signature_root;
-        if (!\Storage::disk('local')->exists($path))
+        if (! \Storage::disk('local')->exists($path)) {
             abort(404);
+        }
 
         $content = \Storage::disk('local')->get($path);
 
@@ -96,24 +98,28 @@ class ChargeController extends Controller
 
     public function getEvidence(Charge $charge)
     {
-        if (!$charge->signature?->evidence_root)
+        if (! $charge->signature?->evidence_root) {
             abort(404);
+        }
 
         $path = $charge->signature->evidence_root;
-        if (!\Storage::disk('local')->exists($path))
+        if (! \Storage::disk('local')->exists($path)) {
             abort(404);
+        }
 
         return response()->file(\Storage::disk('local')->path($path));
     }
 
     public function getCartaPoder(Charge $charge)
     {
-        if (!$charge->signature?->carta_poder_path)
+        if (! $charge->signature?->carta_poder_path) {
             abort(404);
+        }
 
         $path = $charge->signature->carta_poder_path;
-        if (!\Storage::disk('local')->exists($path))
+        if (! \Storage::disk('local')->exists($path)) {
             abort(404);
+        }
 
         return response()->file(\Storage::disk('local')->path($path));
     }
@@ -122,30 +128,34 @@ class ChargeController extends Controller
     public function reportSent(Request $request)
     {
         $filters = $this->getSearchFilters($request);
+
         return $this->reportService->getSentReport($filters['sent'], $request->user(), $filters['default_period']);
     }
 
     public function reportCreated(Request $request)
     {
         $filters = $this->getSearchFilters($request);
+
         return $this->reportService->getCreatedReport($filters['created'], $request->user(), $filters['default_period']);
     }
 
     public function reportResolution(Request $request)
     {
         $filters = $this->getSearchFilters($request);
+
         return $this->reportService->getResolutionReport($filters['resolucion'], $request->user(), $filters['default_period']);
     }
 
     public function reportReceived(Request $request)
     {
         $filters = $this->getSearchFilters($request);
+
         return $this->reportService->getReceivedReport($filters['received'], $request->user(), $filters['default_period']);
     }
 
     private function getSearchFilters($request)
     {
-        $defaultPeriod = \App\Models\Setting::getValue('charge_period', '');
+        $defaultPeriod = Setting::getValue('charge_period', '');
         $defaultPeriod = $defaultPeriod !== '' ? $defaultPeriod : null;
 
         return [

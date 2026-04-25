@@ -78,10 +78,11 @@ class NaturalPersonController extends Controller
 
         $filePath = storage_path('app/public/templates/Plantilla_Personas_Naturales.xlsx');
 
-        if (!file_exists($filePath)) {
-            if (!is_dir(dirname($filePath))) {
+        if (! file_exists($filePath)) {
+            if (! is_dir(dirname($filePath))) {
                 mkdir(dirname($filePath), 0755, true);
             }
+
             return redirect()->back()->withErrors(['La plantilla de personas naturales no se encuentra disponible en el servidor.']);
         }
 

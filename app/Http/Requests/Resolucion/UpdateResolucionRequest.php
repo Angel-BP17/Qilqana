@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Resolucion;
 
 use Carbon\Carbon;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -19,7 +20,7 @@ class UpdateResolucionRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -29,7 +30,7 @@ class UpdateResolucionRequest extends FormRequest
                 'string',
                 Rule::unique('resolucions')->where(function ($query) {
                     return $query->where('periodo', Carbon::parse($this->fecha)->year);
-                })->ignore($this->resolucion)
+                })->ignore($this->resolucion),
             ],
             'fecha' => 'required|date',
             'asunto' => 'required|string|max:255',

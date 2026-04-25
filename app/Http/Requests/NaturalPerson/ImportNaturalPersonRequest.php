@@ -9,6 +9,7 @@ class ImportNaturalPersonRequest extends FormRequest
     public function authorize(): bool
     {
         $user = $this->user();
+
         return $user?->hasRole('ADMINISTRADOR') ||
             $user?->can('natural-people.create');
     }

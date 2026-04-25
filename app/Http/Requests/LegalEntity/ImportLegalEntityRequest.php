@@ -9,6 +9,7 @@ class ImportLegalEntityRequest extends FormRequest
     public function authorize(): bool
     {
         $user = $this->user();
+
         return $user?->hasRole('ADMINISTRADOR') ||
             $user?->can('legal-entities.create');
     }

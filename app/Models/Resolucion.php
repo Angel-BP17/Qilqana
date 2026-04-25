@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Resolucion extends Model
 {
     use HasFactory;
+
     protected $casts = [
         'fecha' => 'datetime',
     ];
@@ -25,7 +26,7 @@ class Resolucion extends Model
     protected $dates = [
         'fecha',
         'created_at',
-        'updated_at'
+        'updated_at',
     ];
 
     public function charge()

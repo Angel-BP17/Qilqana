@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Charge;
 
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -27,13 +28,12 @@ class SignChargeRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
-
     public function rules(): array
     {
         $charge = $this->route('charge');
-        $requiresPoder = !$this->boolean('titularidad')
+        $requiresPoder = ! $this->boolean('titularidad')
             && in_array($charge?->tipo_interesado, ['Persona Juridica', 'Persona Natural'], true);
 
         return [
@@ -49,5 +49,4 @@ class SignChargeRequest extends FormRequest
     {
         throw new AuthorizationException('Este cargo no está asignado a usted.');
     }
-
 }

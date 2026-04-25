@@ -1,22 +1,23 @@
 <?php
 
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ChargeController;
 use App\Http\Controllers\ActivityLogController;
-use App\Http\Controllers\NaturalPersonController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\ResolucionController;
+use App\Http\Controllers\ChargeController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LegalEntityController;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\NaturalPersonController;
+use App\Http\Controllers\ResolucionController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/login', [LoginController::class, 'index'])->name('login.form');
 Route::post('/login', [LoginController::class, 'login'])->name('login');
 Route::get('/storage-link', function () {
     $exitCode = Artisan::call('storage:link');
+
     return response()->json(['ok' => $exitCode === 0, 'exit_code' => $exitCode, 'output' => Artisan::output()]);
 })->name('storage.link');
 
@@ -56,13 +57,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('legal-entities/import', [LegalEntityController::class, 'import'])->name('legal-entities.import');
     Route::get('legal-entities/download-template', [LegalEntityController::class, 'downloadTemplate'])->name('legal-entities.download-template');
     Route::resource('legal-entities', LegalEntityController::class)->except('show');
-    
+
     Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::put('settings', [SettingsController::class, 'update'])->name('settings.update');
     Route::post('settings/backup', [SettingsController::class, 'backup'])->name('settings.backup');
     Route::post('settings/import', [SettingsController::class, 'import'])->name('settings.import');
     Route::post('settings/reset', [SettingsController::class, 'reset'])->name('settings.reset');
-    
+
     Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
     Route::get('/descargar-plantilla', [ResolucionController::class, 'downloadTemplate'])->name('download.template');
     Route::get('/', [HomeController::class, 'index'])->name('home');

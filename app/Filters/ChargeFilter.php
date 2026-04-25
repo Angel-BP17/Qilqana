@@ -18,14 +18,13 @@ class ChargeFilter
             })
             ->when(
                 $searchfilters['search'],
-                fn($q, $search) =>
-                $this->applySearchFilter($q, $search)
+                fn ($q, $search) => $this->applySearchFilter($q, $search)
             )
             ->when(
                 $this->isValidSignatureStatus($searchfilters['signature_status']),
-                fn($q) => $q->whereHas(
+                fn ($q) => $q->whereHas(
                     'signature',
-                    fn($s) => $s->where('signature_status', $searchfilters['signature_status'])
+                    fn ($s) => $s->where('signature_status', $searchfilters['signature_status'])
                 )
             )
             ->orderByDesc('created_at')
@@ -44,7 +43,7 @@ class ChargeFilter
             'resolucion',
         ])
             ->whereNull('resolucion_id')
-            ->whereHas('signature', fn($q) => $q->where('assigned_to', $user?->id))
+            ->whereHas('signature', fn ($q) => $q->where('assigned_to', $user?->id))
             ->whereNotIn('tipo_interesado', ['Persona Juridica', 'Persona Natural'])
             ->when($searchfilters['period'], function ($q, $period) {
                 $q->where(function ($q2) use ($period) {
@@ -53,21 +52,20 @@ class ChargeFilter
             })
             ->when(
                 $searchfilters['signature_status'] !== 'rechazado',
-                fn($q) => $q->whereHas(
+                fn ($q) => $q->whereHas(
                     'signature',
-                    fn($s) => $s->where('signature_status', '!=', 'rechazado')
+                    fn ($s) => $s->where('signature_status', '!=', 'rechazado')
                 )
             )
             ->when(
                 $searchfilters['search'],
-                fn($q, $search) =>
-                $this->applySearchFilter($q, $search)
+                fn ($q, $search) => $this->applySearchFilter($q, $search)
             )
             ->when(
                 $this->isValidSignatureStatus($searchfilters['signature_status']),
-                fn($q) => $q->whereHas(
+                fn ($q) => $q->whereHas(
                     'signature',
-                    fn($s) => $s->where('signature_status', $searchfilters['signature_status'])
+                    fn ($s) => $s->where('signature_status', $searchfilters['signature_status'])
                 )
             )
             ->orderByDesc('created_at')
@@ -87,14 +85,13 @@ class ChargeFilter
             })
             ->when(
                 $searchfilters['search'],
-                fn($q, $search) =>
-                $this->applySearchFilter($q, $search)
+                fn ($q, $search) => $this->applySearchFilter($q, $search)
             )
             ->when(
                 $this->isValidSignatureStatus($searchfilters['signature_status']),
-                fn($q) => $q->whereHas(
+                fn ($q) => $q->whereHas(
                     'signature',
-                    fn($s) => $s->where('signature_status', $searchfilters['signature_status'])
+                    fn ($s) => $s->where('signature_status', $searchfilters['signature_status'])
                 )
             )
             ->orderByDesc('created_at')
@@ -108,12 +105,12 @@ class ChargeFilter
             ->when($searchfilters['period'], function ($q, $period) {
                 $q->where(function ($q2) use ($period) {
                     $q2->where('charge_period', $period)
-                       ->orWhereNull('charge_period');
+                        ->orWhereNull('charge_period');
                 });
             })
             ->when(
                 $searchfilters['search'],
-                fn($q, $search) => $this->applySearchFilter($q, $search)
+                fn ($q, $search) => $this->applySearchFilter($q, $search)
             )
             ->orderByDesc('created_at')
             ->get();

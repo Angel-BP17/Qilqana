@@ -13,13 +13,13 @@ trait HasChargeLogic
      */
     protected function nextChargeNumberForUser(?int $userId, ?string $period = null): string
     {
-        if (!$userId) {
+        if (! $userId) {
             return '1';
         }
 
         $period = $period ?? $this->getChargePeriod();
         $query = Charge::where('user_id', $userId);
-        
+
         if ($period) {
             $query->where('charge_period', $period);
         } else {
@@ -38,6 +38,7 @@ trait HasChargeLogic
     protected function getChargePeriod(): ?string
     {
         $period = Setting::getValue('charge_period', '');
+
         return $period !== '' ? $period : null;
     }
 }

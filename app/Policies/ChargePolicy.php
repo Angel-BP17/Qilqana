@@ -46,11 +46,12 @@ class ChargePolicy
     public function update(User $user, Charge $charge): bool
     {
         // Solo el creador del cargo puede editarlo, siempre que no esté firmado o rechazado.
-        if ($charge->user_id !== $user->id && !$user->hasRole('ADMINISTRADOR')) {
+        if ($charge->user_id !== $user->id && ! $user->hasRole('ADMINISTRADOR')) {
             return false;
         }
 
         $status = $charge->signature?->signature_status;
+
         return in_array($status, ['pendiente'], true);
     }
 
@@ -61,11 +62,12 @@ class ChargePolicy
     {
         // Solo el administrador o el dueño del cargo pueden eliminarlo,
         // siempre que no tenga procesos de firma finalizados.
-        if (!$user->hasRole('ADMINISTRADOR') && $charge->user_id !== $user->id) {
+        if (! $user->hasRole('ADMINISTRADOR') && $charge->user_id !== $user->id) {
             return false;
         }
 
         $status = $charge->signature?->signature_status;
+
         return $status === 'pendiente';
     }
 
@@ -79,8 +81,8 @@ class ChargePolicy
         }
 
         // El asignado puede firmar si el estado es pendiente.
-        return $charge->signature && 
-               $charge->signature->assigned_to === $user->id && 
+        return $charge->signature &&
+               $charge->signature->assigned_to === $user->id &&
                $charge->signature->signature_status === 'pendiente';
     }
 }

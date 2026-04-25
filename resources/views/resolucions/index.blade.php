@@ -45,7 +45,8 @@
                 <div class="col-12 col-md-6 col-lg-3">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body py-3">
-                            <div class="text-muted small text-uppercase mb-2"><span class="material-symbols-outlined me-1">add</span>Nuevo
+                            <div class="text-muted small text-uppercase mb-2"><span
+                                    class="material-symbols-outlined me-1">add</span>Nuevo
                                 registro</div>
                             @if ($hasChargePeriod)
                                 <button type="button" class="btn btn-success w-100" data-bs-toggle="modal"
@@ -70,7 +71,8 @@
                         <div class="card-body py-3">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <div class="text-muted small text-uppercase"><span class="material-symbols-outlined me-1">history_edu</span>Ultimo RD</div>
+                                    <div class="text-muted small text-uppercase"><span
+                                            class="material-symbols-outlined me-1">history_edu</span>Ultimo RD</div>
                                     <div class="fs-3 fw-bold mb-1">{{ $ultimoRegistro }}</div>
                                     <div class="text-muted small">Registro mas reciente</div>
                                 </div>
@@ -82,7 +84,8 @@
                 <div class="col-12 col-md-6 col-lg-2">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body py-3">
-                            <div class="text-muted small text-uppercase"><span class="material-symbols-outlined me-1">calendar_today</span>Periodo</div>
+                            <div class="text-muted small text-uppercase"><span
+                                    class="material-symbols-outlined me-1">calendar_today</span>Periodo</div>
                             @if ($hasChargePeriod)
                                 <div class="fs-3 fw-bold mb-1">{{ $chargePeriod }}</div>
                                 <div class="text-muted small">Actual</div>
@@ -95,7 +98,8 @@
                 <div class="col-12 col-md-6 col-lg-2">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body py-3">
-                            <div class="text-muted small text-uppercase"><span class="material-symbols-outlined me-1">fact_check</span>Total
+                            <div class="text-muted small text-uppercase"><span
+                                    class="material-symbols-outlined me-1">fact_check</span>Total
                             </div>
                             @if ($hasChargePeriod)
                                 <div class="fs-3 fw-bold mb-1">{{ $totalResolucionesPeriodo }}</div>
@@ -109,7 +113,8 @@
                 <div class="col-12 col-md-6 col-lg-2">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body py-3">
-                            <div class="text-muted small text-uppercase"><span class="material-symbols-outlined me-1">history_edu</span>Por firmar
+                            <div class="text-muted small text-uppercase"><span
+                                    class="material-symbols-outlined me-1">history_edu</span>Por firmar
                             </div>
                             @if ($hasChargePeriod)
                                 <div class="fs-3 fw-bold mb-1">{{ $pendientesResolucionesPeriodo }}</div>
@@ -133,7 +138,8 @@
                             <div class="card-body py-3">
                                 <div class="row g-2 align-items-center">
                                     <div class="col-12">
-                                        <div class="fw-semibold"><span class="material-symbols-outlined me-1">description</span>Reportes</div>
+                                        <div class="fw-semibold"><span
+                                                class="material-symbols-outlined me-1">description</span>Reportes</div>
                                     </div>
                                 </div>
                                 <div class="row g-2 align-items-center mt-1">
@@ -169,7 +175,8 @@
                                 <div class="fw-semibold mb-3">
                                     <span class="material-symbols-outlined me-1">upload</span>Importar resoluciones
                                 </div>
-                                <form method="POST" action="{{ route('index.import') }}" enctype="multipart/form-data" class="mt-auto">
+                                <form method="POST" action="{{ route('index.import') }}" enctype="multipart/form-data"
+                                    class="mt-auto">
                                     @csrf
                                     <div class="row g-2">
                                         <div class="col-12 col-md-6">
@@ -205,7 +212,8 @@
                         <div class="row g-2 align-items-center">
                             <div class="col-12 col-lg-3">
                                 <div class="h-100 d-flex flex-column justify-content-center">
-                                    <h5 class="mb-1 fw-bold"><span class="material-symbols-outlined me-2">folder_open</span>Resoluciones</h5>
+                                    <h5 class="mb-1 fw-bold"><span
+                                            class="material-symbols-outlined me-2">folder_open</span>Resoluciones</h5>
                                     <small class="opacity-75">Gestione resoluciones, cargos y firmas</small>
                                     <div class="d-flex gap-2 mt-3 d-md-none">
                                         <button type="button" class="btn btn-outline-light w-100"
@@ -269,11 +277,13 @@
                                             <span class="input-group-text bg-white border-end-0">
                                                 <span class="material-symbols-outlined text-muted">filter_alt</span>
                                             </span>
-                                            <input type="text" id="subfilter-input" class="form-control border-start-0 ps-0" 
+                                            <input type="text" id="subfilter-input"
+                                                class="form-control border-start-0 ps-0"
                                                 placeholder="Sub-filtrar resultados actuales...">
                                         </div>
                                     </div>
-                                    <div class="col-12 col-md-8 mt-2 mt-md-0 d-flex align-items-center justify-content-between">
+                                    <div
+                                        class="col-12 col-md-8 mt-2 mt-md-0 d-flex align-items-center justify-content-between">
                                         <small class="text-muted" id="subfilter-info">
                                             <span class="material-symbols-outlined me-1">info</span>
                                             Buscando en los {{ $resoluciones->count() }} resultados de esta página.
@@ -285,7 +295,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <!-- Contenedor para "Sin resultados locales" -->
                             <div id="local-no-results" class="text-center py-5 d-none">
                                 <span class="material-symbols-outlined fs-1 text-muted mb-2">search_off</span>
@@ -296,231 +306,259 @@
                             </div>
 
                             <!-- Tabla de Resoluciones -->
-                            <div class="d-md-none">
+                            <div class="d-md-none p-3">
                                 @php
-                                    $canSignResolution =
-                                        Auth::user()->hasRole('ADMINISTRADOR') ||
-                                        Auth::user()->can('modulo cargos') ||
-                                        Auth::user()->can('modulo resoluciones');
-                                    $canCreateCharge =
-                                        Auth::user()->hasRole('ADMINISTRADOR') || Auth::user()->can('modulo cargos');
+                                    $canSignResolution = Auth::user()->hasRole('ADMINISTRADOR') || Auth::user()->can('modulo cargos') || Auth::user()->can('modulo resoluciones');
+                                    $canCreateCharge = Auth::user()->hasRole('ADMINISTRADOR') || Auth::user()->can('modulo cargos');
                                     $canDeleteResolution = Auth::user()->hasRole('ADMINISTRADOR');
                                 @endphp
                                 @forelse ($resoluciones as $resolucion)
                                     @php
                                         $charge = $resolucion->charge;
-                                        $signatureContent = null;
-                                        if (
-                                            $charge?->signature?->signature_root &&
-                                            \Illuminate\Support\Facades\Storage::disk('local')->exists(
-                                                $charge->signature->signature_root,
-                                            )
-                                        ) {
-                                            $signatureContent = \Illuminate\Support\Facades\Storage::disk('local')->get(
-                                                $charge->signature->signature_root,
-                                            );
-                                        }
                                         $signatureStatus = $charge?->signature?->signature_status;
+                                        $signatureContent = null;
+                                        if ($charge?->signature?->signature_root && \Illuminate\Support\Facades\Storage::disk('local')->exists($charge->signature->signature_root)) {
+                                            $signatureContent = \Illuminate\Support\Facades\Storage::disk('local')->get($charge->signature->signature_root);
+                                        }
                                     @endphp
-                                    <div class="border rounded-3 p-3 mb-3 bg-white shadow-sm">
-                                        <div class="d-flex justify-content-between gap-2">
-                                            <div>
-                                                <div class="fw-semibold">RD {{ $resolucion->rd }}</div>
-                                                <div class="text-muted small">
-                                                    {{ $resolucion->fecha ? \Carbon\Carbon::parse($resolucion->fecha)->format('d/m/Y') : '' }}
+                                    <div class="card border-0 shadow-sm mb-3 overflow-hidden">
+                                        <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle mb-1">RD {{ $resolucion->rd }}</span>
+                                                    <div class="small text-muted d-flex align-items-center">
+                                                        <span class="material-symbols-outlined fs-6 me-1">calendar_today</span>
+                                                        {{ $resolucion->fecha ? \Carbon\Carbon::parse($resolucion->fecha)->format('d/m/Y') : '---' }}
+                                                    </div>
+                                                </div>
+                                                @include('charges.partials.status-badge', ['status' => $signatureStatus])
+                                            </div>
+                                        </div>
+                                        <div class="card-body py-3">
+                                            <div class="mb-3">
+                                                <label class="text-muted small text-uppercase fw-bold d-block mb-1">Interesado</label>
+                                                <div class="fw-semibold text-dark text-truncate" title="{{ $resolucion->nombres_apellidos }}">
+                                                    {{ $resolucion->nombres_apellidos }}
                                                 </div>
                                             </div>
-                                            <div>
-                                                @if ($signatureStatus === 'firmado')
-                                                    <span class="badge bg-primary rounded-pill">Firmado</span>
-                                                @elseif ($signatureStatus === 'rechazado')
-                                                    <span class="badge bg-danger rounded-pill">Rechazado</span>
-                                                @elseif ($signatureStatus === 'pendiente')
-                                                    <span class="badge bg-warning text-dark rounded-pill">Pendiente</span>
-                                                @else
-                                                    <span class="badge bg-secondary rounded-pill">Sin cargo</span>
+
+                                            <div class="row g-2 mb-3">
+                                                <div class="col-6">
+                                                    <label class="text-muted small text-uppercase fw-bold d-block">DNI</label>
+                                                    <span class="text-dark">{{ $resolucion->dni ?? '---' }}</span>
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="text-muted small text-uppercase fw-bold d-block">Periodo</label>
+                                                    <span class="badge bg-light text-dark border">{{ $resolucion->periodo }}</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="text-muted small text-uppercase fw-bold d-block mb-1">Asunto</label>
+                                                <div class="small text-dark lh-sm">{{ Str::limit($resolucion->asunto, 100) }}</div>
+                                            </div>
+
+                                            <div class="d-flex flex-wrap gap-2 pt-2 border-top">
+                                                <button type="button" class="btn btn-outline-info btn-sm btn-view-res-details d-flex align-items-center"
+                                                    title="Ver detalles"
+                                                    data-rd="{{ $resolucion->rd }}"
+                                                    data-interesado="{{ $resolucion->nombres_apellidos }}"
+                                                    data-dni="{{ $resolucion->dni }}"
+                                                    data-asunto="{{ $resolucion->asunto }}"
+                                                    data-fecha="{{ $resolucion->fecha ? $resolucion->fecha->format('d/m/Y') : '' }}"
+                                                    data-periodo="{{ $resolucion->periodo }}"
+                                                    data-procedencia="{{ $resolucion->procedencia }}"
+                                                    data-has-charge="{{ $charge ? '1' : '0' }}"
+                                                    data-has-signature="{{ $charge?->has_signature ? '1' : '0' }}"
+                                                    data-signature-url="{{ $charge ? route('charges.file.signature', $charge) : '' }}"
+                                                    data-signer="{{ $charge?->signature?->signer?->name ?? '' }} {{ $charge?->signature?->signer?->last_name ?? '' }}"
+                                                    data-titularidad="{{ $charge?->signature?->titularidad ? '1' : '0' }}"
+                                                    data-parentesco="{{ $charge?->signature?->parentesco ?? '' }}"
+                                                    data-titular-name="{{ $resolucion->nombres_apellidos }}"
+                                                    data-has-evidence="{{ $charge?->has_evidence ? '1' : '0' }}"
+                                                    data-evidence-url="{{ $charge ? route('charges.file.evidence', $charge) : '' }}"
+                                                    data-has-carta-poder="{{ $charge?->has_carta_poder ? '1' : '0' }}"
+                                                    data-carta-poder-url="{{ $charge ? route('charges.file.carta-poder', $charge) : '' }}">
+                                                    <span class="material-symbols-outlined fs-6 me-1">visibility</span> Detalles
+                                                </button>
+
+                                                @if (!$charge && $canCreateCharge)
+                                                    <form method="POST" action="{{ route('resolucions.charge.create', $resolucion) }}" class="d-inline">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-outline-primary btn-sm d-flex align-items-center">
+                                                            <span class="material-symbols-outlined fs-6 me-1">add</span> Cargo
+                                                        </button>
+                                                    </form>
+                                                @endif
+
+                                                <button type="button" class="btn btn-outline-success btn-sm btn-sign-resolution d-flex align-items-center"
+                                                    title="Firmar"
+                                                    data-action="{{ $charge ? route('charges.sign.store', $charge) : '' }}"
+                                                    data-charge='@json($charge)'
+                                                    data-signature='@json($signatureContent ?? '')'
+                                                    data-signer="{{ $charge?->signature?->signer?->name ?? '' }}"
+                                                    data-show-external="1" @disabled(!$charge || $signatureStatus !== 'pendiente' || !$canSignResolution)>
+                                                    <span class="material-symbols-outlined fs-6 me-1">history_edu</span> Firmar
+                                                </button>
+
+                                                @if (!Auth::user()->hasRole('VISUALIZADOR'))
+                                                    <div class="ms-auto btn-group">
+                                                        <button type="button" class="btn btn-outline-warning btn-sm btn-edit-resolution"
+                                                            data-action="{{ route('resolucions.update', $resolucion) }}"
+                                                            data-rd="{{ $resolucion->rd }}"
+                                                            data-fecha="{{ $resolucion->fecha ? $resolucion->fecha->format('Y-m-d') : '' }}"
+                                                            data-dni="{{ $resolucion->dni ?? '' }}"
+                                                            data-nombres="{{ $resolucion->nombres_apellidos }}"
+                                                            data-procedencia="{{ $resolucion->procedencia ?? '' }}"
+                                                            data-asunto="{{ $resolucion->asunto }}">
+                                                            <span class="material-symbols-outlined fs-6">edit</span>
+                                                        </button>
+                                                        <button type="button" class="btn btn-outline-danger btn-sm btn-delete-resolution"
+                                                            data-action="{{ route('resolucions.destroy', $resolucion) }}"
+                                                            title="{{ $canDeleteResolution ? 'Eliminar' : 'Solo administradores' }}"
+                                                            @disabled(!$canDeleteResolution)>
+                                                            <span class="material-symbols-outlined fs-6">delete</span>
+                                                        </button>
+                                                    </div>
                                                 @endif
                                             </div>
                                         </div>
-                                        <div class="mt-2">
-                                            <div class="text-muted small">Nombres y apellidos</div>
-                                            <div>{{ $resolucion->nombres_apellidos }}</div>
-                                        </div>
-                                        <div class="mt-2 d-flex flex-wrap gap-2">
-                                            <span class="badge bg-light text-dark">DNI:
-                                                {{ $resolucion->dni ?? '-' }}</span>
-                                            <span class="badge bg-light text-dark">Periodo:
-                                                {{ $resolucion->periodo }}</span>
-                                            <span class="badge bg-light text-dark">Procedencia:
-                                                {{ $resolucion->procedencia }}</span>
-                                        </div>
-                                        <div class="mt-2">
-                                            <div class="text-muted small">Asunto</div>
-                                            <div>{{ Str::limit($resolucion->asunto, 80) }}</div>
-                                        </div>
-                                        <div class="mt-3 d-flex flex-wrap gap-2">
-                                            @if (!$charge && $canCreateCharge)
-                                                <form method="POST"
-                                                    action="{{ route('resolucions.charge.create', $resolucion) }}">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-outline-primary btn-sm">
-                                                        <span class="material-symbols-outlined">add</span> Crear cargo
-                                                    </button>
-                                                </form>
-                                            @endif
-                                            <button type="button"
-                                                class="btn btn-outline-success btn-sm btn-sign-resolution" title="Firmar"
-                                                data-action="{{ $charge ? route('charges.sign.store', $charge) : '' }}"
-                                                data-charge='@json($charge)'
-                                                data-signature='@json($signatureContent ?? '')'
-                                                data-signer="{{ $charge?->signature?->signer?->name ?? '' }}"
-                                                data-show-external="1" @disabled(!$charge || $signatureStatus !== 'pendiente' || !$canSignResolution)>
-                                                <span class="material-symbols-outlined">history_edu</span> Firmar
-                                            </button>
-                                            @if (!Auth::user()->hasRole('VISUALIZADOR'))
-                                                <button type="button" class="btn btn-warning btn-sm btn-edit-resolution"
-                                                    data-action="{{ route('resolucions.update', $resolucion) }}"
-                                                    data-rd="{{ $resolucion->rd }}"
-                                                    data-fecha="{{ $resolucion->fecha ? $resolucion->fecha->format('Y-m-d') : '' }}"
-                                                    data-dni="{{ $resolucion->dni ?? '' }}"
-                                                    data-nombres="{{ $resolucion->nombres_apellidos }}"
-                                                    data-procedencia="{{ $resolucion->procedencia ?? '' }}"
-                                                    data-asunto="{{ $resolucion->asunto }}">
-                                                    <span class="material-symbols-outlined">edit</span> Editar
-                                                </button>
-                                                <button type="button" class="btn btn-danger btn-sm btn-delete-resolution"
-                                                    data-action="{{ route('resolucions.destroy', $resolucion) }}"
-                                                    title="{{ $canDeleteResolution ? 'Eliminar' : 'Solo administradores' }}"
-                                                    @disabled(!$canDeleteResolution)>
-                                                    <span class="material-symbols-outlined">delete</span> Eliminar
-                                                </button>
-                                            @endif
-                                        </div>
                                     </div>
                                 @empty
-                                    <div class="text-center text-muted py-4">No se encontraron resoluciones</div>
+                                    <div class="text-center text-muted py-5 bg-white rounded-3 shadow-sm">
+                                        <span class="material-symbols-outlined fs-1 d-block mb-2">search_off</span>
+                                        No se encontraron resoluciones
+                                    </div>
                                 @endforelse
                             </div>
                             <div class="table-responsive d-none d-md-block">
-                                <table class="table table-bordered table-hover">
-                                    <thead class="thead-light table-dark">
-                                        <tr>
-                                            <th scope="col">ID</th>
-                                            <th scope="col">RD</th>
-                                            <th scope="col">Fecha</th>
-                                            <th scope="col">Nombres y Apellidos</th>
-                                            <th scope="col">DNI</th>
-                                            <th scope="col">Asunto</th>
-                                            <th scope="col">Periodo</th>
-                                            <th scope="col">Procedencia</th>
-                                            <th scope="col">Firma</th>
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead style="--bs-table-bg: #e2eafc; --bs-table-color: #002855;">
+                                        <tr class="border-bottom">
+                                            <th class="ps-3 small fw-bold py-3" style="width: 50px;">#</th>
+                                            <th class="small fw-bold py-3">Resolución</th>
+                                            <th class="small fw-bold py-3">Interesado</th>
+                                            <th class="small fw-bold py-3">Asunto</th>
+                                            <th class="text-center small fw-bold py-3">Estado</th>
                                             @if (!Auth::user()->hasRole('VISUALIZADOR'))
-                                                <th scope="col">Acciones</th>
+                                                <th class="text-end pe-3 small fw-bold py-3">Acciones</th>
                                             @endif
                                         </tr>
                                     </thead>
-                                    @php
-                                        $canSignResolution =
-                                            Auth::user()->hasRole('ADMINISTRADOR') ||
-                                            Auth::user()->can('modulo cargos') ||
-                                            Auth::user()->can('modulo resoluciones');
-                                        $canCreateCharge =
-                                            Auth::user()->hasRole('ADMINISTRADOR') ||
-                                            Auth::user()->can('modulo cargos');
-                                        $canDeleteResolution = Auth::user()->hasRole('ADMINISTRADOR');
-                                    @endphp
                                     <tbody>
                                         @forelse ($resoluciones as $key => $resolucion)
+                                            @php
+                                                $charge = $resolucion->charge;
+                                                $signatureStatus = $charge?->signature?->signature_status;
+                                                $signatureContent = null;
+                                                if ($charge?->signature?->signature_root && \Illuminate\Support\Facades\Storage::disk('local')->exists($charge->signature->signature_root)) {
+                                                    $signatureContent = \Illuminate\Support\Facades\Storage::disk('local')->get($charge->signature->signature_root);
+                                                }
+                                            @endphp
                                             <tr>
-                                                <td> {{ ($resoluciones->currentPage() - 1) * $resoluciones->perPage() + $key + 1 }}
+                                                <td class="ps-3 text-muted small">
+                                                    {{ ($resoluciones->currentPage() - 1) * $resoluciones->perPage() + $key + 1 }}
                                                 </td>
-                                                <td>{{ $resolucion->rd }}</td>
-                                                <td>{{ $resolucion->fecha ? \Carbon\Carbon::parse($resolucion->fecha)->format('d/m/Y') : '' }}
-                                                </td>
-                                                <td>{{ $resolucion->nombres_apellidos }}</td>
-                                                <td>{{ $resolucion->dni ?? null }}</td>
-                                                <td>{{ Str::limit($resolucion->asunto, 50) }}</td>
-                                                <td class="text-center">{{ $resolucion->periodo }}</td>
-                                                <td class="text-center">{{ $resolucion->procedencia }}</td>
-                                                <td class="text-center">
-                                                    @php
-                                                        $charge = $resolucion->charge;
-                                                        $signatureContent = null;
-                                                        if (
-                                                            $charge?->signature?->signature_root &&
-                                                            \Illuminate\Support\Facades\Storage::disk('local')->exists(
-                                                                $charge->signature->signature_root,
-                                                            )
-                                                        ) {
-                                                            $signatureContent = \Illuminate\Support\Facades\Storage::disk(
-                                                                'local',
-                                                            )->get($charge->signature->signature_root);
-                                                        }
-                                                        $signatureStatus = $charge?->signature?->signature_status;
-                                                    @endphp
-                                                    <div
-                                                        class="d-flex align-items-center justify-content-center gap-2 flex-wrap">
-                                                        @if ($signatureStatus === 'firmado')
-                                                            <span class="badge bg-primary">Firmado</span>
-                                                        @elseif ($signatureStatus === 'rechazado')
-                                                            <span class="badge bg-danger">Rechazado</span>
-                                                        @elseif ($signatureStatus === 'pendiente')
-                                                            <span class="badge bg-warning text-dark">Pendiente</span>
-                                                        @else
-                                                            <span class="badge bg-secondary">Sin cargo</span>
-                                                        @endif
-                                                        @if (!$charge && $canCreateCharge)
-                                                            <form method="POST"
-                                                                action="{{ route('resolucions.charge.create', $resolucion) }}">
-                                                                @csrf
-                                                                <button type="submit"
-                                                                    class="btn btn-outline-primary btn-sm">
-                                                                    <span class="material-symbols-outlined">add</span> Crear cargo
-                                                                </button>
-                                                            </form>
-                                                        @endif
-                                                        <button type="button"
-                                                            class="btn btn-outline-success btn-sm btn-sign-resolution"
-                                                            title="Firmar"
-                                                            data-action="{{ $charge ? route('charges.sign.store', $charge) : '' }}"
-                                                            data-charge='@json($charge)'
-                                                            data-signature='@json($signatureContent ?? '')'
-                                                            data-signer="{{ $charge?->signature?->signer?->name ?? '' }}"
-                                                            data-show-external="1" @disabled(!$charge || $signatureStatus !== 'pendiente' || !$canSignResolution)>
-                                                            <span class="material-symbols-outlined">history_edu</span>
-                                                        </button>
+                                                <td>
+                                                    <div class="fw-bold text-primary">RD {{ $resolucion->rd }}</div>
+                                                    <div class="small text-muted d-flex align-items-center">
+                                                        <span class="material-symbols-outlined fs-6 me-1">calendar_today</span>
+                                                        {{ $resolucion->fecha ? \Carbon\Carbon::parse($resolucion->fecha)->format('d/m/Y') : '---' }}
                                                     </div>
                                                 </td>
+                                                <td>
+                                                    <div class="fw-semibold text-dark text-truncate" style="max-width: 220px;" title="{{ $resolucion->nombres_apellidos }}">
+                                                        {{ $resolucion->nombres_apellidos }}
+                                                    </div>
+                                                    <div class="small text-muted">DNI: {{ $resolucion->dni ?? '---' }}</div>
+                                                </td>
+                                                <td>
+                                                    <div class="text-muted small lh-sm text-truncate" style="max-width: 250px;" title="{{ $resolucion->asunto }}">
+                                                        {{ $resolucion->asunto }}
+                                                    </div>
+                                                    <div class="mt-1">
+                                                        <span class="badge bg-light text-muted border small fw-normal">{{ $resolucion->procedencia }}</span>
+                                                        <span class="badge bg-light text-muted border small fw-normal">{{ $resolucion->periodo }}</span>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    @include('charges.partials.status-badge', ['status' => $signatureStatus])
+                                                </td>
                                                 @if (!Auth::user()->hasRole('VISUALIZADOR'))
-                                                    <td>
-                                                        <div class="btn-group">
-                                                            <button type="button"
-                                                                class="btn btn-warning btn-edit-resolution"
-                                                                data-action="{{ route('resolucions.update', $resolucion) }}"
+                                                    <td class="text-end pe-3">
+                                                        <div class="d-flex justify-content-end gap-1">
+                                                            {{-- Acción: Ver Detalles --}}
+                                                            <button type="button" class="btn btn-outline-info btn-sm btn-view-res-details"
+                                                                title="Ver detalles"
                                                                 data-rd="{{ $resolucion->rd }}"
-                                                                data-fecha="{{ $resolucion->fecha ? $resolucion->fecha->format('Y-m-d') : '' }}"
-                                                                data-dni="{{ $resolucion->dni ?? '' }}"
-                                                                data-nombres="{{ $resolucion->nombres_apellidos }}"
-                                                                data-procedencia="{{ $resolucion->procedencia ?? '' }}"
-                                                                data-asunto="{{ $resolucion->asunto }}">
-                                                                <span class="material-symbols-outlined">edit</span>
+                                                                data-interesado="{{ $resolucion->nombres_apellidos }}"
+                                                                data-dni="{{ $resolucion->dni }}"
+                                                                data-asunto="{{ $resolucion->asunto }}"
+                                                                data-fecha="{{ $resolucion->fecha ? $resolucion->fecha->format('d/m/Y') : '' }}"
+                                                                data-periodo="{{ $resolucion->periodo }}"
+                                                                data-procedencia="{{ $resolucion->procedencia }}"
+                                                                data-has-charge="{{ $charge ? '1' : '0' }}"
+                                                                data-has-signature="{{ $charge?->has_signature ? '1' : '0' }}"
+                                                                data-signature-url="{{ $charge ? route('charges.file.signature', $charge) : '' }}"
+                                                                data-signer="{{ $charge?->signature?->signer?->name ?? '' }} {{ $charge?->signature?->signer?->last_name ?? '' }}"
+                                                                data-titularidad="{{ $charge?->signature?->titularidad ? '1' : '0' }}"
+                                                                data-parentesco="{{ $charge?->signature?->parentesco ?? '' }}"
+                                                                data-titular-name="{{ $resolucion->nombres_apellidos }}"
+                                                                data-has-evidence="{{ $charge?->has_evidence ? '1' : '0' }}"
+                                                                data-evidence-url="{{ $charge ? route('charges.file.evidence', $charge) : '' }}"
+                                                                data-has-carta-poder="{{ $charge?->has_carta_poder ? '1' : '0' }}"
+                                                                data-carta-poder-url="{{ $charge ? route('charges.file.carta-poder', $charge) : '' }}">
+                                                                <span class="material-symbols-outlined fs-5">visibility</span>
                                                             </button>
-                                                            <button type="button"
-                                                                class="btn btn-danger btn-delete-resolution"
-                                                                data-action="{{ route('resolucions.destroy', $resolucion) }}"
-                                                                title="{{ $canDeleteResolution ? 'Eliminar' : 'Solo administradores' }}"
-                                                                @disabled(!$canDeleteResolution)><span class="material-symbols-outlined">delete</span></button>
+
+                                                            @if (!$charge && $canCreateCharge)
+                                                                <form method="POST" action="{{ route('resolucions.charge.create', $resolucion) }}" class="d-inline">
+                                                                    @csrf
+                                                                    <button type="submit" class="btn btn-outline-primary btn-sm" title="Crear cargo pendiente">
+                                                                        <span class="material-symbols-outlined fs-5">add_notes</span>
+                                                                    </button>
+                                                                </form>
+                                                            @endif
+
+                                                            {{-- Acción: Firmar --}}
+                                                            <button type="button" class="btn btn-outline-success btn-sm btn-sign-resolution"
+                                                                title="Firmar cargo"
+                                                                data-action="{{ $charge ? route('charges.sign.store', $charge) : '' }}"
+                                                                data-charge='@json($charge)'
+                                                                data-signature='@json($signatureContent ?? '')'
+                                                                data-signer="{{ $charge?->signature?->signer?->name ?? '' }}"
+                                                                data-show-external="1" @disabled(!$charge || $signatureStatus !== 'pendiente' || !$canSignResolution)>
+                                                                <span class="material-symbols-outlined fs-5">history_edu</span>
+                                                            </button>
+
+                                                            <div class="btn-group ms-1">
+                                                                <button type="button" class="btn btn-outline-warning btn-sm btn-edit-resolution"
+                                                                    data-action="{{ route('resolucions.update', $resolucion) }}"
+                                                                    data-rd="{{ $resolucion->rd }}"
+                                                                    data-fecha="{{ $resolucion->fecha ? $resolucion->fecha->format('Y-m-d') : '' }}"
+                                                                    data-dni="{{ $resolucion->dni ?? '' }}"
+                                                                    data-nombres="{{ $resolucion->nombres_apellidos }}"
+                                                                    data-procedencia="{{ $resolucion->procedencia ?? '' }}"
+                                                                    data-asunto="{{ $resolucion->asunto }}" title="Editar">
+                                                                    <span class="material-symbols-outlined fs-5">edit</span>
+                                                                </button>
+                                                                <button type="button" class="btn btn-outline-danger btn-sm btn-delete-resolution"
+                                                                    data-action="{{ route('resolucions.destroy', $resolucion) }}"
+                                                                    title="{{ $canDeleteResolution ? 'Eliminar' : 'Solo administradores' }}"
+                                                                    @disabled(!$canDeleteResolution)>
+                                                                    <span class="material-symbols-outlined fs-5">delete</span>
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </td>
                                                 @endif
                                             </tr>
                                         @empty
                                             <tr>
-                                                @php
-                                                    $colspan = Auth::user()->hasRole('VISUALIZADOR') ? 9 : 10;
-                                                @endphp
-                                                <td colspan="{{ $colspan }}" class="text-center">No se encontraron
-                                                    resoluciones</td>
+                                                <td colspan="{{ Auth::user()->hasRole('VISUALIZADOR') ? 5 : 6 }}" class="text-center py-5 text-muted">
+                                                    <span class="material-symbols-outlined fs-1 d-block mb-2">search_off</span>
+                                                    No se encontraron resoluciones
+                                                </td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -606,6 +644,5 @@
             </div>
         </div>
         @include('charges.forms.sign')
-
-        <!-- Modal de Detalles (igual que antes) -->
+        @include('resolucions.forms.view-details')
     @endsection

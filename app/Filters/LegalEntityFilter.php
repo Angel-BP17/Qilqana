@@ -11,8 +11,8 @@ class LegalEntityFilter
         return $query->when($filters['search'] ?? null, function ($query, $search) {
             $query->where(function ($q) use ($search) {
                 $q->where('ruc', 'like', "%{$search}%")
-                  ->orWhere('razon_social', 'like', "%{$search}%")
-                  ->orWhere('district', 'like', "%{$search}%");
+                    ->orWhere('razon_social', 'like', "%{$search}%")
+                    ->orWhere('district', 'like', "%{$search}%");
             });
         });
     }

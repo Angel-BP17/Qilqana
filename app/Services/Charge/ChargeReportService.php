@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Charge;
 
 use App\Filters\ChargeFilter;
 use App\Models\Charge;
@@ -10,9 +10,7 @@ use Illuminate\Http\Response;
 
 class ChargeReportService
 {
-    public function __construct(protected ChargeFilter $filter)
-    {
-    }
+    public function __construct(protected ChargeFilter $filter) {}
 
     public function generateReport(string $title, string $type, $charges, array $filters): Response
     {
@@ -22,7 +20,7 @@ class ChargeReportService
             'charges' => $charges,
             'filters' => $filters,
         ])->setPaper('a4')
-            ->stream("reporte_cargos_{$type}_" . now()->format('Ymd_His') . '.pdf');
+            ->stream("reporte_cargos_{$type}_".now()->format('Ymd_His').'.pdf');
     }
 
     public function getSentReport(array $data, User $user, string $defaultPeriod): Response
@@ -48,8 +46,8 @@ class ChargeReportService
 
         $charges = Charge::with(['resolucion', 'signature', 'naturalPerson', 'legalEntity'])
             ->whereNotNull('resolucion_id')
-            ->whereHas('signature', fn($q) => $q->where('signature_status', 'firmado'))
-            ->when($period, fn($q) => $q->where('charge_period', $period))
+            ->whereHas('signature', fn ($q) => $q->where('signature_status', 'firmado'))
+            ->when($period, fn ($q) => $q->where('charge_period', $period))
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($q2) use ($search) {
                     $q2->where('n_charge', 'like', "%{$search}%")

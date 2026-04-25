@@ -19,9 +19,7 @@ class LogActivityJob implements ShouldQueue
      */
     public function __construct(
         protected array $payload
-    )
-    {
-    }
+    ) {}
 
     /**
      * Execute the job.
@@ -29,7 +27,7 @@ class LogActivityJob implements ShouldQueue
     public function handle(): void
     {
         $userId = $this->payload['user_id'] ?? null;
-        if ($userId && !User::whereKey($userId)->exists()) {
+        if ($userId && ! User::whereKey($userId)->exists()) {
             $userId = null;
         }
 

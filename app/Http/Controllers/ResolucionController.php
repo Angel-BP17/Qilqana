@@ -4,27 +4,27 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Resolucion\CreateResolucionChargeRequest;
 use App\Http\Requests\Resolucion\CreateResolucionRequest;
-use App\Http\Requests\Resolucion\UpdateResolucionRequest;
+use App\Http\Requests\Resolucion\DeleteResolucionRequest;
 use App\Http\Requests\Resolucion\ImportResolucionRequest;
+use App\Http\Requests\Resolucion\UpdateResolucionRequest;
 use App\Imports\ResolucionesImport;
 use App\Models\Resolucion;
-use App\Services\ResolucionService;
+use App\Services\Resolucion\ResolucionService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
-use App\Http\Requests\Resolucion\DeleteResolucionRequest;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ResolucionController extends Controller
 {
-    public function __construct(protected ResolucionService $service)
-    {
+    public function __construct(protected ResolucionService $service) {}
 
-    }
     public function index(Request $request)
     {
         return view('resolucions.index', $this->service->getAll($request->only(['search', 'periodo'])));
@@ -45,7 +45,7 @@ class ResolucionController extends Controller
         $user = $request->user();
 
         $canCreateCharge = $user?->hasRole('ADMINISTRADOR') || $user?->can('modulo resoluciones');
-        if (!$canCreateCharge) {
+        if (! $canCreateCharge) {
             abort(403);
         }
 
@@ -53,7 +53,7 @@ class ResolucionController extends Controller
             return redirect()->back()->with('info', 'La resolución ya tiene un cargo asociado.');
         }
 
-        $created = $this->service->createCharge($resolucion->id, $user);
+        $created = $this->service->generateChargeForResolucion($resolucion->id, $user);
 
         if ($created) {
             return redirect()->back()->with('success', 'Cargo creado para la resolución.');
@@ -91,12 +91,12 @@ class ResolucionController extends Controller
     {
         $templatePath = storage_path('app/public/templates/Plantilla_Resoluciones.xlsx');
         $templateDir = dirname($templatePath);
-        if (!is_dir($templateDir)) {
+        if (! is_dir($templateDir)) {
             mkdir($templateDir, 0755, true);
         }
 
-        if (!file_exists($templatePath)) {
-            $spreadsheet = new Spreadsheet();
+        if (! file_exists($templatePath)) {
+            $spreadsheet = new Spreadsheet;
             $sheet = $spreadsheet->getActiveSheet();
 
             $sheet->setCellValue('A1', 'RD');
@@ -121,15 +121,15 @@ class ResolucionController extends Controller
 
         // Limitar a 500 registros para PDF en hosting compartido (evita error de memoria)
         $resoluciones = $query->limit(500)->get();
-        
+
         $filtros = [
             'search' => $request->search,
-            'periodo' => $request->periodo
+            'periodo' => $request->periodo,
         ];
 
         return Pdf::loadView('resolucions.report', compact('resoluciones', 'filtros'))
             ->setPaper('a4')
-            ->stream('reporte_resoluciones_' . now()->format('Ymd_His') . '.pdf');
+            ->stream('reporte_resoluciones_'.now()->format('Ymd_His').'.pdf');
     }
 
     public function exportExcel(Request $request)
@@ -138,7 +138,7 @@ class ResolucionController extends Controller
         $query = $this->service->getFilterQuery($request->all());
 
         // Crear nuevo documento de Excel
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
 
         // Encabezados
@@ -150,28 +150,28 @@ class ResolucionController extends Controller
         // Estilos para encabezados
         $headerStyle = [
             'font' => ['bold' => true],
-            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
             'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                'startColor' => ['argb' => 'FFD9D9D9']
-            ]
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['argb' => 'FFD9D9D9'],
+            ],
         ];
         $sheet->getStyle('A1:G1')->applyFromArray($headerStyle);
 
         // Datos por fragmentos (Chunks) para ahorrar memoria
         $row = 2;
-        $query->chunk(200, function($resoluciones) use (&$sheet, &$row) {
+        $query->chunk(200, function ($resoluciones) use (&$sheet, &$row) {
             foreach ($resoluciones as $resolucion) {
-                $sheet->setCellValue('A' . $row, $resolucion->rd);
-                
-                $fechaFormateada = $resolucion->fecha ? \Carbon\Carbon::parse($resolucion->fecha)->format('d/m/Y') : '';
-                $sheet->setCellValue('B' . $row, $fechaFormateada);
+                $sheet->setCellValue('A'.$row, $resolucion->rd);
 
-                $sheet->setCellValue('C' . $row, $resolucion->nombres_apellidos);
-                $sheet->setCellValue('D' . $row, $resolucion->dni ?? '');
-                $sheet->setCellValue('E' . $row, $resolucion->asunto);
-                $sheet->setCellValue('F' . $row, $resolucion->periodo);
-                $sheet->setCellValue('G' . $row, $resolucion->procedencia);
+                $fechaFormateada = $resolucion->fecha ? Carbon::parse($resolucion->fecha)->format('d/m/Y') : '';
+                $sheet->setCellValue('B'.$row, $fechaFormateada);
+
+                $sheet->setCellValue('C'.$row, $resolucion->nombres_apellidos);
+                $sheet->setCellValue('D'.$row, $resolucion->dni ?? '');
+                $sheet->setCellValue('E'.$row, $resolucion->asunto);
+                $sheet->setCellValue('F'.$row, $resolucion->periodo);
+                $sheet->setCellValue('G'.$row, $resolucion->procedencia);
                 $row++;
             }
         });
@@ -181,7 +181,7 @@ class ResolucionController extends Controller
             $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
 
-        $fileName = 'resoluciones_' . now()->format('Ymd_His') . '.xlsx';
+        $fileName = 'resoluciones_'.now()->format('Ymd_His').'.xlsx';
         $writer = new Xlsx($spreadsheet);
 
         return new StreamedResponse(
@@ -191,9 +191,8 @@ class ResolucionController extends Controller
             200,
             [
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'Content-Disposition' => 'attachment; filename="' . $fileName . '"'
+                'Content-Disposition' => 'attachment; filename="'.$fileName.'"',
             ]
         );
     }
 }
-

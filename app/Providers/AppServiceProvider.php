@@ -3,19 +3,19 @@
 namespace App\Providers;
 
 use App\Models\Charge;
+use App\Models\LegalEntity;
 use App\Models\NaturalPerson;
 use App\Models\Resolucion;
-use App\Models\LegalEntity;
 use App\Models\Setting;
 use App\Models\Signature;
 use App\Models\User;
 use App\Observers\ActivityObserver;
-use App\Services\ChargeService;
-use App\Services\Contracts\ChargeServiceInterface;
-use App\Services\Contracts\ResolucionServiceInterface;
-use App\Services\Contracts\UserServiceInterface;
-use App\Services\ResolucionService;
-use App\Services\UserService;
+use App\Services\Charge\ChargeService;
+use App\Services\Charge\Contracts\ChargeServiceInterface;
+use App\Services\Resolucion\Contracts\ResolucionServiceInterface;
+use App\Services\Resolucion\ResolucionService;
+use App\Services\User\Contracts\UserServiceInterface;
+use App\Services\User\UserService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider

@@ -6,7 +6,6 @@ use App\Models\LegalEntity;
 use App\Models\NaturalPerson;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class LookupController extends Controller
 {
@@ -15,8 +14,8 @@ class LookupController extends Controller
         $dni = trim($dni);
         $person = NaturalPerson::where('dni', $dni)->first();
 
-        if (!$person) {
-            $apiKey = (string) env('API_DEV_PERU_KEY', '');
+        if (! $person) {
+            $apiKey = (string) config('services.apisperu.key', '');
             if ($apiKey !== '') {
                 try {
                     $response = Http::withToken($apiKey)
@@ -27,7 +26,7 @@ class LookupController extends Controller
                         $data = $response->json();
                         $dniValue = $data['dni'] ?? null;
 
-                        if (!empty($dniValue)) {
+                        if (! empty($dniValue)) {
                             return response()->json([
                                 'data' => [
                                     'id' => null,
@@ -38,28 +37,10 @@ class LookupController extends Controller
                                 ],
                             ]);
                         }
-                        Log::warning('LookupController.naturalPersonByDni:apisperu_empty', [
-                            'dni' => $dni,
-                            'response' => $data,
-                        ]);
-                    } else {
-                        Log::warning('LookupController.naturalPersonByDni:apisperu_non_ok', [
-                            'dni' => $dni,
-                            'status' => $response->status(),
-                            'body' => $response->body(),
-                        ]);
                     }
                 } catch (\Throwable $e) {
-                    Log::error('LookupController.naturalPersonByDni:apisperu_exception', [
-                        'dni' => $dni,
-                        'message' => $e->getMessage(),
-                    ]);
                     return response()->json(['message' => 'Error consultando apisperu.com'], 502);
                 }
-            } else {
-                Log::warning('LookupController.naturalPersonByDni:missing_api_key', [
-                    'dni' => $dni,
-                ]);
             }
 
             return response()->json(['message' => 'No encontrado'], 404);
@@ -106,7 +87,7 @@ class LookupController extends Controller
             ]);
         }
 
-        $apiKey = (string) env('API_DEV_PERU_KEY', '');
+        $apiKey = (string) config('services.apisperu.key', '');
         if ($apiKey === '') {
             return response()->json(['message' => 'No encontrado'], 404);
         }
@@ -116,16 +97,12 @@ class LookupController extends Controller
                 ->acceptJson()
                 ->get("https://dniruc.apisperu.com/api/v1/ruc/{$ruc}");
 
-            if (!$rucResponse->ok()) {
-                Log::warning('LookupController.legalEntityByRuc:apisperu_non_ok', [
-                    'ruc' => $ruc,
-                    'status' => $rucResponse->status(),
-                ]);
+            if (! $rucResponse->ok()) {
                 return response()->json(['message' => 'No encontrado'], 404);
             }
 
             $rucData = $rucResponse->json();
-            
+
             if (empty($rucData['ruc'])) {
                 return response()->json(['message' => 'No encontrado'], 404);
             }
@@ -140,10 +117,6 @@ class LookupController extends Controller
                 ],
             ]);
         } catch (\Throwable $e) {
-            Log::error('LookupController.legalEntityByRuc:apisperu_exception', [
-                'ruc' => $ruc,
-                'message' => $e->getMessage(),
-            ]);
             return response()->json(['message' => 'Error consultando apisperu.com'], 502);
         }
     }

@@ -42,12 +42,12 @@ class SettingsController extends Controller
 
         $timestamp = now()->format('Ymd_His');
         $backupDir = storage_path('app/backups');
-        if (!is_dir($backupDir)) {
+        if (! is_dir($backupDir)) {
             mkdir($backupDir, 0755, true);
         }
 
-        $zipPath = $backupDir . DIRECTORY_SEPARATOR . "backup_{$timestamp}.zip";
-        $zip = new ZipArchive();
+        $zipPath = $backupDir.DIRECTORY_SEPARATOR."backup_{$timestamp}.zip";
+        $zip = new ZipArchive;
         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
             return redirect()->route('settings.index')->with('error', 'No se pudo crear el backup.');
         }
@@ -77,14 +77,14 @@ class SettingsController extends Controller
 
         $path = $data['backup_file']->store('tmp', 'local');
         $absolutePath = Storage::disk('local')->path($path);
-        $extractPath = storage_path('app/tmp/backup_' . now()->format('Ymd_His'));
+        $extractPath = storage_path('app/tmp/backup_'.now()->format('Ymd_His'));
 
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
         if ($zip->open($absolutePath) !== true) {
             return redirect()->route('settings.index')->with('error', 'No se pudo abrir el backup.');
         }
 
-        if (!is_dir($extractPath)) {
+        if (! is_dir($extractPath)) {
             mkdir($extractPath, 0755, true);
         }
         $zip->extractTo($extractPath);
@@ -123,7 +123,7 @@ class SettingsController extends Controller
     {
         $user = $request->user();
         $allowed = $user?->hasRole('ADMINISTRADOR') || $user?->can('modulo configuracion');
-        if (!$allowed) {
+        if (! $allowed) {
             abort(403);
         }
     }
@@ -161,8 +161,8 @@ class SettingsController extends Controller
             $this->disableForeignKeys();
             foreach ($this->backupTables() as $table) {
                 DB::table($table)->delete();
-                $filePath = $extractPath . DIRECTORY_SEPARATOR . 'db' . DIRECTORY_SEPARATOR . "{$table}.json";
-                if (!file_exists($filePath)) {
+                $filePath = $extractPath.DIRECTORY_SEPARATOR.'db'.DIRECTORY_SEPARATOR."{$table}.json";
+                if (! file_exists($filePath)) {
                     continue;
                 }
                 $data = json_decode(file_get_contents($filePath), true) ?? [];
@@ -179,16 +179,16 @@ class SettingsController extends Controller
         Storage::disk('local')->deleteDirectory('private/charges_poder');
         Storage::disk('local')->deleteDirectory('private/charges_evidence');
 
-        $storagePath = $extractPath . DIRECTORY_SEPARATOR . 'storage';
+        $storagePath = $extractPath.DIRECTORY_SEPARATOR.'storage';
         if (is_dir($storagePath)) {
             $iterator = new \RecursiveIteratorIterator(
                 new \RecursiveDirectoryIterator($storagePath, \FilesystemIterator::SKIP_DOTS)
             );
             foreach ($iterator as $file) {
-                if (!$file->isFile()) {
+                if (! $file->isFile()) {
                     continue;
                 }
-                $relative = str_replace($storagePath . DIRECTORY_SEPARATOR, '', $file->getPathname());
+                $relative = str_replace($storagePath.DIRECTORY_SEPARATOR, '', $file->getPathname());
                 $contents = file_get_contents($file->getPathname());
                 Storage::disk('local')->put($relative, $contents);
             }
@@ -217,7 +217,7 @@ class SettingsController extends Controller
 
     protected function deleteDirectory(string $path): void
     {
-        if (!is_dir($path)) {
+        if (! is_dir($path)) {
             return;
         }
         $iterator = new \RecursiveIteratorIterator(

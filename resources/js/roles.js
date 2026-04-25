@@ -1,5 +1,7 @@
 import { RolesManagement } from './modules/roles/management';
 
-document.addEventListener('DOMContentLoaded', () => {
-    RolesManagement.init();
-});
+export default {
+    init: () => {
+        RolesManagement.init();
+    }
+};

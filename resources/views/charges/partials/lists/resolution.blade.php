@@ -1,10 +1,5 @@
 <div class="tab-pane fade {{ $active ?? false ? 'show active' : '' }}" id="resolution-tab-pane" role="tabpanel"
     aria-labelledby="resolution-tab" tabindex="0">
-    @php
-        \Illuminate\Support\Facades\Log::info('Blade::resolution.blade.php - Renderizando lista', [
-            'count' => $resolutionCharges->count(),
-        ]);
-    @endphp
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-info border-0 py-3">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
@@ -59,23 +54,47 @@
             {{-- VISTA MÓVIL --}}
             <div class="d-md-none p-3">
                 @forelse ($resolutionCharges as $charge)
-                    <div class="card border-0 shadow-sm mb-2">
-                        <div class="card-body p-3">
-                            <div class="d-flex justify-content-between align-items-start gap-2">
+                    <div class="card border-0 shadow-sm mb-3 overflow-hidden">
+                        <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+                            <div class="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <div class="small text-muted">Cargo #{{ $charge->n_charge }}</div>
-                                    <div class="fw-semibold">RD: {{ $charge->resolucion?->rd }}</div>
-                                    <div class="small text-muted">{{ $charge->resolucion?->periodo }}</div>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle mb-1">RD {{ $charge->resolucion?->rd }}</span>
+                                    <div class="small text-muted d-flex align-items-center">
+                                        <span class="material-symbols-outlined fs-6 me-1">receipt_long</span>
+                                        Cargo #{{ $charge->n_charge }}
+                                    </div>
                                 </div>
                                 @include('charges.partials.status-badge', [
                                     'status' => $charge->signature?->signature_status,
                                 ])
                             </div>
-                            <div class="mt-2">
-                                <div class="small text-muted">Interesado: {{ $charge->resolucion?->nombres_apellidos }}
+                        </div>
+                        <div class="card-body py-3">
+                            <div class="mb-3">
+                                <label class="text-muted small text-uppercase fw-bold d-block mb-1">Interesado</label>
+                                <div class="fw-semibold text-dark text-truncate" title="{{ $charge->resolucion?->nombres_apellidos }}">
+                                    {{ $charge->resolucion?->nombres_apellidos }}
+                                </div>
+                                <div class="small text-muted">DNI: {{ $charge->resolucion?->dni ?? '---' }}</div>
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="text-muted small text-uppercase fw-bold d-block">Periodo</label>
+                                    <span class="badge bg-light text-dark border small fw-normal">{{ $charge->resolucion?->periodo }}</span>
+                                </div>
+                                <div class="col-6">
+                                    <label class="text-muted small text-uppercase fw-bold d-block">Procedencia</label>
+                                    <span class="small text-dark">{{ $charge->resolucion?->procedencia ?? '---' }}</span>
                                 </div>
                             </div>
-                            <div class="mt-3">
+
+                            <div class="mb-3">
+                                <label class="text-muted small text-uppercase fw-bold d-block mb-1">Asunto</label>
+                                <div class="small text-dark lh-sm">{{ Str::limit($charge->asunto, 100) }}</div>
+                            </div>
+
+                            <div class="pt-2 border-top">
                                 @include('charges.partials.item-actions', [
                                     'charge' => $charge,
                                     'canSign' => true,
@@ -84,7 +103,10 @@
                         </div>
                     </div>
                 @empty
-                    <div class="text-center text-muted py-4">No hay cargos de resoluciones.</div>
+                    <div class="text-center text-muted py-5 bg-white rounded-3 shadow-sm">
+                        <span class="material-symbols-outlined fs-1 d-block mb-2">inbox</span>
+                        No hay cargos de resoluciones.
+                    </div>
                 @endforelse
             </div>
 
@@ -111,7 +133,11 @@
                                 <td>{{ $charge->n_charge }}</td>
                                 <td class="fw-bold">{{ $charge->resolucion?->rd }}</td>
                                 <td>{{ $charge->resolucion?->periodo }}</td>
-                                <td>{{ $charge->resolucion?->nombres_apellidos }}</td>
+                                <td style="max-width: 250px;">
+                                    <div class="fw-semibold text-truncate" title="{{ $charge->resolucion?->nombres_apellidos }}">
+                                        {{ $charge->resolucion?->nombres_apellidos }}
+                                    </div>
+                                </td>
                                 <td>{{ $charge->resolucion?->dni }}</td>
                                 <td style="max-width: 200px;" class="text-truncate">{{ $charge->asunto }}</td>
                                 <td>@include('charges.partials.status-badge', [

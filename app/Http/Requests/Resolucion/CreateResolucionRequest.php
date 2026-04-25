@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Resolucion;
 
+use App\Models\Resolucion;
 use Carbon\Carbon;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -13,13 +15,13 @@ class CreateResolucionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->can('create', \App\Models\Resolucion::class);
+        return $this->user()->can('create', Resolucion::class);
     }
 
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -29,7 +31,7 @@ class CreateResolucionRequest extends FormRequest
                 'string',
                 Rule::unique('resolucions')->where(function ($query) {
                     return $query->where('periodo', Carbon::parse($this->fecha)->year);
-                })
+                }),
             ],
             'fecha' => 'required|date',
             'asunto' => 'required|string|max:255',

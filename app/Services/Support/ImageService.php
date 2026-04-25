@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Support;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -11,11 +11,6 @@ class ImageService
     /**
      * Store and optimize an image.
      *
-     * @param UploadedFile $file
-     * @param string $folder
-     * @param int|null $quality
-     * @param string|null $customName
-     * @param int $maxWidth
      * @return string Path of the stored file
      */
     public function storeAndOptimize(

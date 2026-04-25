@@ -1,5 +1,7 @@
 import { UserManagement } from './modules/users/management';
 
-document.addEventListener('DOMContentLoaded', () => {
-    UserManagement.init();
-});
+export default {
+    init: () => {
+        UserManagement.init();
+    }
+};

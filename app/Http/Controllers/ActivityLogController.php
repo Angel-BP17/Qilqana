@@ -26,9 +26,9 @@ class ActivityLogController extends Controller
         if ($request->filled('search')) {
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
-                $q->where('reason', 'like', '%' . $search . '%')
-                    ->orWhere('model', 'like', '%' . $search . '%')
-                    ->orWhere('action', 'like', '%' . $search . '%');
+                $q->where('reason', 'like', '%'.$search.'%')
+                    ->orWhere('model', 'like', '%'.$search.'%')
+                    ->orWhere('action', 'like', '%'.$search.'%');
             });
         }
 
@@ -45,7 +45,7 @@ class ActivityLogController extends Controller
     {
         $user = $request->user();
         $allowed = $user?->hasRole('ADMINISTRADOR') || $user?->can('modulo registro de actividades');
-        if (!$allowed) {
+        if (! $allowed) {
             abort(403);
         }
     }

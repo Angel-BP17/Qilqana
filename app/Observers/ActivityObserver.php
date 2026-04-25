@@ -22,6 +22,7 @@ class ActivityObserver
     {
         if ($model instanceof Signature) {
             $this->handleSignatureUpdate($model);
+
             return;
         }
 
@@ -46,7 +47,7 @@ class ActivityObserver
             return;
         }
 
-        if (!in_array($currentStatus, ['firmado', 'rechazado'], true)) {
+        if (! in_array($currentStatus, ['firmado', 'rechazado'], true)) {
             return;
         }
 
@@ -61,7 +62,7 @@ class ActivityObserver
         }
 
         $reason = request()?->input('reason');
-        if (!$reason && $currentStatus === 'rechazado') {
+        if (! $reason && $currentStatus === 'rechazado') {
             $reason = request()?->input('signature_comment');
         }
 

@@ -1,24 +1,23 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\User;
 
 use App\Filters\UserFilter;
 use App\Models\User;
-use App\Services\Contracts\UserServiceInterface;
+use App\Services\User\Contracts\UserServiceInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
 class UserService implements UserServiceInterface
 {
-    public function __construct(protected UserFilter $filter)
-    {
-    }
+    public function __construct(protected UserFilter $filter) {}
 
     public function getAll(array $data): array
     {
         $users = $this->filter->applyFilters($data)->paginate(10);
         $roles = Role::all();
+
         return compact('users', 'roles');
     }
 
@@ -28,12 +27,16 @@ class UserService implements UserServiceInterface
             return DB::transaction(function () use ($data) {
                 $data['password'] = Hash::make($data['password']);
                 $user = User::create($data);
-                
-                if (!empty($data['roles'])) $user->assignRole($data['roles']);
+
+                if (! empty($data['roles'])) {
+                    $user->assignRole($data['roles']);
+                }
+
                 return true;
             });
         } catch (\Throwable $th) {
             report($th);
+
             return false;
         }
     }
@@ -44,7 +47,7 @@ class UserService implements UserServiceInterface
             return DB::transaction(function () use ($data, $id) {
                 $model = User::findOrFail($id);
 
-                if (!empty($data['password'])) {
+                if (! empty($data['password'])) {
                     $data['password'] = Hash::make($data['password']);
                 } else {
                     unset($data['password']);
@@ -55,12 +58,15 @@ class UserService implements UserServiceInterface
                 unset($data['roles']);
 
                 $model->update($data);
-                if ($hasRoles) $model->syncRoles($roles ?? []);
-                
+                if ($hasRoles) {
+                    $model->syncRoles($roles ?? []);
+                }
+
                 return true;
             });
         } catch (\Throwable $th) {
             report($th);
+
             return false;
         }
     }
@@ -69,9 +75,11 @@ class UserService implements UserServiceInterface
     {
         try {
             $model = User::findOrFail($id);
+
             return (bool) $model->delete();
         } catch (\Throwable $th) {
             report($th);
+
             return false;
         }
     }

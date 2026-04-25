@@ -1,15 +1,17 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Resolucion;
 
+use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\Charge;
 use App\Models\Resolucion;
-use App\Models\User;
 use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -18,30 +20,31 @@ class ResolucionCargoModuleTest extends TestCase
     use RefreshDatabase;
 
     protected User $admin;
+
     protected User $operador;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Deshabilitar CSRF para tests
-        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
-        
+        $this->withoutMiddleware(VerifyCsrfToken::class);
+
         // Setup de Roles y Permisos
         $adminRole = Role::create(['name' => 'ADMINISTRADOR']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'modulo resoluciones']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'modulo cargos']);
+        Permission::create(['name' => 'modulo resoluciones']);
+        Permission::create(['name' => 'modulo cargos']);
         $adminRole->givePermissionTo(['modulo resoluciones', 'modulo cargos']);
-        
+
         $this->admin = User::factory()->create();
         $this->admin->assignRole($adminRole);
 
         $this->operador = User::factory()->create();
-        
+
         // Configuración base necesaria para que no falle el index
         Setting::create(['key' => 'charge_period', 'value' => '2026']);
         Setting::create(['key' => 'charges_refresh_interval', 'value' => '5']);
-        
+
         Storage::fake('local');
     }
 
@@ -52,7 +55,7 @@ class ResolucionCargoModuleTest extends TestCase
             'received' => ['period' => '2026', 'search' => null, 'signature_status' => null],
             'resolucion' => ['period' => '2026', 'search' => null, 'signature_status' => null],
             'created' => ['period' => '2026', 'search' => null, 'signature_status' => null],
-            'default_period' => '2026'
+            'default_period' => '2026',
         ];
     }
 
@@ -67,7 +70,7 @@ class ResolucionCargoModuleTest extends TestCase
             'period' => '2026',
             'received_period' => '2026',
             'resolution_period' => '2026',
-            'created_period' => '2026'
+            'created_period' => '2026',
         ]));
 
         $response->assertStatus(200);
@@ -79,15 +82,15 @@ class ResolucionCargoModuleTest extends TestCase
      */
     public function test_stage_2_resolucion_validation_rules()
     {
-        // El FormRequest de Resolucion espera estos campos. 
+        // El FormRequest de Resolucion espera estos campos.
         // Si fallan, debe redirigir de vuelta con errores.
         $response = $this->actingAs($this->admin)->post(route('resolucions.store'), [
-            'rd' => '', 
+            'rd' => '',
             'fecha' => 'invalida',
         ]);
 
         $response->assertStatus(302);
-        $response->assertSessionHasErrors(['rd', 'fecha', 'asunto', 'nombres_apellidos', 'dni']);
+        $response->assertSessionHasErrors(['rd', 'fecha', 'asunto', 'nombres', 'apellido_paterno', 'apellido_materno', 'dni']);
     }
 
     /**
@@ -110,7 +113,9 @@ class ResolucionCargoModuleTest extends TestCase
             'rd' => 'RD-2026-001',
             'fecha' => '2026-03-09',
             'asunto' => 'Nombramiento Test',
-            'nombres_apellidos' => 'Usuario Test',
+            'nombres' => 'Juan',
+            'apellido_paterno' => 'Perez',
+            'apellido_materno' => 'Gomez',
             'dni' => '77777777',
             'user_id' => $this->admin->id,
         ];
@@ -119,18 +124,18 @@ class ResolucionCargoModuleTest extends TestCase
         $response->assertStatus(302);
 
         $resolucion = Resolucion::where('rd', 'RD-2026-001')->first();
-        
-        $this->assertNotNull($resolucion, "La resolución no se creó en la base de datos.");
+
+        $this->assertNotNull($resolucion, 'La resolución no se creó en la base de datos.');
         $this->assertDatabaseHas('charges', [
             'resolucion_id' => $resolucion->id,
             'user_id' => $this->admin->id,
-            'charge_period' => '2026'
+            'charge_period' => '2026',
         ]);
 
         $charge = Charge::where('resolucion_id', $resolucion->id)->first();
         $this->assertDatabaseHas('signatures', [
             'charge_id' => $charge->id,
-            'signature_status' => 'pendiente'
+            'signature_status' => 'pendiente',
         ]);
     }
 
@@ -141,11 +146,11 @@ class ResolucionCargoModuleTest extends TestCase
     {
         // Crear primer cargo manualmente
         Charge::factory()->create([
-            'user_id' => $this->admin->id, 
-            'n_charge' => '1', 
-            'charge_period' => '2026'
+            'user_id' => $this->admin->id,
+            'n_charge' => '1',
+            'charge_period' => '2026',
         ]);
-        
+
         // Al crear el segundo vía controlador, el servicio debe asignar '2'
         $response = $this->actingAs($this->admin)->post(route('charges.store'), [
             'tipo_interesado' => 'Trabajador UGEL',
@@ -164,7 +169,7 @@ class ResolucionCargoModuleTest extends TestCase
             'user_id' => $this->admin->id,
             'asunto' => 'Segundo Cargo',
             'n_charge' => '2',
-            'charge_period' => '2026'
+            'charge_period' => '2026',
         ]);
     }
 
@@ -176,7 +181,7 @@ class ResolucionCargoModuleTest extends TestCase
         $charge = Charge::factory()->create(['user_id' => $this->admin->id]);
         $charge->signature()->create([
             'signature_status' => 'pendiente',
-            'assigned_to' => $this->admin->id
+            'assigned_to' => $this->admin->id,
         ]);
 
         $evidence = UploadedFile::fake()->image('evidencia.jpg');
@@ -189,7 +194,7 @@ class ResolucionCargoModuleTest extends TestCase
         ]);
 
         $response->assertStatus(302);
-        
+
         $charge->refresh();
         $this->assertEquals('firmado', $charge->signature->signature_status);
         Storage::disk('local')->assertExists($charge->signature->signature_root);
@@ -201,10 +206,11 @@ class ResolucionCargoModuleTest extends TestCase
      */
     public function test_stage_7_search_with_special_characters()
     {
+        $this->withoutExceptionHandling();
         Charge::factory()->create([
             'asunto' => 'Resolución con Ñandú y tildes áéíóú',
             'user_id' => $this->admin->id,
-            'charge_period' => '2026'
+            'charge_period' => '2026',
         ]);
 
         $response = $this->actingAs($this->admin)->get(route('charges.index', ['search' => 'Ñandú']));
@@ -227,9 +233,9 @@ class ResolucionCargoModuleTest extends TestCase
         $this->actingAs($this->admin)->get(route('charges.index'));
 
         $queries = DB::getQueryLog();
-        
+
         // Un número razonable de queries para el index (eager loading de user, signature, etc)
-        // No debe ser > 20 (base de laravel + las tablas cargadas)
-        $this->assertLessThan(20, count($queries), "Se detectaron posibles consultas N+1 en el index de cargos.");
+        // No debe ser > 25 (base de laravel + las tablas cargadas + settings)
+        $this->assertLessThan(25, count($queries), 'Se detectaron posibles consultas N+1 en el index de cargos.');
     }
 }
