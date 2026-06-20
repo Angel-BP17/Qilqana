@@ -25,7 +25,8 @@ class UpdateUserRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
+            'apellido_paterno' => 'required|string|max:255',
+            'apellido_materno' => 'required|string|max:255',
             'dni' => ['required', 'string', 'max:10', Rule::unique('users')->ignore($this->route('user'))],
             'password' => 'nullable|string',
             'roles' => 'nullable|array',

@@ -1,54 +1,46 @@
 <div class="tab-pane fade {{ $active ?? false ? 'show active' : '' }}" id="resolution-tab-pane" role="tabpanel"
     aria-labelledby="resolution-tab" tabindex="0">
     <div class="card border-0 shadow-sm mb-4">
-        <div class="card-header bg-info border-0 py-3">
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                <div class="d-flex align-items-center gap-2">
-                    <h5 class="mb-0 fw-bold text-white">Cargos de resoluciones</h5>
-                    <span class="badge bg-light text-dark">{{ $resolutionCharges->count() }}</span>
-                </div>
-                <div class="d-flex flex-wrap gap-2 align-items-center">
-                    <div class="d-none d-md-flex gap-2 align-items-center">
-                        <form class="d-flex flex-wrap gap-2 row" action="{{ route('charges.index') }}" method="GET">
-                            <div class="col">
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0">
-                                        <span class="material-symbols-outlined text-muted">search</span>
-                                    </span>
-                                    <input type="text" class="form-control border-start-0" name="resolution_search"
-                                        placeholder="No. cargo, RD, nombres..." value="{{ request('resolution_search') }}">
-                                </div>
-                            </div>
-                            <div class="col-2">
-                                <select name="resolution_period" class="form-select" onchange="this.form.submit()">
-                                    <option value="">Todos los periodos</option>
-                                    @foreach ($periodOptions ?? [] as $period)
-                                        <option value="{{ $period }}" @selected(($resolutionPeriod ?? request('resolution_period')) === $period)>
-                                            {{ $period }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-auto">
-                                <button class="btn btn-light" type="submit"><span class="material-symbols-outlined">filter_alt</span> Filtrar</button>
-                            </div>
-                        </form>
-                        <form action="{{ route('charges.reports.resolution') }}" method="GET">
-                            @if (request('resolution_search'))
-                                <input type="hidden" name="resolution_search"
-                                    value="{{ request('resolution_search') }}">
-                            @endif
-                            @if ($resolutionPeriod)
-                                <input type="hidden" name="resolution_period" value="{{ $resolutionPeriod }}">
-                            @endif
-                            <button class="btn btn-light" type="submit">
-                                <span class="material-symbols-outlined me-1">picture_as_pdf</span> Reporte PDF
-                            </button>
-                        </form>
+        <x-card-header title="Cargos de resoluciones" :badge="$resolutionCharges->count()" colSize="md">
+            <form class="d-flex flex-wrap gap-2 flex-grow-1 flex-md-grow-0 justify-content-md-end" action="{{ route('charges.index') }}" method="GET">
+                <div class="flex-grow-1" style="min-width: 200px; max-width: 400px;">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0">
+                            <span class="material-symbols-outlined text-muted">search</span>
+                        </span>
+                        <input type="text" class="form-control border-start-0" name="resolution_search"
+                            placeholder="No. cargo, RD, nombres..." value="{{ request('resolution_search') }}">
                     </div>
                 </div>
-            </div>
-        </div>
+                <div style="width: 120px;">
+                    <select name="resolution_period" class="form-select" onchange="this.form.submit()">
+                        <option value="">Periodo</option>
+                        @foreach ($periodOptions ?? [] as $period)
+                            <option value="{{ $period }}" @selected(($resolutionPeriod ?? request('resolution_period')) === $period)>
+                                {{ $period }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <button class="btn btn-light" type="submit" title="Filtrar">
+                    <span class="material-symbols-outlined">filter_alt</span>
+                    <span class="d-md-none d-lg-inline">Filtrar</span>
+                </button>
+            </form>
+            <form action="{{ route('charges.reports.resolution') }}" method="GET" target="_blank" class="flex-grow-1 flex-md-grow-0">
+                @if (request('resolution_search'))
+                    <input type="hidden" name="resolution_search" value="{{ request('resolution_search') }}">
+                @endif
+                @if ($resolutionPeriod)
+                    <input type="hidden" name="resolution_period" value="{{ $resolutionPeriod }}">
+                @endif
+                <button class="btn btn-light w-100" type="submit" @disabled($resolutionCharges->isEmpty())>
+                    <span class="material-symbols-outlined me-1">picture_as_pdf</span>
+                    <span class="d-none d-sm-inline">Reporte PDF</span>
+                    <span class="d-sm-none">PDF</span>
+                </button>
+            </form>
+        </x-card-header>
 
         <div class="card-body p-0">
             {{-- VISTA MÓVIL --}}
@@ -58,7 +50,7 @@
                         <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle mb-1">RD {{ $charge->resolucion?->rd }}</span>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle mb-1">{{ $charge->resolucion?->type?->abreviacion ?? 'RD' }} {{ $charge->resolucion?->rd }}</span>
                                     <div class="small text-muted d-flex align-items-center">
                                         <span class="material-symbols-outlined fs-6 me-1">receipt_long</span>
                                         Cargo #{{ $charge->n_charge }}
@@ -131,7 +123,7 @@
                             <tr>
                                 <td>{{ $key + 1 }}</td>
                                 <td>{{ $charge->n_charge }}</td>
-                                <td class="fw-bold">{{ $charge->resolucion?->rd }}</td>
+                                <td class="fw-bold">{{ $charge->resolucion?->type?->abreviacion ?? 'RD' }} {{ $charge->resolucion?->rd }}</td>
                                 <td>{{ $charge->resolucion?->periodo }}</td>
                                 <td style="max-width: 250px;">
                                     <div class="fw-semibold text-truncate" title="{{ $charge->resolucion?->nombres_apellidos }}">

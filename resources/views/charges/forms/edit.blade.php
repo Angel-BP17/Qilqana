@@ -104,17 +104,43 @@
                                 style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase();">
                         </div>
                     </div>
+                    {{-- SECCIÓN: RESOLUCIONES VINCULADAS --}}
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-12">
+                            <label for="edit_resolucion_ids" class="form-label fw-bold">Resoluciones vinculadas</label>
+                            <select class="form-select select2-resolutions-edit" id="edit_resolucion_ids" name="resolucion_ids[]" multiple="multiple" data-placeholder="Seleccione una o más resoluciones">
+                                @if(isset($resoluciones))
+                                    @foreach($resoluciones as $res)
+                                        <option value="{{ $res->id }}">{{ $res->type?->abreviacion ?? 'RD' }} {{ $res->rd }} - {{ $res->nombres_apellidos }}</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="form-text">Actualice los vínculos de resoluciones para este cargo.</div>
+                        </div>
+                    </div>
+
                     <div class="row g-3 mt-3">
-                        <div class="col">
+                        <div class="col-md-8">
                             <label for="edit_asunto" class="form-label">Se remite</label>
                             <input type="text" class="form-control" id="edit_asunto" name="asunto"
-                                style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase();" required>
+                                style="text-transform: uppercase;">
                         </div>
                         <div class="col-md-4">
                             <label for="edit_document_date" class="form-label">Fecha del documento</label>
                             <input type="date" class="form-control" id="edit_document_date" name="document_date">
                         </div>
-                    </div>
+                        </div>
+
+                        <div class="row g-3 mt-1">
+                        <div class="col-md-12">
+                            <label for="edit_document_file" class="form-label fw-bold">Actualizar Documento (PDF)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><span class="material-symbols-outlined">description</span></span>
+                                <input type="file" class="form-control" id="edit_document_file" name="document_file" accept=".pdf">
+                            </div>
+                            <div class="form-text text-info">Si selecciona un archivo nuevo, el anterior será reemplazado. Máximo: {{ (int) \App\Models\Setting::getValue('charges_max_file_size', '5120') / 1024 }}MB.</div>
+                        </div>
+                        </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>

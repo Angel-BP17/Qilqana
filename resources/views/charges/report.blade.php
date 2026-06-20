@@ -1,6 +1,5 @@
-﻿<!DOCTYPE html>
-<html>
-
+<!DOCTYPE html>
+<html lang="es">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>{{ $title }}</title>
@@ -9,266 +8,172 @@
             margin: 40px 25px;
             size: A4;
         }
-
-        @page :right {
-            @top-right {
-                font-size: 12px;
-                font-weight: bold;
-            }
-
-            @bottom-right {
-                content: "PÃ¡gina " counter(page) " de " counter(pages);
-                font-size: 10px;
-            }
-        }
-
         body {
             font-family: Arial, sans-serif;
-            font-size: 12px;
+            font-size: 11px;
+            color: #333;
         }
-
         .title-header {
             background: #0D47A1;
             color: white;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             text-transform: uppercase;
-            padding: 12px;
+            padding: 10px;
             text-align: center;
         }
-
-        .header {
-            text-align: center;
-            margin-bottom: 8px;
-        }
-
         .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .header-logo img {
+            width: 180px;
+        }
+        .header-title {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .header-date {
+            text-align: right;
+            font-size: 10px;
+            color: #666;
+        }
+        .filters {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            font-size: 10px;
+        }
+        table.main-table {
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
         }
-
-        .header-logo {
-            width: 30%;
-            text-align: left;
-            vertical-align: middle;
-        }
-
-        .header-logo img {
-            width: 220px;
-        }
-
-        .header-title {
-            width: 40%;
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        .header-spacer {
-            width: 30%;
-        }
-
-        .title {
-            font-size: 18px;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        p {
-            text-align: center;
-            font-size: 12px;
-            margin: 5px 0;
-        }
-
-        .filters {
-            margin-bottom: 10px;
-            font-size: 12px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 0;
-        }
-
-        .header-table,
-        .header-table td {
-            border: none;
-        }
-
-        .table-head th {
-            background: #abcaed;
-            color: rgb(0, 0, 0);
+        table.main-table th {
+            background: #E3F2FD;
+            color: #0D47A1;
             text-transform: uppercase;
             font-weight: bold;
-            padding: 10px;
+            font-size: 9px;
+            padding: 8px 4px;
+            border: 1px solid #BBDEFB;
         }
-
-        th,
-        td {
-            border: 1px solid #333;
-            padding: 6px;
+        table.main-table td {
+            border: 1px solid #eee;
+            padding: 6px 4px;
             text-align: center;
-            font-size: 11px;
-            word-wrap: break-word;
-            white-space: normal;
-        }
-
-        th {
-            background: #abcaed;
-            color: rgb(0, 0, 0);
-            text-transform: uppercase;
-            font-weight: bold;
-            padding: 10px;
-        }
-
-        .json-table {
-            width: 100%;
-            border-collapse: collapse;
             font-size: 10px;
-        }
-
-        .json-table th,
-        .json-table td {
-            border: 1px solid #aaa;
-            padding: 5px;
-            text-align: left;
             word-wrap: break-word;
-            white-space: normal;
         }
-
-        .json-container {
-            text-align: left;
-        }
-
+        .text-left { text-align: left !important; }
         .footer {
-            margin-top: 20px;
+            margin-top: 15px;
             text-align: right;
             font-size: 10px;
+            font-style: italic;
+            color: #777;
         }
     </style>
 </head>
-
 <body>
-    <div class="header">
-        <table class="header-table">
-            <tr>
-                <td class="header-logo">
-                    <img src="{{ public_path('img/logo-ugel.png') }}" alt="Logo UGEL">
-                </td>
-                <td class="header-title">
-                    <div class="title">{{ $title }}</div>
-                    <p>Generado: {{ now()->format('d/m/Y H:i') }}</p>
-                </td>
-                <td class="header-spacer"></td>
-            </tr>
-        </table>
-    </div>
+    <table class="header-table">
+        <tr>
+            <td class="header-logo" style="width: 30%;">
+                <img src="{{ public_path('img/logo-ugel.png') }}" alt="Logo UGEL">
+            </td>
+            <td class="header-title" style="width: 40%;">
+                {{ $title }}
+            </td>
+            <td class="header-date" style="width: 30%;">
+                Generado: {{ now()->format('d/m/Y H:i') }}
+            </td>
+        </tr>
+    </table>
 
-    @if (($filters['search'] ?? null) || ($filters['signature_status'] ?? null))
+    @if (($filters['search'] ?? null) || ($filters['signature_status'] ?? null) || ($filters['period'] ?? null))
         <div class="filters">
-            <strong>Filtros aplicados:</strong>
-            @if ($filters['search'] ?? null)
-                Busqueda: "{{ $filters['search'] }}"
-            @endif
-            @if ($filters['signature_status'] ?? null)
-                | Estado: {{ ucfirst($filters['signature_status']) }}
-            @endif
+            <strong>Filtros:</strong>
+            @if ($filters['search'] ?? null) Busqueda: "{{ $filters['search'] }}" @endif
+            @if ($filters['signature_status'] ?? null) | Estado: {{ ucfirst($filters['signature_status']) }} @endif
+            @if ($filters['period'] ?? null) | Periodo: {{ $filters['period'] }} @endif
         </div>
     @endif
 
-    <table>
+    <table class="main-table">
         <thead>
             <tr>
-                <th colspan="{{ $type === 'sent' || $type === 'resolution' ? 9 : 9 }}" class="title-header">
+                <th colspan="{{ $type === 'resolution' ? 10 : 9 }}" class="title-header">
                     {{ $title }}
                 </th>
             </tr>
             @if ($type === 'sent')
-                <tr class="table-head">
-                    <th>ID</th>
-                    <th>No. cargo</th>
-                    <th>Periodo</th>
-                    <th>Fecha</th>
+                <tr>
+                    <th style="width: 30px;">ID</th>
+                    <th style="width: 60px;">No. Cargo</th>
+                    <th style="width: 50px;">Periodo</th>
+                    <th style="width: 70px;">Fecha</th>
                     <th>Interesado</th>
                     <th>Asunto</th>
-                    <th>Estado</th>
-                    <th>Fecha firma</th>
-                    <th>Firma</th>
+                    <th style="width: 60px;">Estado</th>
+                    <th style="width: 80px;">Fecha Firma</th>
+                    <th style="width: 60px;">Firma</th>
                 </tr>
             @elseif ($type === 'resolution')
-                <tr class="table-head">
-                    <th>ID</th>
-                    <th>No. cargo</th>
-                    <th>Periodo</th>
-                    <th>RD</th>
-                    <th>Fecha</th>
-                    <th>Nombres y apellidos</th>
-                    <th>DNI</th>
+                <tr>
+                    <th style="width: 30px;">ID</th>
+                    <th style="width: 50px;">Cargo</th>
+                    <th style="width: 40px;">Año</th>
+                    <th style="width: 70px;">RD</th>
+                    <th style="width: 70px;">Fecha RD</th>
+                    <th>Interesado</th>
+                    <th style="width: 70px;">DNI</th>
                     <th>Asunto</th>
-                    <th>Fecha firma</th>
-                    <th>Firma</th>
+                    <th style="width: 80px;">Fecha Firma</th>
+                    <th style="width: 60px;">Firma</th>
                 </tr>
             @else
-                <tr class="table-head">
-                    <th>ID</th>
-                    <th>NÂ° Cargo</th>
-                    <th>Periodo</th>
+                <tr>
+                    <th style="width: 30px;">ID</th>
+                    <th style="width: 60px;">No. Cargo</th>
+                    <th style="width: 50px;">Periodo</th>
                     <th>Enviado por</th>
                     <th>Interesado</th>
                     <th>Asunto</th>
-                    <th>Estado</th>
-                    <th>Fecha firma</th>
-                    <th>Firma</th>
+                    <th style="width: 60px;">Estado</th>
+                    <th style="width: 80px;">Fecha Firma</th>
+                    <th style="width: 60px;">Firma</th>
                 </tr>
             @endif
         </thead>
         <tbody>
             @foreach ($charges as $charge)
                 @php
-                    $interesadoLabel = '';
                     $signatureImage = null;
-                    if ($charge->tipo_interesado === 'Persona Juridica') {
-                        $interesadoLabel = $charge->legalEntity?->razon_social ?: $charge->legalEntity?->ruc ?: 'N/A';
-                    } else {
-                        $interesadoLabel = trim(
-                            ($charge->naturalPerson?->nombres ?? '') . ' ' . ($charge->naturalPerson?->apellidos ?? ''),
-                        );
-                        if ($interesadoLabel === '') {
-                            $interesadoLabel = $charge->naturalPerson?->dni ?? 'N/A';
-                        }
+                    if ($charge->signature?->signature_status === 'firmado' && $charge->signature_content) {
+                        $signatureImage = 'data:image/svg+xml;base64,' . base64_encode($charge->signature_content);
                     }
-
-                    if (
-                        $charge->signature?->signature_status === 'firmado' &&
-                        $charge->signature?->signature_root &&
-                        \Illuminate\Support\Facades\Storage::disk('local')->exists($charge->signature->signature_root)
-                    ) {
-                        $signatureSvg = \Illuminate\Support\Facades\Storage::disk('local')->get(
-                            $charge->signature->signature_root,
-                        );
-                        $signatureImage = 'data:image/svg+xml;base64,' . base64_encode($signatureSvg);
-                    }
-                    $signatureCompletedAt = $charge->signature?->signature_completed_at;
-                    $signatureCompletedLabel = $signatureCompletedAt
-                        ? $signatureCompletedAt->format('d/m/Y h:i:s A')
-                        : 'â€”';
+                    $signatureCompletedLabel = $charge->signature?->signature_completed_at 
+                        ? $charge->signature->signature_completed_at->format('d/m/Y H:i') 
+                        : '---';
                 @endphp
                 @if ($type === 'sent')
                     <tr>
                         <td>{{ $charge->id }}</td>
                         <td>{{ $charge->n_charge }}</td>
-                        <td>{{ $charge->charge_period ?? 'N/A' }}</td>
-                        <td>{{ optional($charge->created_at)->format('Y-m-d') }}</td>
-                        <td>{{ $interesadoLabel }}</td>
-                        <td>{{ Str::limit($charge->asunto ?? '', 60) }}</td>
+                        <td>{{ $charge->charge_period }}</td>
+                        <td>{{ $charge->created_at->format('d/m/Y') }}</td>
+                        <td class="text-left">{{ $charge->interesado_label }}</td>
+                        <td class="text-left">{{ Str::limit($charge->asunto, 80) }}</td>
                         <td>{{ ucfirst($charge->signature?->signature_status ?? 'pendiente') }}</td>
                         <td>{{ $signatureCompletedLabel }}</td>
                         <td>
                             @if ($signatureImage)
-                                <img src="{{ $signatureImage }}" alt="Firma" style="height: 28px;">
+                                <img src="{{ $signatureImage }}" style="height: 25px;">
                             @else
-                                X
+                                ---
                             @endif
                         </td>
                     </tr>
@@ -276,20 +181,18 @@
                     <tr>
                         <td>{{ $charge->id }}</td>
                         <td>{{ $charge->n_charge }}</td>
-                        <td>{{ $charge->charge_period ?? 'N/A' }}</td>
-                        <td>{{ $charge->resolucion?->rd ?? 'N/A' }}</td>
-                        <td>
-                            {{ $charge->resolucion?->fecha ? \Carbon\Carbon::parse($charge->resolucion->fecha)->format('Y-m-d') : '' }}
-                        </td>
-                        <td>{{ $charge->resolucion?->nombres_apellidos ?? 'N/A' }}</td>
-                        <td>{{ $charge->resolucion?->dni ?? 'N/A' }}</td>
-                        <td>{{ Str::limit($charge->resolucion?->asunto ?? '', 60) }}</td>
+                        <td>{{ $charge->charge_period }}</td>
+                        <td>{{ $charge->resolucion?->rd ? ($charge->resolucion?->type?->abreviacion ?? 'RD') . ' ' . $charge->resolucion?->rd : 'N/A' }}</td>
+                        <td>{{ $charge->resolucion?->formatted_fecha }}</td>
+                        <td class="text-left">{{ $charge->resolucion?->nombres_apellidos }}</td>
+                        <td>{{ $charge->resolucion?->dni }}</td>
+                        <td class="text-left">{{ Str::limit($charge->asunto, 80) }}</td>
                         <td>{{ $signatureCompletedLabel }}</td>
                         <td>
                             @if ($signatureImage)
-                                <img src="{{ $signatureImage }}" alt="Firma" style="height: 28px;">
+                                <img src="{{ $signatureImage }}" style="height: 25px;">
                             @else
-                                X
+                                ---
                             @endif
                         </td>
                     </tr>
@@ -297,18 +200,17 @@
                     <tr>
                         <td>{{ $charge->id }}</td>
                         <td>{{ $charge->n_charge }}</td>
-                        <td>{{ $charge->charge_period ?? 'N/A' }}</td>
-                        <td>{{ trim(($charge->user?->name ?? '') . ' ' . ($charge->user?->last_name ?? '')) ?: 'N/A' }}
-                        </td>
-                        <td>{{ $interesadoLabel }}</td>
-                        <td>{{ Str::limit($charge->asunto ?? '', 60) }}</td>
+                        <td>{{ $charge->charge_period }}</td>
+                        <td class="text-left text-capitalize">{{ strtolower($charge->user?->name . ' ' . $charge->user?->last_name) }}</td>
+                        <td class="text-left">{{ $charge->interesado_label }}</td>
+                        <td class="text-left">{{ Str::limit($charge->asunto, 80) }}</td>
                         <td>{{ ucfirst($charge->signature?->signature_status ?? 'pendiente') }}</td>
                         <td>{{ $signatureCompletedLabel }}</td>
                         <td>
                             @if ($signatureImage)
-                                <img src="{{ $signatureImage }}" alt="Firma" style="height: 28px;">
+                                <img src="{{ $signatureImage }}" style="height: 25px;">
                             @else
-                                X
+                                ---
                             @endif
                         </td>
                     </tr>
@@ -321,6 +223,4 @@
         Total de registros: {{ $charges->count() }}
     </div>
 </body>
-
 </html>
-

@@ -7,6 +7,29 @@ export const NaturalPeopleManagement = {
         this.setupDeleteModal();
         this.setupLookup();
         this.setupImport();
+        this.setupDocumentTypeToggle();
+    },
+
+    setupDocumentTypeToggle: function() {
+        const setup = (prefix, selectId, dniContainerId, cedulaContainerId) => {
+            const select = document.getElementById(selectId);
+            const dniContainer = document.getElementById(dniContainerId);
+            const cedulaContainer = document.getElementById(cedulaContainerId);
+
+            if (!select) return;
+
+            const toggle = () => {
+                const isDni = select.value === 'DNI';
+                if (dniContainer) dniContainer.classList.toggle('d-none', !isDni);
+                if (cedulaContainer) cedulaContainer.classList.toggle('d-none', isDni);
+            };
+
+            select.addEventListener('change', toggle);
+            toggle(); // Init
+        };
+
+        setup('create', 'create_doc_type', 'container_create_dni', 'container_create_cedula');
+        setup('edit', 'edit_doc_type', 'container_edit_dni_local', 'container_edit_cedula_local');
     },
 
     setupEditModal: function() {
@@ -19,11 +42,23 @@ export const NaturalPeopleManagement = {
             if (!btn) return;
 
             form.action = btn.dataset.action;
-            document.getElementById('edit_dni').value = btn.dataset.dni || '';
+            
+            const dni = btn.dataset.dni || '';
+            const cedula = btn.dataset.cedula || '';
+            
+            document.getElementById('edit_dni').value = dni;
+            document.getElementById('edit_cedula').value = cedula;
             document.getElementById('edit_nombres').value = btn.dataset.nombres || '';
             document.getElementById('edit_apellido_paterno').value = btn.dataset.apellidoPaterno || '';
             document.getElementById('edit_apellido_materno').value = btn.dataset.apellidoMaterno || '';
             
+            // Ajustar el tipo de documento en el select
+            const docTypeSelect = document.getElementById('edit_doc_type');
+            if (docTypeSelect) {
+                docTypeSelect.value = cedula ? 'CEDULA' : 'DNI';
+                docTypeSelect.dispatchEvent(new Event('change'));
+            }
+
             const bootstrapInstance = window.bootstrap || bootstrap;
             let modal = bootstrapInstance.Modal.getInstance(modalEl);
             if (!modal) {

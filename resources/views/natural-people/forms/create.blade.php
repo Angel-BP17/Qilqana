@@ -11,18 +11,38 @@
                 @csrf
                 <div class="modal-body p-4">
                     <div class="row g-3">
-                        <div class="col-12 col-md-6">
-                            <label for="dni" class="form-label fw-semibold">DNI</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0">
-                                    <span class="material-symbols-outlined">article</span>
-                                </span>
-                                <input type="text" class="form-control input-lookup-special border-start-0" id="dni" name="dni"
-                                    value="{{ old('dni') }}" minlength="8" maxlength="10" inputmode="numeric"
-                                    pattern="\d{8,10}" placeholder="Ingrese DNI">
-                                <button class="btn btn-lookup-special px-4" type="button" id="lookup_dni_btn">
-                                    <span class="material-symbols-outlined me-1">search</span> Buscar
-                                </button>
+                        <div class="col-12 col-md-4">
+                            <label for="create_doc_type" class="form-label fw-semibold">Tipo de Documento</label>
+                            <select class="form-select" id="create_doc_type" name="document_type">
+                                <option value="DNI" selected>DNI</option>
+                                <option value="CEDULA">CÉDULA</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-8">
+                            <div id="container_create_dni">
+                                <label for="dni" class="form-label fw-semibold">DNI</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <span class="material-symbols-outlined">article</span>
+                                    </span>
+                                    <input type="text" class="form-control input-lookup-special border-start-0" id="dni" name="dni"
+                                        value="{{ old('dni') }}" minlength="8" maxlength="10" inputmode="numeric"
+                                        pattern="\d{8,10}" placeholder="Ingrese DNI">
+                                    <button class="btn btn-lookup-special px-4" type="button" id="lookup_dni_btn">
+                                        <span class="material-symbols-outlined me-1">search</span> Buscar
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="container_create_cedula" class="d-none">
+                                <label for="cedula" class="form-label fw-semibold">CÉDULA</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <span class="material-symbols-outlined">identity_platform</span>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0" id="cedula" name="cedula"
+                                        value="{{ old('cedula') }}" placeholder="Ingrese CÉDULA">
+                                </div>
                             </div>
                         </div>
 

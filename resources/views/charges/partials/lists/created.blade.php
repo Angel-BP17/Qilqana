@@ -1,48 +1,41 @@
 <div class="tab-pane fade {{ ($active ?? false) ? 'show active' : '' }}" id="created-tab-pane" role="tabpanel" aria-labelledby="created-tab" tabindex="0">
     <div class="card border-0 shadow-sm mb-4">
-        <div class="card-header bg-info border-0 py-3">
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                <div class="d-flex align-items-center gap-2">
-                    <h5 class="mb-0 fw-bold text-white">Cargos creados</h5>
-                    <span class="badge bg-light text-dark">{{ $createdTotal }}</span>
-                </div>
-                <div class="d-flex flex-wrap gap-2 align-items-center">
-                    <div class="d-none d-md-flex gap-2 align-items-center">
-                        <form class="d-flex flex-wrap gap-2" action="{{ route('charges.index') }}" method="GET">
-                            <div class="col">
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0">
-                                        <span class="material-symbols-outlined text-muted">search</span>
-                                    </span>
-                                    <input type="text" class="form-control border-start-0" name="created_search"
-                                        placeholder="No de cargo, RUC, DNI..." value="{{ request('created_search') }}">
-                                </div>
-                            </div>
-                            <div class="col-2">
-                                <select name="created_period" class="form-select" onchange="this.form.submit()">
-                                    <option value="">Todos los periodos</option>
-                                    @foreach ($periodOptions ?? [] as $period)
-                                        <option value="{{ $period }}" @selected(($createdPeriod ?? request('created_period')) === $period)>
-                                            {{ $period }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-auto">
-                                <button class="btn btn-light" type="submit"><span class="material-symbols-outlined">filter_alt</span> Filtrar</button>
-                            </div>
-                        </form>
-                        <form action="{{ route('charges.reports.created') }}" method="GET">
-                            @if (request('created_search')) <input type="hidden" name="created_search" value="{{ request('created_search') }}"> @endif
-                            @if ($createdPeriod) <input type="hidden" name="created_period" value="{{ $createdPeriod }}"> @endif
-                            <button class="btn btn-light" type="submit">
-                                <span class="material-symbols-outlined me-1">picture_as_pdf</span> Reporte PDF
-                            </button>
-                        </form>
+        <x-card-header title="Cargos creados" :badge="$createdTotal" colSize="md">
+            <form class="d-flex flex-wrap gap-2 flex-grow-1 flex-md-grow-0 justify-content-md-end" action="{{ route('charges.index') }}" method="GET">
+                <div class="flex-grow-1" style="min-width: 200px; max-width: 350px;">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0">
+                            <span class="material-symbols-outlined text-muted">search</span>
+                        </span>
+                        <input type="text" class="form-control border-start-0" name="created_search"
+                            placeholder="No de cargo, RUC, DNI..." value="{{ request('created_search') }}">
                     </div>
                 </div>
-            </div>
-        </div>
+                <div style="width: 120px;">
+                    <select name="created_period" class="form-select" onchange="this.form.submit()">
+                        <option value="">Periodo</option>
+                        @foreach ($periodOptions ?? [] as $period)
+                            <option value="{{ $period }}" @selected(($createdPeriod ?? request('created_period')) === $period)>
+                                {{ $period }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <button class="btn btn-light" type="submit" title="Filtrar">
+                    <span class="material-symbols-outlined">filter_alt</span>
+                    <span class="d-md-none d-lg-inline">Filtrar</span>
+                </button>
+            </form>
+            <form action="{{ route('charges.reports.created') }}" method="GET" target="_blank" class="flex-grow-1 flex-md-grow-0">
+                @if (request('created_search')) <input type="hidden" name="created_search" value="{{ request('created_search') }}"> @endif
+                @if ($createdPeriod) <input type="hidden" name="created_period" value="{{ $createdPeriod }}"> @endif
+                <button class="btn btn-light w-100" type="submit" @disabled($createdCharges->isEmpty())>
+                    <span class="material-symbols-outlined me-1">picture_as_pdf</span>
+                    <span class="d-none d-sm-inline">Reporte PDF</span>
+                    <span class="d-sm-none">PDF</span>
+                </button>
+            </form>
+        </x-card-header>
 
         <div class="card-body p-0">
             {{-- VISTA MÓVIL --}}

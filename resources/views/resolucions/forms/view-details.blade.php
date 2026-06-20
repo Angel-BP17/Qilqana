@@ -17,28 +17,28 @@
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="text-muted small text-uppercase fw-bold d-block">Interesado</label>
-                                <span id="view_res_interesado" class="fw-semibold"></span>
+                                <p class="text-muted small text-uppercase fw-bold mb-1">Interesado</p>
+                                <span id="view_res_interesado" class="fw-semibold text-dark"></span>
                             </div>
                             <div class="col-md-6">
-                                <label class="text-muted small text-uppercase fw-bold d-block">DNI</label>
-                                <span id="view_res_dni"></span>
+                                <p class="text-muted small text-uppercase fw-bold mb-1">DNI</p>
+                                <span id="view_res_dni" class="text-dark"></span>
                             </div>
                             <div class="col-md-12">
-                                <label class="text-muted small text-uppercase fw-bold d-block">Asunto</label>
-                                <span id="view_res_asunto"></span>
+                                <p class="text-muted small text-uppercase fw-bold mb-1">Asunto</p>
+                                <span id="view_res_asunto" class="text-dark"></span>
                             </div>
                             <div class="col-md-4">
-                                <label class="text-muted small text-uppercase fw-bold d-block">Fecha</label>
-                                <span id="view_res_fecha"></span>
+                                <p class="text-muted small text-uppercase fw-bold mb-1">Fecha</p>
+                                <span id="view_res_fecha" class="text-dark"></span>
                             </div>
                             <div class="col-md-4">
-                                <label class="text-muted small text-uppercase fw-bold d-block">Periodo</label>
-                                <span id="view_res_periodo"></span>
+                                <p class="text-muted small text-uppercase fw-bold mb-1">Periodo</p>
+                                <span id="view_res_periodo" class="text-dark"></span>
                             </div>
                             <div class="col-md-4">
-                                <label class="text-muted small text-uppercase fw-bold d-block">Procedencia</label>
-                                <span id="view_res_procedencia"></span>
+                                <p class="text-muted small text-uppercase fw-bold mb-1">Procedencia</p>
+                                <span id="view_res_procedencia" class="text-dark"></span>
                             </div>
                         </div>
                     </div>
@@ -51,6 +51,24 @@
                             <span class="material-symbols-outlined me-2">receipt_long</span>
                             Información del Cargo Asociado
                         </h6>
+                    </div>
+
+                    {{-- Documento del Cargo --}}
+                    <div class="col-12" id="view_res_document_section" style="display:none;">
+                        <div class="card border-0 shadow-sm border-start border-primary border-4">
+                            <div class="card-body d-flex align-items-center justify-content-between py-3">
+                                <div class="d-flex align-items-center">
+                                    <span class="material-symbols-outlined text-primary fs-1 me-3">picture_as_pdf</span>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">Documento Adjunto</h6>
+                                        <small class="text-muted">Archivo PDF del cargo registrado</small>
+                                    </div>
+                                </div>
+                                <a id="view_res_document_link" href="#" target="_blank" class="btn btn-primary d-flex align-items-center">
+                                    <span class="material-symbols-outlined me-1">download</span> Ver / Descargar
+                                </a>
+                            </div>
+                        </div>
                     </div>
                     
                     {{-- Firma --}}
@@ -69,8 +87,11 @@
                     {{-- Evidencia --}}
                     <div class="col-md-6" id="view_res_evidence_section" style="display:none;">
                         <div class="card border-0 shadow-sm h-100">
-                            <div class="card-header bg-white py-3">
+                            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                                 <h6 class="mb-0 fw-bold text-warning">Evidencia Física</h6>
+                                <a id="view_res_map_link" href="#" target="_blank" class="btn btn-sm btn-outline-warning p-1 py-0 d-none" title="Ver ubicación en el mapa">
+                                    <span class="material-symbols-outlined fs-6">location_on</span>
+                                </a>
                             </div>
                             <div class="card-body text-center p-2">
                                 <div id="view_res_evidence_content" class="rounded overflow-hidden border"></div>

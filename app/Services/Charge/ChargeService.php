@@ -59,6 +59,14 @@ class ChargeService implements ChargeServiceInterface
             $user = $data['user'];
             $assignedTo = ($data['tipo_interesado'] === 'Trabajador UGEL') ? ($data['assigned_to'] ?? null) : $user->id;
 
+            $documentPath = null;
+            if (! empty($data['document_file'])) {
+                $documentPath = $data['document_file']->store('private/charges_documents', 'local');
+            }
+
+            // Si es Trabajador UGEL, el user_id del cargo (destinatario) es el assigned_to
+            $targetUserId = ($data['tipo_interesado'] === 'Trabajador UGEL') ? $assignedTo : null;
+
             $charge = Charge::create([
                 'n_charge' => $this->nextChargeNumberForUser($user->id, $this->getChargePeriod()),
                 'charge_period' => $this->getChargePeriod(),
@@ -68,7 +76,13 @@ class ChargeService implements ChargeServiceInterface
                 'natural_person_id' => $this->resolveNaturalPerson($data),
                 'legal_entity_id' => $this->resolveLegalEntity($data),
                 'asunto' => $data['asunto'],
+                'document_path' => $documentPath,
             ]);
+
+            // Vincular múltiples resoluciones
+            if (! empty($data['resolucion_ids'])) {
+                $charge->resolucions()->attach($data['resolucion_ids']);
+            }
 
             $charge->signature()->create([
                 'assigned_to' => $assignedTo,
@@ -99,11 +113,25 @@ class ChargeService implements ChargeServiceInterface
                 ]);
             }
 
+            $documentPath = $model->document_path;
+            if (! empty($data['document_file'])) {
+                if ($documentPath) {
+                    Storage::disk('local')->delete($documentPath);
+                }
+                $documentPath = $data['document_file']->store('private/charges_documents', 'local');
+            }
+
             $model->update([
                 'document_date' => $data['document_date'] ?? null,
                 'asunto' => $data['asunto'],
                 'tipo_interesado' => $data['tipo_interesado'],
+                'document_path' => $documentPath,
             ]);
+
+            // Sincronizar resoluciones
+            if (isset($data['resolucion_ids'])) {
+                $model->resolucions()->sync($data['resolucion_ids']);
+            }
 
             $this->syncInteresado($model, $data);
 
@@ -118,6 +146,10 @@ class ChargeService implements ChargeServiceInterface
             if ($model->signature) {
                 $this->imageService->deleteIfExists($model->signature->signature_root);
                 $this->imageService->deleteIfExists($model->signature->evidence_root);
+            }
+
+            if ($model->document_path) {
+                Storage::disk('local')->delete($model->document_path);
             }
 
             return (bool) $model->delete();
@@ -153,6 +185,7 @@ class ChargeService implements ChargeServiceInterface
                 'parentesco' => $isTitular ? null : ($data['parentesco'] ?? null),
                 'carta_poder_path' => $isTitular ? null : $cartaPoderPath,
                 'evidence_root' => $evidencePath,
+                'evidence_location' => ! empty($data['evidence_location']) ? json_decode($data['evidence_location'], true) : null,
             ]);
 
             return true;

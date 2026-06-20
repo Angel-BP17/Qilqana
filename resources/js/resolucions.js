@@ -1,11 +1,15 @@
 import { ResolucionsManagement } from './modules/resolucions/management';
 import { SignatureModule } from './modules/charges/signature';
 import { ResolucionViewerModule } from './modules/resolucions/viewer';
+import { FormModule } from './modules/charges/forms';
+import { LookupModule } from './modules/charges/lookup';
 
 export default {
     init: () => {
         ResolucionsManagement.init();
         ResolucionViewerModule.init();
+        FormModule.init();
+        LookupModule.init();
 
         const signForm = document.getElementById('signChargeForm');
         if (signForm) {

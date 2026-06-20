@@ -55,4 +55,48 @@ class ChargeServiceTest extends TestCase
         Storage::disk('local')->assertMissing('private/charges_signatures/test.svg');
         Storage::disk('local')->assertMissing('private/charges_evidence/test.jpg');
     }
+
+    /** @test */
+    public function it_stores_signature_with_evidence_location()
+    {
+        Storage::fake('local');
+
+        $charge = Charge::create([
+            'n_charge' => '2',
+            'user_id' => $this->user->id,
+            'asunto' => 'Cargo de prueba de firma',
+            'tipo_interesado' => 'Persona Natural',
+        ]);
+
+        $data = [
+            'firma' => '<svg>firma</svg>',
+            'titularidad' => '1',
+            'evidence_location' => json_encode([
+                'lat' => -12.046374,
+                'lng' => -77.031206,
+                'accuracy' => 15,
+                'timestamp' => '2026-06-19T06:30:00Z',
+            ]),
+        ];
+
+        $files = [];
+
+        $result = $this->service->signStore($data, $files, $charge->id, $this->user->id);
+
+        $this->assertTrue($result);
+
+        $this->assertDatabaseHas('signatures', [
+            'charge_id' => $charge->id,
+            'signature_status' => 'firmado',
+            'signed_by' => $this->user->id,
+        ]);
+
+        $signature = $charge->fresh()->signature;
+        $this->assertNotNull($signature);
+        $this->assertIsArray($signature->evidence_location);
+        $this->assertEquals(-12.046374, $signature->evidence_location['lat']);
+        $this->assertEquals(-77.031206, $signature->evidence_location['lng']);
+        $this->assertEquals(15, $signature->evidence_location['accuracy']);
+        $this->assertEquals('2026-06-19T06:30:00Z', $signature->evidence_location['timestamp']);
+    }
 }

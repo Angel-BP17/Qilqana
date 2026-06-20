@@ -4,11 +4,14 @@ namespace Tests\Feature\Charge;
 
 use App\Models\Charge;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ChargeFileServiceTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
      * Verifica que la ruta de firma sirve el contenido SVG correctamente.
      */

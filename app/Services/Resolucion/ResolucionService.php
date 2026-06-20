@@ -4,6 +4,7 @@ namespace App\Services\Resolucion;
 
 use App\Filters\ResolucionFilter;
 use App\Models\Charge;
+use App\Models\LegalEntity;
 use App\Models\NaturalPerson;
 use App\Models\Resolucion;
 use App\Services\Resolucion\Contracts\ResolucionServiceInterface;
@@ -48,40 +49,146 @@ class ResolucionService implements ResolucionServiceInterface
         );
     }
 
+    public function getFilterQuery(array $filters)
+    {
+        return $this->filter->applyFilters($filters);
+    }
+
     public function create(array $data): bool
     {
         try {
             $data['periodo'] = Carbon::parse($data['fecha'])->year;
+            $data['rd'] = mb_strtoupper(trim($data['rd'] ?? ''), 'UTF-8');
+
+            if (isset($data['procedencia'])) {
+                $data['procedencia'] = mb_strtoupper($data['procedencia'], 'UTF-8');
+            }
+            if (isset($data['asunto'])) {
+                $data['asunto'] = mb_strtoupper($data['asunto'], 'UTF-8');
+            }
 
             return DB::transaction(function () use ($data) {
-                // 1. Registrar o recuperar Persona Natural
-                $personId = null;
-                if (! empty($data['dni'])) {
-                    $person = NaturalPerson::updateOrCreate(
-                        ['dni' => $data['dni']],
-                        [
-                            'nombres' => $data['nombres'] ?? '',
-                            'apellido_paterno' => $data['apellido_paterno'] ?? '',
-                            'apellido_materno' => $data['apellido_materno'] ?? '',
-                        ]
-                    );
-                    $personId = $person->id;
+                // 1. Crear Resolución
+                $resolucion = Resolucion::create([
+                    'resolucion_type_id' => $data['resolucion_type_id'] ?? null,
+                    'asunto_type_id' => $data['asunto_type_id'] ?? null,
+                    'rd' => $data['rd'],
+                    'fecha' => $data['fecha'],
+                    'periodo' => $data['periodo'],
+                    'asunto' => $data['asunto'],
+                    'procedencia' => $data['procedencia'] ?? null,
+                    'user_id' => $data['user_id'],
+                ]);
+
+                // 2. Vincular/Registrar Interesados
+                if (! empty($data['interesados'])) {
+                    foreach ($data['interesados'] as $item) {
+                        $this->processAndAttachInteresado($resolucion, $item);
+                    }
                 }
 
-                // 2. Concatenar para la tabla resolucions (compatibilidad)
-                if (! isset($data['nombres_apellidos'])) {
-                    $data['nombres_apellidos'] = trim(
-                        ($data['nombres'] ?? '').' '.
-                        ($data['apellido_paterno'] ?? '').' '.
-                        ($data['apellido_materno'] ?? '')
-                    );
+                // 3. Sincronizar campos de texto (Denormalización)
+                $resolucion->syncInteresadosData();
+
+                return true;
+            });
+        } catch (\Throwable $th) {
+            report($th);
+
+            return false;
+        }
+    }
+
+    /**
+     * Procesa los datos de un interesado, creándolo si es necesario, y lo vincula a la resolución.
+     */
+    private function processAndAttachInteresado(Resolucion $resolucion, array $item): void
+    {
+        $id = $item['id'] ?? null;
+        $type = $item['type'];
+
+        // Si es una Persona Natural (nueva o existente)
+        if ($type === 'NaturalPerson' || $type === 'Persona Natural') {
+            if (! $id) {
+                $person = NaturalPerson::updateOrCreate(
+                    ['dni' => $item['dni'] ?? null, 'cedula' => $item['cedula'] ?? null],
+                    [
+                        'nombres' => mb_strtoupper($item['nombres'] ?? '', 'UTF-8'),
+                        'apellido_paterno' => mb_strtoupper($item['apellido_paterno'] ?? '', 'UTF-8'),
+                        'apellido_materno' => mb_strtoupper($item['apellido_materno'] ?? '', 'UTF-8'),
+                    ]
+                );
+                $id = $person->id;
+            }
+            $resolucion->naturalPeople()->syncWithoutDetaching([$id]);
+        }
+
+        // Si es una Persona Juridica (nueva o existente)
+        elseif ($type === 'LegalEntity' || $type === 'Persona Juridica') {
+            if (! $id) {
+                $entity = LegalEntity::updateOrCreate(
+                    ['ruc' => $item['ruc'] ?? null],
+                    [
+                        'razon_social' => mb_strtoupper($item['razon_social'] ?? '', 'UTF-8'),
+                        'district' => mb_strtoupper($item['district'] ?? '', 'UTF-8'),
+                    ]
+                );
+                $id = $entity->id;
+            }
+            $resolucion->legalEntities()->syncWithoutDetaching([$id]);
+        }
+
+        // Si es un Trabajador UGEL (Siempre existente)
+        elseif ($type === 'User' || $type === 'Trabajador UGEL') {
+            if ($id) {
+                $resolucion->users()->syncWithoutDetaching([$id]);
+            }
+        }
+    }
+
+    public function update(array $data, int $id): bool
+    {
+        try {
+            $resolucion = Resolucion::findOrFail($id);
+
+            if (isset($data['fecha'])) {
+                $data['periodo'] = Carbon::parse($data['fecha'])->year;
+            }
+            if (isset($data['rd'])) {
+                $data['rd'] = mb_strtoupper(trim($data['rd']), 'UTF-8');
+            }
+            if (isset($data['procedencia'])) {
+                $data['procedencia'] = mb_strtoupper($data['procedencia'], 'UTF-8');
+            }
+            if (isset($data['asunto'])) {
+                $data['asunto'] = mb_strtoupper($data['asunto'], 'UTF-8');
+            }
+
+            return DB::transaction(function () use ($data, $resolucion) {
+                // 1. Actualizar campos base
+                $resolucion->update([
+                    'resolucion_type_id' => $data['resolucion_type_id'] ?? $resolucion->resolucion_type_id,
+                    'asunto_type_id' => $data['asunto_type_id'] ?? $resolucion->asunto_type_id,
+                    'rd' => $data['rd'] ?? $resolucion->rd,
+                    'fecha' => $data['fecha'] ?? $resolucion->fecha,
+                    'periodo' => $data['periodo'] ?? $resolucion->periodo,
+                    'asunto' => $data['asunto'] ?? $resolucion->asunto,
+                    'procedencia' => $data['procedencia'] ?? $resolucion->procedencia,
+                ]);
+
+                // 2. Sincronizar Interesados (Si se envían)
+                if (isset($data['interesados'])) {
+                    $resolucion->naturalPeople()->detach();
+                    $resolucion->legalEntities()->detach();
+                    $resolucion->users()->detach();
+
+                    foreach ($data['interesados'] as $item) {
+                        $this->processAndAttachInteresado($resolucion, $item);
+                    }
                 }
 
-                // 3. Crear Resolución
-                $resolucion = Resolucion::create($data);
-
-                // 4. Crear Cargo vinculado a la persona
-                $this->persistChargeRecord($resolucion, $data['user_id'], $personId);
+                // 3. Sincronizar campos de texto
+                $resolucion->syncInteresadosData();
 
                 return true;
             });
@@ -95,56 +202,53 @@ class ResolucionService implements ResolucionServiceInterface
     public function generateChargeForResolucion($id, $user): bool
     {
         try {
-            $resolucion = Resolucion::findOrFail($id);
-            if ($resolucion->charge) {
+            $resolucion = Resolucion::with(['naturalPeople', 'legalEntities', 'users'])->findOrFail($id);
+            if ($resolucion->charges()->exists()) {
                 return true;
             }
 
             return DB::transaction(function () use ($resolucion, $user) {
-                // Buscar a la persona por el DNI registrado en la resolución
-                $person = NaturalPerson::where('dni', $resolucion->dni)->first();
+                $naturalPersonId = null;
+                $legalEntityId = null;
+                $assignedTo = $user->id;
+                $tipoInteresado = 'Persona Natural';
 
-                $this->persistChargeRecord($resolucion, $user->id, $person?->id);
+                $firstNatural = $resolucion->naturalPeople->first();
+                $firstLegal = $resolucion->legalEntities->first();
+                $firstUser = $resolucion->users->first();
+
+                if ($firstUser) {
+                    $assignedTo = $firstUser->id;
+                    $tipoInteresado = 'Trabajador UGEL';
+                } elseif ($firstLegal) {
+                    $legalEntityId = $firstLegal->id;
+                    $tipoInteresado = 'Persona Juridica';
+                } elseif ($firstNatural) {
+                    $naturalPersonId = $firstNatural->id;
+                    $tipoInteresado = 'Persona Natural';
+                }
+
+                $charge = Charge::create([
+                    'n_charge' => $this->nextChargeNumberForUser($user->id),
+                    'charge_period' => $this->getChargePeriod(),
+                    'document_date' => $resolucion->fecha,
+                    'user_id' => $user->id,
+                    'tipo_interesado' => $tipoInteresado,
+                    'natural_person_id' => $naturalPersonId,
+                    'legal_entity_id' => $legalEntityId,
+                    'asunto' => $resolucion->asunto,
+                ]);
+
+                $charge->resolucions()->attach($resolucion->id);
+
+                $charge->signature()->create([
+                    'assigned_to' => $assignedTo,
+                    'signature_status' => 'pendiente',
+                    'signature_requested_at' => now(),
+                ]);
 
                 return true;
             });
-        } catch (\Throwable $th) {
-            report($th);
-
-            return false;
-        }
-    }
-
-    public function update(array $data, int $id): bool
-    {
-        try {
-            $model = Resolucion::findOrFail($id);
-            if (isset($data['fecha'])) {
-                $data['periodo'] = Carbon::parse($data['fecha'])->year;
-            }
-
-            // Actualizar o crear Persona Natural si viene DNI
-            if (! empty($data['dni'])) {
-                NaturalPerson::updateOrCreate(
-                    ['dni' => $data['dni']],
-                    [
-                        'nombres' => $data['nombres'] ?? '',
-                        'apellido_paterno' => $data['apellido_paterno'] ?? '',
-                        'apellido_materno' => $data['apellido_materno'] ?? '',
-                    ]
-                );
-            }
-
-            // Concatenar si vienen los campos segregados
-            if (isset($data['nombres'])) {
-                $data['nombres_apellidos'] = trim(
-                    ($data['nombres'] ?? '').' '.
-                    ($data['apellido_paterno'] ?? '').' '.
-                    ($data['apellido_materno'] ?? '')
-                );
-            }
-
-            return (bool) $model->update($data);
         } catch (\Throwable $th) {
             report($th);
 
@@ -165,26 +269,6 @@ class ResolucionService implements ResolucionServiceInterface
         }
     }
 
-    private function persistChargeRecord(Resolucion $resolucion, int $userId, ?int $naturalPersonId = null): void
-    {
-        $charge = Charge::create([
-            'n_charge' => $this->nextChargeNumberForUser($userId),
-            'charge_period' => $this->getChargePeriod(),
-            'document_date' => $resolucion->fecha,
-            'user_id' => $userId,
-            'resolucion_id' => $resolucion->id,
-            'natural_person_id' => $naturalPersonId, // Vínculo crítico corregido
-            'asunto' => $resolucion->asunto,
-            'tipo_interesado' => 'Persona Natural',
-        ]);
-
-        $charge->signature()->create([
-            'assigned_to' => $userId,
-            'signature_status' => 'pendiente',
-            'signature_requested_at' => now(),
-        ]);
-    }
-
     private function getStats(?string $chargePeriod): array
     {
         if (! $chargePeriod) {
@@ -193,7 +277,7 @@ class ResolucionService implements ResolucionServiceInterface
 
         return [
             'totalResolucionesPeriodo' => Resolucion::where('periodo', $chargePeriod)->count(),
-            'pendientesResolucionesPeriodo' => Charge::whereNotNull('resolucion_id')
+            'pendientesResolucionesPeriodo' => Charge::whereHas('resolucions', fn ($q) => $q->where('periodo', $chargePeriod))
                 ->where('charge_period', $chargePeriod)
                 ->whereHas('signature', fn ($q) => $q->where('signature_status', 'pendiente'))
                 ->count(),

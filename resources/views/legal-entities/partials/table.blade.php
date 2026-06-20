@@ -5,22 +5,28 @@
 @endphp
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-info border-0 py-3 px-4">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-            <h5 class="mb-0 fw-bold text-white">
-                <span class="material-symbols-outlined me-2">corporate_fare</span>Personas jurídicas
-            </h5>
-            <form action="{{ route('legal-entities.index') }}" method="GET" class="d-flex gap-2 w-100 w-md-auto">
-                <div class="input-group input-group-sm flex-grow-1">
-                    <span class="input-group-text bg-white border-end-0 input-lookup-special">
-                        <span class="material-symbols-outlined text-muted">search</span>
-                    </span>
-                    <input type="text" name="search" class="form-control border-start-0 ps-0 input-lookup-special" 
-                        placeholder="Buscar por RUC o razón social..." value="{{ request('search') }}" style="min-width: 300px;">
-                </div>
-                <button type="submit" class="btn btn-lookup-special btn-sm px-4">
-                    <span class="material-symbols-outlined me-1">search</span> Buscar
-                </button>
-            </form>
+        <div class="row g-3 align-items-center">
+            <div class="col-12 col-md-auto">
+                <h5 class="mb-0 fw-bold text-white">
+                    <span class="material-symbols-outlined me-2">corporate_fare</span>Personas jurídicas
+                </h5>
+            </div>
+            <div class="col-12 col-md text-end">
+                <form action="{{ route('legal-entities.index') }}" method="GET" class="d-flex flex-wrap gap-2 justify-content-md-end">
+                    <div class="flex-grow-1" style="max-width: 400px; min-width: 200px;">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-white border-end-0">
+                                <span class="material-symbols-outlined text-muted">search</span>
+                            </span>
+                            <input type="text" name="search" class="form-control border-start-0 ps-0" 
+                                placeholder="RUC o razón social..." value="{{ request('search') }}">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-lookup-special btn-sm px-4">
+                        <span class="material-symbols-outlined me-1">search</span> Buscar
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
     <div class="card-body p-0">

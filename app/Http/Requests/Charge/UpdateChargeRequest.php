@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Charge;
 
+use App\Models\Setting;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -36,6 +37,12 @@ class UpdateChargeRequest extends FormRequest
             'apellido_paterno' => ['required_if:tipo_interesado,Persona Natural,Trabajador UGEL', 'nullable', 'string', 'max:255'],
             'apellido_materno' => ['required_if:tipo_interesado,Persona Natural,Trabajador UGEL', 'nullable', 'string', 'max:255'],
             'asunto' => ['required', 'string', 'max:255'],
+            'document_file' => [
+                'nullable',
+                'file',
+                'mimes:pdf',
+                'max:'.((int) Setting::getValue('charges_max_file_size', '5') * 1024),
+            ],
             'document_date' => ['nullable', 'date'],
             'assigned_to' => ['required_if:tipo_interesado,Trabajador UGEL', 'nullable', Rule::exists('users', 'id')],
             'representative_dni' => ['nullable', 'string', 'max:10'],

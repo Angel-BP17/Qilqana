@@ -34,7 +34,7 @@ export const ResolucionViewerModule = {
         const chargeInfo = document.getElementById('view_res_charge_info');
         const noChargeAlert = document.getElementById('view_res_no_charge_alert');
 
-        if (d.hasCharge === '1' && (d.hasSignature === '1' || d.hasEvidence === '1')) {
+        if (d.hasCharge === '1' && (d.hasSignature === '1' || d.hasEvidence === '1' || d.hasDocument === '1')) {
             chargeInfo.style.display = 'flex';
             noChargeAlert.style.display = 'none';
             this.handleChargeSections(d);
@@ -47,6 +47,16 @@ export const ResolucionViewerModule = {
     },
 
     handleChargeSections: function(d) {
+        // Documento del Cargo
+        const docSection = document.getElementById('view_res_document_section');
+        const docLink = document.getElementById('view_res_document_link');
+        if (d.hasDocument === '1') {
+            docSection.style.display = 'block';
+            docLink.href = d.documentUrl;
+        } else {
+            docSection.style.display = 'none';
+        }
+
         // Reutilizamos la lógica de carga del ViewerModule de cargos
         const sigSection = document.getElementById('view_res_signature_section');
         const sigContent = document.getElementById('view_res_signature_content');
@@ -63,9 +73,25 @@ export const ResolucionViewerModule = {
 
         const evSection = document.getElementById('view_res_evidence_section');
         const evContent = document.getElementById('view_res_evidence_content');
+        const mapLink = document.getElementById('view_res_map_link');
+
         if (d.hasEvidence === '1') {
             evSection.style.display = 'block';
             SharedViewer.load(d.evidenceUrl, evContent, false);
+
+            if (d.evidenceLocation && d.evidenceLocation !== 'null') {
+                try {
+                    const loc = typeof d.evidenceLocation === 'string' ? JSON.parse(d.evidenceLocation) : d.evidenceLocation;
+                    if (loc && loc.lat && loc.lng) {
+                        mapLink.href = `https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lng}`;
+                        mapLink.classList.remove('d-none');
+                    } else {
+                        mapLink.classList.add('d-none');
+                    }
+                } catch (e) { mapLink.classList.add('d-none'); }
+            } else {
+                mapLink.classList.add('d-none');
+            }
         } else {
             evSection.style.display = 'none';
         }

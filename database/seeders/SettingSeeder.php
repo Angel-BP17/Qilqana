@@ -14,5 +14,6 @@ class SettingSeeder extends Seeder
     {
         Setting::setValue('charge_period', '2026');
         Setting::setValue('charges_refresh_interval', '5');
+        Setting::setValue('charges_max_file_size', '5');
     }
 }

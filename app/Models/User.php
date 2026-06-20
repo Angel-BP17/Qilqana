@@ -43,4 +43,14 @@ class User extends Authenticatable
     protected $casts = [
         'password' => 'hashed',
     ];
+
+    public function naturalPerson()
+    {
+        return $this->belongsTo(NaturalPerson::class, 'dni', 'dni');
+    }
+
+    public function resolucions()
+    {
+        return $this->morphToMany(Resolucion::class, 'interesado', 'resolucion_interesados');
+    }
 }

@@ -60,8 +60,8 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="signature-pad-container border border-primary-subtle rounded p-2 bg-light">
-                            <canvas id="signature-pad" class="signature-pad w-100" style="height: 240px;"></canvas>
+                        <div class="signature-pad-container border border-primary-subtle rounded p-2 bg-light" style="overflow: hidden; position: relative;">
+                            <canvas id="signature-pad" class="signature-pad w-100" style="height: 240px; touch-action: none;"></canvas>
                         </div>
                         <div class="form-text mt-2">
                             Dibuje la firma y confirme para marcar el cargo como firmado.
@@ -71,7 +71,8 @@
                         <label for="sign_evidence_root" class="form-label">Evidencia (opcional)</label>
                         <input type="file" class="form-control" id="sign_evidence_root" name="evidence_root"
                             accept=".jpg,.jpeg,.png">
-                        <div class="form-text">Adjunte una foto de la evidencia (JPG o PNG).</div>
+                        <input type="hidden" name="evidence_location" id="sign_evidence_location">
+                        <div class="form-text">Adjunte una foto de la evidencia (JPG o PNG). Intentaremos registrar su ubicación para auditoría.</div>
                     </div>
                     <div class="signature-preview" id="signaturePreviewContainer" style="display:none;">
                         <p class="mb-2 text-muted">Vista previa de la firma:</p>

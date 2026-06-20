@@ -12,25 +12,7 @@
             </div>
         </div>
 
-        @if (session('success'))
-            <div class="alert alert-success shadow-sm">
-                {{ session('success') }}
-            </div>
-        @endif
-        @if (session('error'))
-            <div class="alert alert-danger shadow-sm">
-                {{ session('error') }}
-            </div>
-        @endif
-        @if ($errors->any())
-            <div class="alert alert-danger shadow-sm">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+
 
         <div class="row g-3">
             <div class="col-lg-6">
@@ -56,6 +38,12 @@
                                     value="{{ old('charge_period', $chargePeriod) }}" maxlength="4" inputmode="numeric"
                                     pattern="\d{4}" placeholder="YYYY">
                                 <div class="form-text">La numeración de cargos se reinicia por periodo.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="max_file_size" class="form-label">Tamaño máximo de archivos (MB)</label>
+                                <input type="number" class="form-control" id="max_file_size" name="max_file_size"
+                                    min="1" max="100" value="{{ old('max_file_size', $maxFileSize) }}" required>
+                                <div class="form-text">Límite máximo permitido para la subida de documentos y evidencias.</div>
                             </div>
                             <button type="submit" class="btn btn-success">Guardar configuración</button>
                         </form>

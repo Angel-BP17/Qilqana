@@ -74,7 +74,6 @@ class UserSeeder extends Seeder
                 'modulo cargos',
             ],
             'REGISTRADOR' => [
-                'modulo resoluciones',
                 'modulo cargos',
             ],
             'LECTOR' => [

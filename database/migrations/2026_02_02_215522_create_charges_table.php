@@ -22,7 +22,7 @@ return new class extends Migration
 
             // Interesado relacionado al cargo
             $table->enum('tipo_interesado', ['Persona Juridica', 'Persona Natural', 'Trabajador UGEL']);
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('natural_person_id')->nullable()->constrained('natural_people')->nullOnDelete();
             $table->foreignId('legal_entity_id')->nullable()->constrained('legal_entities')->nullOnDelete();
 

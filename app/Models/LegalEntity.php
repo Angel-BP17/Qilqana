@@ -28,6 +28,11 @@ class LegalEntity extends Model
         return $this->hasMany(Charge::class);
     }
 
+    public function resolucions()
+    {
+        return $this->morphToMany(Resolucion::class, 'interesado', 'resolucion_interesados');
+    }
+
     public function representative()
     {
         return $this->belongsTo(Representative::class);

@@ -93,6 +93,13 @@ export const DashboardModule = {
                     }
                 }
 
+                // Llenar resoluciones vinculadas (Select2)
+                const resSelect = $('#edit_resolucion_ids');
+                if (resSelect.length && charge.resolucions) {
+                    const ids = charge.resolucions.map(r => r.id);
+                    resSelect.val(ids).trigger('change');
+                }
+
                 document.getElementById('edit_tipo_interesado').dispatchEvent(new Event('change'));
                 
                 const modalEl = document.getElementById('editChargeModal');

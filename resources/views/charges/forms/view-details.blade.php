@@ -17,34 +17,52 @@
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="text-muted small text-uppercase fw-bold d-block">Interesado</label>
-                                <span id="view_charge_interesado" class="fw-semibold"></span>
+                                <p class="text-muted small text-uppercase fw-bold mb-1">Interesado</p>
+                                <span id="view_charge_interesado" class="fw-semibold text-dark"></span>
                             </div>
                             <div class="col-md-6">
-                                <label class="text-muted small text-uppercase fw-bold d-block">Tipo</label>
+                                <p class="text-muted small text-uppercase fw-bold mb-1">Tipo</p>
                                 <span id="view_charge_tipo" class="badge bg-info-subtle text-info border border-info-subtle"></span>
                             </div>
                             <div class="col-md-6">
-                                <label class="text-muted small text-uppercase fw-bold d-block">Asunto</label>
-                                <span id="view_charge_asunto"></span>
+                                <p class="text-muted small text-uppercase fw-bold mb-1">Asunto</p>
+                                <span id="view_charge_asunto" class="text-dark"></span>
                             </div>
                             <div class="col-md-6">
-                                <label class="text-muted small text-uppercase fw-bold d-block">Fecha del Documento</label>
-                                <span id="view_charge_fecha"></span>
+                                <p class="text-muted small text-uppercase fw-bold mb-1">Fecha del Documento</p>
+                                <span id="view_charge_fecha" class="text-dark"></span>
                             </div>
                             <div class="col-md-6">
-                                <label class="text-muted small text-uppercase fw-bold d-block">Registrado por</label>
-                                <span id="view_charge_user"></span>
+                                <p class="text-muted small text-uppercase fw-bold mb-1">Registrado por</p>
+                                <span id="view_charge_user" class="text-dark"></span>
                             </div>
                             <div class="col-md-6">
-                                <label class="text-muted small text-uppercase fw-bold d-block">Estado de Firma</label>
-                                <span id="view_charge_status"></span>
+                                <p class="text-muted small text-uppercase fw-bold mb-1">Estado de Firma</p>
+                                <span id="view_charge_status" class="text-dark"></span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="row g-4">
+                    {{-- Documento del Cargo --}}
+                    <div class="col-12" id="view_charge_document_section" style="display:none;">
+                        <div class="card border-0 shadow-sm border-start border-primary border-4">
+                            <div class="card-body d-flex align-items-center justify-content-between py-3">
+                                <div class="d-flex align-items-center">
+                                    <span class="material-symbols-outlined text-primary fs-1 me-3">picture_as_pdf</span>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">Documento Adjunto</h6>
+                                        <small class="text-muted">Archivo PDF del cargo registrado</small>
+                                    </div>
+                                </div>
+                                <a id="view_charge_document_link" href="#" target="_blank" class="btn btn-primary d-flex align-items-center">
+                                    <span class="material-symbols-outlined me-1">download</span> Ver / Descargar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                     {{-- Firma --}}
                     <div class="col-12" id="view_charge_signature_section" style="display:none;">
                         <div class="card border-0 shadow-sm">
@@ -61,11 +79,20 @@
                     {{-- Evidencia --}}
                     <div class="col-md-6" id="view_charge_evidence_section" style="display:none;">
                         <div class="card border-0 shadow-sm h-100">
-                            <div class="card-header bg-white py-3">
+                            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                                 <h6 class="mb-0 fw-bold text-warning">Evidencia Física</h6>
+                                <div class="d-flex gap-1">
+                                    <button id="btn_toggle_map" class="btn btn-sm btn-outline-warning p-1 py-0 d-none" title="Ver ubicación en mapa">
+                                        <span class="material-symbols-outlined fs-6">map</span>
+                                    </button>
+                                    <a id="view_charge_map_link" href="#" target="_blank" class="btn btn-sm btn-outline-warning p-1 py-0 d-none" title="Abrir en Google Maps">
+                                        <span class="material-symbols-outlined fs-6">open_in_new</span>
+                                    </a>
+                                </div>
                             </div>
-                            <div class="card-body text-center p-2">
-                                <div id="view_charge_evidence_content" class="rounded overflow-hidden border"></div>
+                            <div class="card-body p-2">
+                                <div id="view_charge_evidence_content" class="rounded overflow-hidden border text-center mb-2"></div>
+                                <div id="view_charge_map_container" class="rounded border d-none" style="height: 200px; width: 100%;"></div>
                             </div>
                         </div>
                     </div>

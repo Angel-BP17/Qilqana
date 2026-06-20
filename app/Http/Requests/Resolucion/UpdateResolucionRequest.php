@@ -25,20 +25,28 @@ class UpdateResolucionRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'resolucion_type_id' => 'required|exists:resolucion_types,id',
+            'asunto_type_id' => [
+                'nullable',
+                Rule::exists('asunto_type_resolucion_type', 'asunto_type_id')
+                    ->where('resolucion_type_id', $this->resolucion_type_id),
+            ],
             'rd' => [
                 'required',
                 'string',
                 Rule::unique('resolucions')->where(function ($query) {
-                    return $query->where('periodo', Carbon::parse($this->fecha)->year);
-                })->ignore($this->resolucion),
+                    return $query->where('periodo', Carbon::parse($this->fecha)->year)
+                        ->where('resolucion_type_id', $this->resolucion_type_id);
+                })->ignore($this->route('resolucion')),
             ],
             'fecha' => 'required|date',
-            'asunto' => 'required|string|max:255',
-            'nombres' => 'required|string|max:255',
-            'apellido_paterno' => 'required|string|max:255',
-            'apellido_materno' => 'required|string|max:255',
-            'dni' => 'required|string|min:8|max:10|regex:/^\d{8,10}$/',
+            'asunto' => 'required|string',
             'procedencia' => 'nullable|string|max:255',
+
+            // Múltiples Interesados
+            'interesados' => 'nullable|array',
+            'interesados.*.id' => 'required_with:interesados|integer',
+            'interesados.*.type' => 'required_with:interesados|string|in:NaturalPerson,LegalEntity,User,Persona Natural,Persona Juridica,Trabajador UGEL',
         ];
     }
 }

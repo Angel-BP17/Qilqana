@@ -8,9 +8,9 @@ class ChargeFilter
 {
     public function getAllSentCharges($searchfilters, $user)
     {
-        return Charge::with(['user', 'naturalPerson', 'legalEntity.representative.naturalPerson', 'signature', 'signature.signer', 'signature.assignedTo', 'resolucion'])
+        return Charge::with(['user', 'naturalPerson', 'legalEntity.representative.naturalPerson', 'signature', 'signature.signer', 'signature.assignedTo', 'resolucions'])
             ->where('user_id', $user?->id)
-            ->whereNull('resolucion_id')
+            ->whereDoesntHave('resolucions')
             ->when($searchfilters['period'], function ($q, $period) {
                 $q->where(function ($q2) use ($period) {
                     $q2->where('charge_period', $period)->orWhereNull('charge_period');
@@ -40,9 +40,9 @@ class ChargeFilter
             'signature',
             'signature.signer',
             'signature.assignedTo',
-            'resolucion',
+            'resolucions',
         ])
-            ->whereNull('resolucion_id')
+            ->whereDoesntHave('resolucions')
             ->whereHas('signature', fn ($q) => $q->where('assigned_to', $user?->id))
             ->whereNotIn('tipo_interesado', ['Persona Juridica', 'Persona Natural'])
             ->when($searchfilters['period'], function ($q, $period) {
@@ -74,9 +74,9 @@ class ChargeFilter
 
     public function getAllCreatedCharges($searchfilters, $user)
     {
-        return Charge::with(['user', 'naturalPerson', 'legalEntity.representative.naturalPerson', 'signature', 'signature.signer', 'signature.assignedTo', 'resolucion'])
+        return Charge::with(['user', 'naturalPerson', 'legalEntity.representative.naturalPerson', 'signature', 'signature.signer', 'signature.assignedTo', 'resolucions'])
             ->where('user_id', $user?->id)
-            ->whereNull('resolucion_id')
+            ->whereDoesntHave('resolucions')
             ->whereIn('tipo_interesado', ['Persona Juridica', 'Persona Natural'])
             ->when($searchfilters['period'], function ($q, $period) {
                 $q->where(function ($q2) use ($period) {
@@ -100,8 +100,8 @@ class ChargeFilter
 
     public function getAllResolutionCharges($searchfilters, $user)
     {
-        return Charge::with(['user', 'naturalPerson', 'legalEntity.representative.naturalPerson', 'signature', 'signature.signer', 'signature.assignedTo', 'resolucion'])
-            ->whereNotNull('resolucion_id')
+        return Charge::with(['user', 'naturalPerson', 'legalEntity.representative.naturalPerson', 'signature', 'signature.signer', 'signature.assignedTo', 'resolucions'])
+            ->whereHas('resolucions')
             ->when($searchfilters['period'], function ($q, $period) {
                 $q->where(function ($q2) use ($period) {
                     $q2->where('charge_period', $period)

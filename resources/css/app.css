@@ -88,6 +88,107 @@
     box-shadow: 0 0 8px rgba(47, 69, 151, 0.4);
 }
 
+/* Ajuste para Select2 dentro de Input Groups (Ancho completo) */
+.input-group > .select2-container--bootstrap-5 {
+    flex: 1 1 auto !important;
+    width: 1% !important;
+}
+
+.input-group > .select2-container--bootstrap-5 .select2-selection {
+    border-top-left-radius: 0 !important;
+    border-bottom-left-radius: 0 !important;
+}
+
+/* --- ESTILOS PARA SELECT2 PERSONALIZADOS (Diseño Interactivo) --- */
+.select2-container--bootstrap-5 .select2-selection--multiple,
+.select2-container--bootstrap-5 .select2-selection--single {
+    border: 1.5px solid #dee2e6 !important;
+    min-height: 48px !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease-in-out !important;
+    cursor: pointer !important;
+    background-color: #ffffff !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.select2-container--bootstrap-5 .select2-selection--multiple {
+    padding: 4px 8px !important;
+}
+
+.select2-container--bootstrap-5 .select2-selection--single {
+    padding: 0 12px !important;
+}
+
+/* Estado habilitado (Invitar al click) */
+.select2-container--bootstrap-5:not(.select2-container--disabled) .select2-selection--multiple:hover,
+.select2-container--bootstrap-5:not(.select2-container--disabled) .select2-selection--single:hover {
+    border-color: #2F4597 !important;
+    background-color: #f8faff !important;
+    box-shadow: 0 0 0 0.25rem rgba(47, 69, 151, 0.1) !important;
+}
+
+/* Ajuste para el texto en selección única */
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+    color: #212529 !important;
+    padding: 0 !important;
+    font-weight: 500 !important;
+}
+
+/* Indicador de flecha en selección única */
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__arrow {
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    right: 10px !important;
+}
+
+/* Cuando está vacío, mostrar que es una zona de entrada */
+.select2-container--bootstrap-5 .select2-selection--multiple .select2-search__field::placeholder,
+.select2-container--bootstrap-5 .select2-selection--single .select2-selection__placeholder {
+    color: #6c757d !important;
+    font-weight: 500 !important;
+}
+
+/* Estado Deshabilitado (Más oscuro para contraste) */
+.select2-container--bootstrap-5.select2-container--disabled .select2-selection--multiple,
+.select2-container--bootstrap-5.select2-container--disabled .select2-selection--single {
+    background-color: #e9ecef !important;
+    cursor: not-allowed !important;
+    opacity: 0.8 !important;
+    border-color: #dee2e6 !important;
+}
+
+/* Estilo de las burbujas seleccionadas (solo múltiple) */
+.select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice {
+    background-color: #2F4597 !important;
+    border: none !important;
+    color: #ffffff !important;
+    font-size: 0.85rem !important;
+    border-radius: 6px !important;
+    padding: 3px 12px !important;
+    margin: 3px 4px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    box-shadow: 0 2px 4px rgba(47, 69, 151, 0.2) !important;
+}
+
+.select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice__remove {
+    color: rgba(255, 255, 255, 0.8) !important;
+    border-right: none !important;
+    margin-right: 8px !important;
+    order: -1 !important; /* X al principio */
+}
+
+.select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice__remove:hover {
+    color: #ffffff !important;
+}
+
+.select2-dropdown {
+    border: 1px solid #2F4597 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
 /* Estilos personalizados existentes */
 .custom-auth-container {
   background-color: #2F4597; /* $primary */

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Charge;
 
+use App\Models\Setting;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -36,12 +37,15 @@ class SignChargeRequest extends FormRequest
         $requiresPoder = ! $this->boolean('titularidad')
             && in_array($charge?->tipo_interesado, ['Persona Juridica', 'Persona Natural'], true);
 
+        $maxFileSizeKb = (int) Setting::getValue('charges_max_file_size', '5') * 1024;
+
         return [
             'firma' => ['required', 'string'],
             'titularidad' => ['nullable', 'boolean'],
             'parentesco' => [Rule::requiredIf($requiresPoder), 'nullable', 'string', 'max:255'],
-            'carta_poder' => [Rule::requiredIf($requiresPoder), 'nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
-            'evidence_root' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:5120'],
+            'carta_poder' => [Rule::requiredIf($requiresPoder), 'nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:'.$maxFileSizeKb],
+            'evidence_root' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:'.$maxFileSizeKb],
+            'evidence_location' => ['nullable', 'json'],
         ];
     }
 

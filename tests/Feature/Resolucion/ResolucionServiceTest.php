@@ -27,7 +27,7 @@ class ResolucionServiceTest extends TestCase
     }
 
     /** @test */
-    public function it_creates_a_resolucion_and_associated_charge()
+    public function it_creates_a_resolucion_without_automatic_charge()
     {
         $data = [
             'rd' => 'RD-001-2026',
@@ -42,10 +42,14 @@ class ResolucionServiceTest extends TestCase
 
         $this->assertTrue($result);
         $this->assertDatabaseHas('resolucions', ['rd' => 'RD-001-2026']);
-        $this->assertDatabaseHas('charges', [
-            'resolucion_id' => Resolucion::where('rd', 'RD-001-2026')->first()->id,
+        $resolucion = Resolucion::where('rd', 'RD-001-2026')->first();
+
+        $this->assertDatabaseMissing('charges', [
             'user_id' => $this->user->id,
-            'charge_period' => '2026',
+        ]);
+
+        $this->assertDatabaseMissing('charge_resolucion', [
+            'resolucion_id' => $resolucion->id,
         ]);
     }
 

@@ -13,6 +13,7 @@ class NaturalPerson extends Model
 
     protected $fillable = [
         'dni',
+        'cedula',
         'nombres',
         'apellido_paterno',
         'apellido_materno',
@@ -30,5 +31,10 @@ class NaturalPerson extends Model
     public function charges()
     {
         return $this->hasMany(Charge::class);
+    }
+
+    public function resolucions()
+    {
+        return $this->morphToMany(Resolucion::class, 'interesado', 'resolucion_interesados');
     }
 }

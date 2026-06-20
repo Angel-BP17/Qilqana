@@ -12,21 +12,7 @@
             </div>
         </div>
 
-        @if ($errors->any())
-            <div class="alert alert-danger shadow-sm">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
 
-        @if (session('success'))
-            <div class="alert alert-success shadow-sm">
-                {{ session('success') }}
-            </div>
-        @endif
 
         <div class="row g-3 mb-4">
             <div class="col-12 col-md-6">
@@ -59,13 +45,66 @@
         </div>
 
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-info border-0 py-3">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <h5 class="mb-0 fw-bold text-white">Roles y permisos</h5>
+            <div class="card-header bg-info border-0 py-3 px-3 px-md-4">
+                <div class="row g-3 align-items-center">
+                    <div class="col-12 col-md-auto">
+                        <h5 class="mb-0 fw-bold text-white">
+                            <span class="material-symbols-outlined me-2">shield</span>Roles y permisos
+                        </h5>
+                    </div>
                 </div>
             </div>
             <div class="card-body p-0">
-                <div class="table-responsive">
+                {{-- Vista móvil --}}
+                <div class="d-md-none p-3">
+                    @foreach ($roles as $index => $role)
+                        @php
+                            $rolePerms = $role->permissions->pluck('name');
+                        @endphp
+                        <div class="card border-0 shadow-sm mb-3 overflow-hidden border">
+                            <div class="card-body py-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="fw-bold text-dark fs-5">{{ $role->name }}</div>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-outline-info btn-sm btn-role-info"
+                                            title="Ver detalles" data-name="{{ $role->name }}"
+                                            data-permissions='@json($rolePerms)'>
+                                            <span class="material-symbols-outlined fs-6">info</span>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary btn-sm btn-edit-role"
+                                            title="Editar" data-action="{{ route('roles.update', $role) }}"
+                                            data-name="{{ $role->name }}"
+                                            data-permissions='@json($rolePerms)'>
+                                            <span class="material-symbols-outlined fs-6">edit</span>
+                                        </button>
+                                        <form method="POST" action="{{ route('roles.destroy', $role) }}" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-outline-danger btn-sm"
+                                                onclick="return confirm('¿Eliminar este rol?')">
+                                                <span class="material-symbols-outlined fs-6">delete</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <p class="text-muted small text-uppercase fw-bold mb-1">Permisos</p>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @forelse ($rolePerms as $perm)
+                                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle small">
+                                                {{ $permissionLabels[$perm] ?? $perm }}
+                                            </span>
+                                        @empty
+                                            <span class="text-muted small">Sin permisos</span>
+                                        @endforelse
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="table-responsive d-none d-md-block">
                     <table class="table align-middle table-hover mb-0">
                         <thead class="table-light">
                             <tr>

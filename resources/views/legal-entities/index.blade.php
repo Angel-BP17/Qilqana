@@ -15,21 +15,7 @@
         @php
             $canCreateLegalEntity = Auth::user()->hasRole('ADMINISTRADOR') || Auth::user()->can('legal-entities.create');
         @endphp
-        @if ($errors->any())
-            <div class="alert alert-danger shadow-sm">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
 
-        @if (session('success'))
-            <div class="alert alert-success shadow-sm">
-                {{ session('success') }}
-            </div>
-        @endif
 
         <div class="row g-3 mb-4">
             <div class="col-12 col-lg-6">

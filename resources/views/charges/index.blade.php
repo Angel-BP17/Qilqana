@@ -12,32 +12,7 @@
             </div>
         </div>
 
-        @if ($errors->any())
-            <div class="alert alert-danger shadow-sm">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
 
-        @if (session('errores'))
-            <div class="alert alert-warning mt-3 shadow-sm">
-                <h5 class="mb-2">Errores durante la importacion:</h5>
-                <ul class="mb-0">
-                    @foreach (session('errores') as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        @if (session('success'))
-            <div class="alert alert-success shadow-sm">
-                {{ session('success') }}
-            </div>
-        @endif
         <div id="charges-dashboard" data-refresh-interval="{{ $refreshIntervalSeconds ?? 5 }}" data-refresh-url="{{ route('charges.refresh') }}">
             @include('charges.partials.dashboard')
         </div>

@@ -157,7 +157,7 @@
             @foreach ($resoluciones as $resolucion)
                 <tr>
                     <td>{{ $resolucion->id }}</td>
-                    <td>{{ $resolucion->rd }}</td>
+                    <td>{{ $resolucion->type?->abreviacion ?? 'RD' }} {{ $resolucion->rd }}</td>
                     <td>{{ $resolucion->fecha ? \Carbon\Carbon::parse($resolucion->fecha)->format('d/m/Y') : '' }}</td>
                     <td>{{ $resolucion->nombres_apellidos }}</td>
                     <td>{{ $resolucion->dni ?? 'N/A' }}</td>

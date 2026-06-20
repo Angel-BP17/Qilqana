@@ -3,23 +3,22 @@
 namespace App\Imports;
 
 use Carbon\Carbon;
-use DB;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\ToCollection;
-use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithStartRow;
-use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate; // Removido WithHeadingRow ya que no se usa
+use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 
-class ResolucionesImport implements ShouldQueue, ToCollection, WithBatchInserts, WithCalculatedFormulas, WithChunkReading, WithStartRow
+class ResolucionesImport implements ShouldQueue, ToCollection, WithCalculatedFormulas, WithChunkReading, WithStartRow
 {
     private $startRow = 2;
 
     private $startColumn = 'A';
 
-    private $columnIndex = 0; // Índice numérico para la columna de inicio
+    private $columnIndex = 0;
 
     public function setStartRow(int $row): void
     {
@@ -34,45 +33,75 @@ class ResolucionesImport implements ShouldQueue, ToCollection, WithBatchInserts,
 
     public function collection(Collection $rows): void
     {
-        $buffer = [];
+        // Intentar forzar límites en hosting compartido (si el host lo permite)
+        @set_time_limit(300);
+        @ini_set('memory_limit', '512M');
+
+        $resolucionesBuffer = [];
+        $personasBuffer = [];
+        $dnisParaValidar = [];
 
         foreach ($rows as $row) {
-            // Convertir a array y obtener solo las columnas necesarias
             $rowData = $row->toArray();
-
-            // Si la fila está vacía, saltar
             if (empty(array_filter($rowData))) {
                 continue;
             }
 
-            // Obtener valores comenzando desde la columna especificada
-            $rd = $rowData[$this->columnIndex] ?? '';
-            $fecha = $this->parseFecha($rowData[$this->columnIndex + 1] ?? null);
-            $dni = $rowData[$this->columnIndex + 2] ?? '';
-            $nombres = $rowData[$this->columnIndex + 3] ?? '';
-            $asunto = $rowData[$this->columnIndex + 4] ?? '';
-            $periodo = $rowData[$this->columnIndex + 5] ?? ($fecha ? $fecha->year : null);
-            $procedencia = $rowData[$this->columnIndex + 6] ?? '';
-
-            // Validar RD obligatorio
-            if (empty(trim($rd))) {
+            $rd = trim($rowData[$this->columnIndex] ?? '');
+            if (empty($rd)) {
                 continue;
             }
 
-            $buffer[] = [
-                'rd' => trim($rd),
-                'fecha' => $fecha ? $fecha->toDateString() : null,
-                'dni' => ltrim($dni, "'"),
-                'nombres_apellidos' => trim($nombres),
-                'asunto' => trim($asunto),
-                'procedencia' => trim($procedencia),
+            $fecha = $this->parseFecha($rowData[$this->columnIndex + 1] ?? null);
+            $rawDni = trim($rowData[$this->columnIndex + 2] ?? '');
+            $dni = ($rawDni === 'NULL' || empty($rawDni)) ? null : ltrim($rawDni, "'");
+            $ruc = trim($rowData[$this->columnIndex + 3] ?? null);
+            $nombresCsv = trim($rowData[$this->columnIndex + 4] ?? 'SIN NOMBRE');
+            $asunto = trim($rowData[$this->columnIndex + 5] ?? 'Sin asunto');
+            $periodo = $rowData[$this->columnIndex + 6] ?? ($fecha ? $fecha->year : null);
+            $procedencia = trim($rowData[$this->columnIndex + 7] ?? 'IMPORTACIÓN MASIVA');
+            $typeId = $rowData[$this->columnIndex + 8] ?? null;
+
+            $resolucionesBuffer[] = [
+                'rd' => $rd,
                 'periodo' => $periodo,
+                'fecha' => $fecha ? $fecha->toDateTimeString() : null,
+                'dni' => $dni,
+                'ruc' => $ruc,
+                'resolucion_type_id' => $typeId,
+                'nombres_apellidos' => $nombresCsv,
+                'asunto' => $asunto,
+                'procedencia' => $procedencia,
+                'created_at' => now(),
+                'updated_at' => now(),
             ];
+
+            if ($dni && preg_match('/^\d{8,10}$/', $dni)) {
+                $dnisParaValidar[] = $dni;
+                $personasBuffer[$dni] = [
+                    'dni' => $dni,
+                    'nombres' => $nombresCsv,
+                    'apellido_paterno' => null,
+                    'apellido_materno' => null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
         }
 
-        // Guardar en bloque si hay datos
-        if (! empty($buffer)) {
-            DB::table('resolucions')->upsert($buffer, ['rd']);
+        // En hosting compartido usamos chunks más pequeños (500) para no saturar MySQL
+        if (! empty($resolucionesBuffer)) {
+            // Usar DB::table directamente es más ligero que el modelo en procesos masivos
+            DB::table('resolucions')->upsert($resolucionesBuffer, ['rd', 'periodo'], ['fecha', 'dni', 'ruc', 'resolucion_type_id', 'nombres_apellidos', 'asunto', 'procedencia', 'updated_at']);
+        }
+
+        if (! empty($personasBuffer)) {
+            $dnisExistentes = DB::table('natural_people')->whereIn('dni', $dnisParaValidar)->pluck('dni')->toArray();
+            $nuevasPersonas = array_diff_key($personasBuffer, array_flip($dnisExistentes));
+
+            if (! empty($nuevasPersonas)) {
+                DB::table('natural_people')->insert(array_values($nuevasPersonas));
+            }
         }
     }
 
@@ -81,29 +110,14 @@ class ResolucionesImport implements ShouldQueue, ToCollection, WithBatchInserts,
         if (blank($valor)) {
             return null;
         }
-
-        // Número de serie de Excel
         if (is_numeric($valor)) {
             return Carbon::instance(ExcelDate::excelToDateTimeObject($valor));
         }
-
-        // Manejar diferentes formatos de fecha
-        $formats = [
-            'd/m/Y',
-            'd-m-Y',
-            'Y-m-d',
-            'm/d/Y',
-            'd.m.Y',
-            'Y.m.d',
-            'd M Y',
-            'd F Y',
-        ];
-
+        $formats = ['d/m/Y', 'd-m-Y', 'Y-m-d', 'm/d/Y'];
         foreach ($formats as $format) {
             try {
                 return Carbon::createFromFormat($format, trim($valor));
             } catch (\Exception $e) {
-                // Continuar intentando
             }
         }
 
@@ -117,11 +131,11 @@ class ResolucionesImport implements ShouldQueue, ToCollection, WithBatchInserts,
 
     public function chunkSize(): int
     {
-        return 2000;
-    }
+        return 500;
+    } // Chunks más pequeños para hostings débiles
 
     public function batchSize(): int
     {
-        return 2000;
+        return 500;
     }
 }

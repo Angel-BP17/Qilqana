@@ -1,15 +1,19 @@
 <?php
 
-use App\Http\Controllers\ActivityLogController;
-use App\Http\Controllers\ChargeController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\LegalEntityController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\NaturalPersonController;
-use App\Http\Controllers\ResolucionController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Catalogs\AsuntoTypeController;
+use App\Http\Controllers\Catalogs\LegalEntityController;
+use App\Http\Controllers\Catalogs\NaturalPersonController;
+use App\Http\Controllers\Catalogs\ResolucionTypeController;
+use App\Http\Controllers\Operations\ChargeController;
+use App\Http\Controllers\Operations\ResolucionController;
+use App\Http\Controllers\System\ActivityLogController;
+use App\Http\Controllers\System\HomeController;
+use App\Http\Controllers\System\LookupController;
+use App\Http\Controllers\System\RoleController;
+use App\Http\Controllers\System\SearchController;
+use App\Http\Controllers\System\SettingsController;
+use App\Http\Controllers\System\UserController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
@@ -45,6 +49,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('charges/refresh', [ChargeController::class, 'refresh'])->name('charges.refresh');
     Route::get('charges/{charge}/signature', [ChargeController::class, 'getSignature'])->name('charges.file.signature');
     Route::get('charges/{charge}/evidence', [ChargeController::class, 'getEvidence'])->name('charges.file.evidence');
+    Route::get('charges/{charge}/document', [ChargeController::class, 'getDocument'])->name('charges.file.document');
     Route::get('charges/{charge}/carta-poder', [ChargeController::class, 'getCartaPoder'])->name('charges.file.carta-poder');
     Route::resource('charges', ChargeController::class)->except('show');
 
@@ -65,6 +70,20 @@ Route::middleware(['auth'])->group(function () {
     Route::post('settings/reset', [SettingsController::class, 'reset'])->name('settings.reset');
 
     Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+    Route::resource('resolucion-types', ResolucionTypeController::class)->except('create', 'show', 'edit');
+    Route::resource('asunto-types', AsuntoTypeController::class)->except('create', 'show', 'edit');
     Route::get('/descargar-plantilla', [ResolucionController::class, 'downloadTemplate'])->name('download.template');
     Route::get('/', [HomeController::class, 'index'])->name('home');
+
+    // Rutas para búsquedas dinámicas (Select2 / AJAX / APIs Externas)
+    Route::prefix('search')->group(function () {
+        Route::get('natural-people', [SearchController::class, 'naturalPeople'])->name('search.natural-people');
+        Route::get('natural-people/by-dni/{dni}', [LookupController::class, 'naturalPersonByDni'])->name('search.by-dni');
+        Route::get('natural-people/by-cedula/{cedula}', [SearchController::class, 'byCedula'])->name('search.by-cedula');
+        Route::get('legal-entities', [SearchController::class, 'legalEntities'])->name('search.legal-entities');
+        Route::get('legal-entities/by-ruc/{ruc}', [LookupController::class, 'legalEntityByRuc'])->name('search.by-ruc');
+        Route::get('users', [SearchController::class, 'users'])->name('search.users');
+        Route::get('pending-resolutions', [SearchController::class, 'pendingResolutions'])->name('search.pending-resolutions');
+        Route::get('asuntos-by-resolution-type/{id}', [SearchController::class, 'asuntosByResolutionType'])->name('search.asuntos-by-type');
+    });
 });

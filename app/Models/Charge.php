@@ -14,11 +14,11 @@ class Charge extends Model
         'charge_period',
         'document_date',
         'user_id',
-        'resolucion_id',
         'tipo_interesado',
         'natural_person_id',
         'legal_entity_id',
         'asunto',
+        'document_path',
     ];
 
     public function user()
@@ -26,9 +26,14 @@ class Charge extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function resolucion()
+    public function resolucions()
     {
-        return $this->belongsTo(Resolucion::class);
+        return $this->belongsToMany(Resolucion::class);
+    }
+
+    public function getResolucionAttribute()
+    {
+        return $this->resolucions->first();
     }
 
     public function naturalPerson()
@@ -70,7 +75,9 @@ class Charge extends Model
 
                 return $fullName !== '' ? $fullName : ($person->dni ?? '---');
             case 'Trabajador UGEL':
-                return trim(($this->user?->name ?? '').' '.($this->user?->last_name ?? '')) ?: '---';
+                $targetUser = $this->signature?->assignedTo;
+
+                return $targetUser ? trim(($targetUser->name ?? '').' '.($targetUser->last_name ?? '')) : '---';
             default:
                 return '---';
         }
@@ -89,5 +96,25 @@ class Charge extends Model
     public function getHasEvidenceAttribute(): bool
     {
         return (bool) ($this->signature?->evidence_root);
+    }
+
+    public function getFileSignatureUrlAttribute(): string
+    {
+        return $this->has_signature ? route('charges.file.signature', $this) : '';
+    }
+
+    public function getFileEvidenceUrlAttribute(): string
+    {
+        return $this->has_evidence ? route('charges.file.evidence', $this) : '';
+    }
+
+    public function getFileCartaPoderUrlAttribute(): string
+    {
+        return $this->has_carta_poder ? route('charges.file.carta-poder', $this) : '';
+    }
+
+    public function getFileDocumentUrlAttribute(): string
+    {
+        return $this->document_path ? route('charges.file.document', $this) : '';
     }
 }

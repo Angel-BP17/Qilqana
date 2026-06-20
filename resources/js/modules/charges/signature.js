@@ -3,6 +3,7 @@ export const SignatureModule = {
     init: function() {
         const canvas = document.getElementById('signature-pad');
         const form = document.getElementById('signChargeForm');
+        const modalEl = document.getElementById('signChargeModal');
         if (!canvas || typeof window.SignaturePad === 'undefined') return;
 
         this.pad = new window.SignaturePad(canvas, { 
@@ -10,6 +11,21 @@ export const SignatureModule = {
             penColor: 'rgb(0, 0, 0)' 
         });
         
+        // Redimensionar cuando el modal se muestra completamente
+        if (modalEl) {
+            modalEl.addEventListener('shown.bs.modal', () => {
+                this.resize();
+            });
+        }
+
+        // Redimensionar al cambiar el tamaño de la ventana
+        window.addEventListener('resize', () => {
+            // Solo redimensionar si el modal está visible para evitar problemas
+            if (modalEl && modalEl.classList.contains('show')) {
+                this.resize();
+            }
+        });
+
         const confirmBtn = document.getElementById('confirm-signature');
 
         // Eventos de limpieza y deshacer
@@ -50,6 +66,50 @@ export const SignatureModule = {
         // Escuchar cambios en campos de texto y archivo para habilitar el botón
         parentescoInput?.addEventListener('input', () => this.validate(confirmBtn));
         cartaPoderInput?.addEventListener('change', () => this.validate(confirmBtn));
+
+        // Captura de geolocalización al seleccionar evidencia
+        const evidenceInput = document.getElementById('sign_evidence_root');
+        const locationInput = document.getElementById('sign_evidence_location');
+
+        evidenceInput?.addEventListener('change', () => {
+            // Eliminar advertencias previas
+            document.getElementById('geolocation-warning')?.remove();
+
+            if (evidenceInput.files.length > 0) {
+                if (!navigator.geolocation) {
+                    showGeolocationWarning('Su navegador no soporta geolocalización o requiere HTTPS.');
+                    return;
+                }
+
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    const loc = {
+                        lat: pos.coords.latitude,
+                        lng: pos.coords.longitude,
+                        accuracy: pos.coords.accuracy,
+                        timestamp: new Date(pos.timestamp).toISOString()
+                    };
+                    locationInput.value = JSON.stringify(loc);
+                }, (err) => {
+                    console.warn('[Geolocation] No se pudo obtener ubicación:', err.message);
+                    if (err.code === err.PERMISSION_DENIED) {
+                        showGeolocationWarning('Permiso de ubicación denegado por el usuario o navegador.');
+                    } else if (err.message.toLowerCase().includes('secure origin') || window.location.protocol !== 'https:') {
+                        showGeolocationWarning('La geolocalización requiere HTTPS. Ejecute "herd secure" para habilitarlo.');
+                    } else {
+                        showGeolocationWarning('No se pudo obtener la geolocalización.');
+                    }
+                });
+            }
+        });
+
+        function showGeolocationWarning(msg) {
+            if (!evidenceInput) return;
+            const warningEl = document.createElement('div');
+            warningEl.id = 'geolocation-warning';
+            warningEl.className = 'text-warning small mt-1 d-flex align-items-center gap-1';
+            warningEl.innerHTML = `<span class="material-symbols-outlined fs-6 align-middle">warning</span> <span>${msg}</span>`;
+            evidenceInput.parentNode.appendChild(warningEl);
+        }
 
         // Envío de formulario
         form?.addEventListener('submit', (e) => {

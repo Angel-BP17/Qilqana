@@ -1,64 +1,61 @@
 <div class="tab-pane fade {{ $active ?? false ? 'show active' : '' }}" id="sent-tab-pane" role="tabpanel"
     aria-labelledby="sent-tab" tabindex="0">
     <div class="card border-0 shadow-sm mb-4">
-        <div class="card-header bg-info border-0 py-3">
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                <div class="d-flex align-items-center gap-2">
-                    <h5 class="mb-0 fw-bold text-white">Cargos enviados</h5>
-                    <span class="badge bg-light text-dark">{{ $sentTotal }}</span>
-                    <span class="badge bg-warning text-dark">Pendientes: {{ $sentPending }}</span>
-                    <span class="badge bg-primary">Firmados: {{ $sentSigned }}</span>
-                </div>
-                <div class="d-flex flex-wrap gap-2 align-items-center">
-                    <div class="d-md-none d-flex gap-2">
-                        <button class="btn btn-light" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#sent-filters">
-                            <span class="material-symbols-outlined me-1">filter_alt</span> Filtros
-                        </button>
-                        <button class="btn btn-light" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#sent-pdf">
-                            <span class="material-symbols-outlined me-1">picture_as_pdf</span> PDF
-                        </button>
-                    </div>
-                    <div class="d-none d-md-flex gap-2 align-items-center">
-                        @include('charges.forms.filter')
-                        <form action="{{ route('charges.reports.sent') }}" method="GET">
+        <x-card-header title="Cargos enviados" :badge="$sentTotal" colSize="xl">
+            <x-slot:left>
+                <span class="badge bg-warning text-dark">Pendientes: {{ $sentPending }}</span>
+                <span class="badge bg-primary">Firmados: {{ $sentSigned }}</span>
+            </x-slot:left>
+
+            <div class="d-none d-md-flex flex-grow-1 flex-xl-grow-0 justify-content-xl-end gap-2">
+                @include('charges.forms.filter')
+                <form action="{{ route('charges.reports.sent') }}" method="GET" target="_blank" class="flex-grow-1 flex-xl-grow-0">
+                    @if (request('search'))
+                        <input type="hidden" name="search" value="{{ request('search') }}">
+                    @endif
+                    @if (request('signature_status'))
+                        <input type="hidden" name="signature_status" value="{{ request('signature_status') }}">
+                    @endif
+                    @if ($sentPeriod)
+                        <input type="hidden" name="period" value="{{ $sentPeriod }}">
+                    @endif
+                    <button class="btn btn-light w-100" type="submit" @disabled($sentChargesFiltered->isEmpty())>
+                        <span class="material-symbols-outlined me-1">picture_as_pdf</span>
+                        <span class="d-none d-sm-inline">Reporte PDF</span>
+                        <span class="d-sm-none">PDF</span>
+                    </button>
+                </form>
+            </div>
+            <div class="d-md-none d-flex gap-2 w-100">
+                <button class="btn btn-light flex-grow-1" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#sent-filters">
+                    <span class="material-symbols-outlined me-1">filter_alt</span> Filtros
+                </button>
+                <button class="btn btn-light flex-grow-1" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#sent-pdf">
+                    <span class="material-symbols-outlined me-1">picture_as_pdf</span> PDF
+                </button>
+            </div>
+        </x-card-header>
+
+                            {{-- Filtros y PDF para móvil --}}
+                            <div class="collapse d-md-none px-3 pt-3 pb-3" id="sent-filters">
+                            @include('charges.forms.filter')
+                            </div>
+                            <div class="collapse d-md-none px-3 pt-3 pb-3" id="sent-pdf">
+                            <form action="{{ route('charges.reports.sent') }}" method="GET" target="_blank">
                             @if (request('search'))
-                                <input type="hidden" name="search" value="{{ request('search') }}">
+                            <input type="hidden" name="search" value="{{ request('search') }}">
                             @endif
                             @if (request('signature_status'))
-                                <input type="hidden" name="signature_status" value="{{ request('signature_status') }}">
+                            <input type="hidden" name="signature_status" value="{{ request('signature_status') }}">
                             @endif
                             @if ($sentPeriod)
-                                <input type="hidden" name="period" value="{{ $sentPeriod }}">
+                            <input type="hidden" name="period" value="{{ $sentPeriod }}">
                             @endif
-                            <button class="btn btn-light" type="submit">
-                                <span class="material-symbols-outlined me-1">picture_as_pdf</span> Reporte PDF
+                            <button class="btn btn-light w-100" type="submit" @disabled($sentChargesFiltered->isEmpty())>
+                            <span class="material-symbols-outlined me-1">picture_as_pdf</span> Reporte PDF
                             </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {{-- Filtros y PDF para móvil --}}
-        <div class="collapse d-md-none px-3 pt-3 pb-3" id="sent-filters">
-            @include('charges.forms.filter')
-        </div>
-        <div class="collapse d-md-none px-3 pt-3 pb-3" id="sent-pdf">
-            <form action="{{ route('charges.reports.sent') }}" method="GET">
-                @if (request('search'))
-                    <input type="hidden" name="search" value="{{ request('search') }}">
-                @endif
-                @if (request('signature_status'))
-                    <input type="hidden" name="signature_status" value="{{ request('signature_status') }}">
-                @endif
-                @if ($sentPeriod)
-                    <input type="hidden" name="period" value="{{ $sentPeriod }}">
-                @endif
-                <button class="btn btn-light w-100" type="submit">
-                    <span class="material-symbols-outlined me-1">picture_as_pdf</span> Reporte PDF
-                </button>
             </form>
         </div>
 

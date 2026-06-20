@@ -107,7 +107,7 @@ class ResolucionCargoModuleTest extends TestCase
     /**
      * ETAPA 4: INTEGRIDAD DE MODELOS (RELACIONES)
      */
-    public function test_stage_4_creating_resolucion_automatically_creates_charge_and_signature()
+    public function test_stage_4_creating_resolucion_no_longer_creates_charge_automatically()
     {
         $data = [
             'rd' => 'RD-2026-001',
@@ -126,16 +126,12 @@ class ResolucionCargoModuleTest extends TestCase
         $resolucion = Resolucion::where('rd', 'RD-2026-001')->first();
 
         $this->assertNotNull($resolucion, 'La resolución no se creó en la base de datos.');
-        $this->assertDatabaseHas('charges', [
-            'resolucion_id' => $resolucion->id,
+        $this->assertDatabaseMissing('charges', [
             'user_id' => $this->admin->id,
-            'charge_period' => '2026',
         ]);
 
-        $charge = Charge::where('resolucion_id', $resolucion->id)->first();
-        $this->assertDatabaseHas('signatures', [
-            'charge_id' => $charge->id,
-            'signature_status' => 'pendiente',
+        $this->assertDatabaseMissing('charge_resolucion', [
+            'resolucion_id' => $resolucion->id,
         ]);
     }
 

@@ -22,12 +22,14 @@ class Signature extends Model
         'titularidad',
         'parentesco',
         'carta_poder_path',
+        'evidence_location',
     ];
 
     protected $casts = [
         'signature_requested_at' => 'datetime',
         'signature_completed_at' => 'datetime',
         'titularidad' => 'boolean',
+        'evidence_location' => 'array',
     ];
 
     public function charge()

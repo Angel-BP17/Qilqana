@@ -35,7 +35,7 @@ export const LookupModule = {
         this.setLoading(btn, true);
 
         try {
-            const res = await fetch(`api/natural-people/by-dni/${encodeURIComponent(clean)}`);
+            const res = await fetch(`/search/natural-people/by-dni/${encodeURIComponent(clean)}`);
             const payload = await res.json();
             
             details.forEach(el => el.classList.remove('d-none'));
@@ -81,7 +81,7 @@ export const LookupModule = {
         this.setLoading(btn, true);
 
         try {
-            const res = await fetch(`api/legal-entities/by-ruc/${encodeURIComponent(clean)}`);
+            const res = await fetch(`/search/legal-entities/by-ruc/${encodeURIComponent(clean)}`);
             const payload = await res.json();
 
             entityDetails.forEach(el => el.classList.remove('d-none'));
