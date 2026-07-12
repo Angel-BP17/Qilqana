@@ -10,18 +10,132 @@
             <form method="POST" action="{{ route('charges.store') }}" id="createChargeForm" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body px-4">
-                    {{-- SECCIÓN 1: IDENTIFICACIÓN DEL INTERESADO --}}
+                    {{-- Alert para errores de validación de Laravel --}}
+                    @if ($errors->any())
+                        <div class="alert alert-danger border-danger-subtle py-2 mb-4">
+                            <h6 class="fw-bold mb-1 small text-danger d-flex align-items-center">
+                                <span class="material-symbols-outlined fs-5 me-1">error</span>
+                                Errores de Validación:
+                            </h6>
+                            <ul class="mb-0 small ps-3">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    {{-- SECCIÓN 1: RESOLUCIONES VINCULADAS --}}
                     <div class="card border-primary-subtle bg-light-subtle mb-4">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center mb-3">
-                                <span class="material-symbols-outlined text-primary me-2">person_pin</span>
-                                <h6 class="text-primary fw-bold mb-0">Destinatario del Cargo</h6>
+                                <span class="material-symbols-outlined text-primary me-2">link</span>
+                                <h6 class="text-primary fw-bold mb-0">1. Resoluciones a Vincular</h6>
                             </div>
                             
-                            <div class="row g-3 mb-2">
+                            {{-- Filtros de Fecha --}}
+                            <div class="row g-2 mb-3">
+                                <div class="col-12 col-md-6">
+                                    <label for="search_desde" class="form-label small text-muted fw-bold text-uppercase mb-1">Fecha Desde</label>
+                                    <input type="date" class="form-control form-control-sm border-secondary-subtle bg-white" id="search_desde">
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <label for="search_hasta" class="form-label small text-muted fw-bold text-uppercase mb-1">Fecha Hasta</label>
+                                    <input type="date" class="form-control form-control-sm border-secondary-subtle bg-white" id="search_hasta">
+                                </div>
+                            </div>
+
+                            {{-- Input de Búsqueda Rápida --}}
+                            <div class="input-group mb-3">
+                                <span class="input-group-text bg-white"><span class="material-symbols-outlined text-muted fs-5">search</span></span>
+                                <input type="text" class="form-control border-secondary-subtle bg-white" id="search_resolutions_input" placeholder="Busque por RD, nombre, DNI o asunto..." autocomplete="off">
+                                <button class="btn btn-primary fw-bold px-4" type="button" id="btn_search_resolutions">Buscar</button>
+                            </div>
+ 
+                            {{-- Contenedor de Resultados del Buscador --}}
+                            <div class="border rounded-2 bg-white p-0 overflow-hidden d-none mb-3" id="resolutions_results_container">
+                                <div class="bg-light p-2 border-bottom d-flex justify-content-between align-items-center">
+                                    <span class="small fw-bold text-muted ms-1">Resultados de Búsqueda</span>
+                                    <span class="badge bg-secondary rounded-pill" id="resolutions_results_count">0</span>
+                                </div>
+                                <div class="list-group list-group-flush" id="resolutions_list" style="max-height: 200px; overflow-y: auto;">
+                                    {{-- Se renderizan aquí dinámicamente --}}
+                                </div>
+                            </div>
+
+                            <div class="form-text mt-1 mb-3" id="resolutions_help_text">
+                                <span class="material-symbols-outlined fs-6 align-middle me-1">info</span>Filtre por fecha o escriba para buscar resoluciones sin cargo en el sistema.
+                            </div>
+
+                            {{-- LISTA VISUAL DE RESOLUCIONES SELECCIONADAS (PERSISTENTE) --}}
+                            <div class="border rounded-2 bg-white overflow-hidden" id="selected_resolutions_container">
+                                <table class="table table-sm table-hover mb-0 align-middle" id="table_selected_resolutions">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="ps-3 py-2 small text-muted text-uppercase" style="width: 150px;">Resolución</th>
+                                            <th class="py-2 small text-muted text-uppercase">Detalles (Interesado / Fecha)</th>
+                                            <th class="text-end pe-3 py-2" style="width: 50px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="list_selected_resolutions">
+                                        <tr class="empty-resolutions-row">
+                                            <td colspan="3" class="text-center py-4 text-muted small italic">
+                                                <span class="material-symbols-outlined fs-2 d-block mb-1">link_off</span>
+                                                No hay resoluciones añadidas a este cargo.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="hidden_resolutions_inputs"></div>
+                        </div>
+                    </div>
+
+                    {{-- SECCIÓN 2: ¿PARA QUIÉNES DESEA CREAR LOS CARGOS? --}}
+                    <div class="card border-primary-subtle bg-light-subtle mb-4">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="material-symbols-outlined text-primary me-2">group</span>
+                                <h6 class="text-primary fw-bold mb-0">2. ¿PARA QUIÉNES DESEA CREAR LOS CARGOS?</h6>
+                            </div>
+                            
+                            <div class="row g-2 mb-3">
+                                <div class="col-12 col-md-6">
+                                    <div class="form-check border rounded-3 p-3 bg-white d-flex align-items-center h-100">
+                                        <input class="form-check-input ms-0 me-2" type="radio" name="cargo_para" id="recipient_type_interesados" value="interesados_resolucion">
+                                        <label class="form-check-label fw-bold text-dark cursor-pointer mb-0" for="recipient_type_interesados">
+                                            Interesados de la resolución
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="form-check border rounded-3 p-3 bg-white d-flex align-items-center h-100">
+                                        <input class="form-check-input ms-0 me-2" type="radio" name="cargo_para" id="recipient_type_otros" value="otros" checked>
+                                        <label class="form-check-label fw-bold text-dark cursor-pointer mb-0" for="recipient_type_otros">
+                                            Otros destinatarios
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-center text-muted small" id="recipient_type_help_container">
+                                <span class="material-symbols-outlined fs-5 me-2">info</span>
+                                <span id="recipient_help_message">Se creará un cargo para cada destinatario que agregue manualmente a continuación.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- SECCIÓN 3: IDENTIFICACIÓN DEL INTERESADO --}}
+                    <div class="card border-primary-subtle bg-light-subtle mb-4" id="recipient_manual_section">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="material-symbols-outlined text-primary me-2">person_pin</span>
+                                <h6 class="text-primary fw-bold mb-0">3. Destinatario del Cargo</h6>
+                            </div>
+                                       <div class="row g-3 mb-2">
                                 <div class="col-12 col-md-6">
                                     <label for="tipo_interesado" class="form-label fw-bold small text-muted text-uppercase">Clasificación</label>
-                                    <select class="form-select border-secondary-subtle" id="tipo_interesado" name="tipo_interesado" required>
+                                    <select class="form-select border-secondary-subtle" id="tipo_interesado">
                                         <option value="">Seleccione...</option>
                                         <option value="Persona Natural">Persona Natural</option>
                                         <option value="Persona Juridica">Persona Juridica</option>
@@ -32,7 +146,7 @@
                                 {{-- Sub-selector para Persona Natural (DNI/Cédula) --}}
                                 <div class="col-12 col-md-6 interessado-selector-field d-none" id="container_natural_doc_type">
                                     <label class="form-label fw-bold small text-muted text-uppercase">Tipo Documento</label>
-                                    <select class="form-select border-secondary-subtle" id="charge_natural_doc_type" name="document_type">
+                                    <select class="form-select border-secondary-subtle" id="charge_natural_doc_type">
                                         <option value="DNI" selected>DNI</option>
                                         <option value="CEDULA">CÉDULA</option>
                                     </select>
@@ -66,98 +180,82 @@
                                     <div id="lookup_charge_legal_error" class="text-danger small mt-1 d-none"></div>
                                 </div>
 
-                                {{-- Buscador Trabajador UGEL (Se mantiene Select2) --}}
+                                {{-- Buscador Trabajador UGEL --}}
                                 <div class="interessado-selector-field d-none mt-3" id="container_ugel_user">
-                                    <label class="form-label fw-bold small text-muted text-uppercase">Búsqueda de Trabajador</label>
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Búsqueda de Trabajador (DNI/Nombre)</label>
                                     <div class="input-group">
                                         <span class="input-group-text bg-white border-secondary-subtle text-primary">
-                                            <span class="material-symbols-outlined fs-5">engineering</span>
+                                            <span class="material-symbols-outlined fs-5">badge</span>
                                         </span>
-                                        <select class="form-select select2-ajax-users border-secondary-subtle" id="select_ugel_user" name="assigned_to">
-                                        </select>
+                                        <input type="text" class="form-control border-secondary-subtle" id="lookup_charge_ugel_value" placeholder="Ingrese DNI o nombre del trabajador...">
+                                        <button class="btn btn-primary fw-bold" type="button" id="btn_lookup_charge_ugel">BUSCAR</button>
                                     </div>
+                                    <div id="lookup_charge_ugel_error" class="text-danger small mt-1 d-none"></div>
                                 </div>
                             </div>
 
-                            {{-- Información del Destinatario Seleccionado --}}
+                            {{-- Información del Destinatario Resuelto --}}
                             <div id="charge_recipient_info" class="mt-3 d-none">
-                                <div class="alert alert-info border-primary-subtle d-flex align-items-center mb-0">
-                                    <span class="material-symbols-outlined me-3 fs-3">check_circle</span>
-                                    <div>
-                                        <div class="fw-bold small text-uppercase">Destinatario Confirmado:</div>
-                                        <div id="charge_recipient_name" class="fw-bold text-dark"></div>
-                                        <div id="charge_recipient_id_text" class="small text-muted"></div>
+                                <div class="alert alert-info border-primary-subtle d-flex align-items-center justify-content-between mb-0 py-2">
+                                    <div class="d-flex align-items-center">
+                                        <span class="material-symbols-outlined text-primary me-3 fs-3">check_circle</span>
+                                        <div>
+                                            <div id="charge_recipient_name" class="fw-bold text-dark small"></div>
+                                            <div id="charge_recipient_id_text" class="small text-muted" style="font-size: 0.85em;"></div>
+                                        </div>
                                     </div>
+                                    <button type="button" class="btn btn-success btn-sm fw-bold px-3 d-flex align-items-center gap-1 shadow-sm" id="btn_add_recipient_to_list">
+                                        <span class="material-symbols-outlined fs-5">person_add</span>Agregar
+                                    </button>
                                 </div>
-                                {{-- Inputs ocultos para el envío --}}
-                                <input type="hidden" name="natural_person_id" id="hidden_charge_natural_id">
-                                <input type="hidden" name="legal_entity_id" id="hidden_charge_legal_id">
+                            </div>
+
+                            {{-- Lista de Destinatarios Agregados --}}
+                            <div id="charge_recipient_list_wrapper" class="mt-4 d-none">
+                                <label class="form-label fw-bold small text-muted text-uppercase mb-2">Destinatarios Agregados</label>
+                                <div class="list-group shadow-sm border border-secondary-subtle rounded-3 overflow-hidden bg-white" id="charge_recipient_list_container">
+                                    {{-- Se insertarán dinámicamente --}}
+                                </div>
+                                <div id="hidden_destinatarios_inputs"></div>
                             </div>
                         </div>
                     </div>
 
-                    {{-- SECCIÓN 2: RESOLUCIONES VINCULADAS (Búsqueda Checkbox) --}}
+                    {{-- SECCIÓN 4: DETALLES DEL DOCUMENTO --}}
                     <div class="card border-primary-subtle bg-light-subtle mb-4">
                         <div class="card-body p-3">
-                            <label class="form-label fw-bold small text-muted text-uppercase mb-2">
-                                <span class="material-symbols-outlined fs-6 align-middle me-1">link</span>Resoluciones a Vincular
-                            </label>
-                            
-                            {{-- Input de Búsqueda --}}
-                            <div class="input-group mb-3">
-                                <span class="input-group-text bg-white"><span class="material-symbols-outlined text-muted fs-5">search</span></span>
-                                <input type="text" class="form-control" id="search_resolutions_input" placeholder="Busque por RD, nombre, DNI o asunto..." autocomplete="off">
-                                <button class="btn btn-primary fw-bold" type="button" id="btn_search_resolutions">Buscar</button>
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="material-symbols-outlined text-primary me-2">edit_document</span>
+                                <h6 class="text-primary fw-bold mb-0">4. Detalles del documento del cargo</h6>
                             </div>
-
-                            {{-- Contenedor de Resultados con Checkboxes --}}
-                            <div class="border rounded-2 bg-white p-0 overflow-hidden d-none" id="resolutions_results_container">
-                                <div class="bg-light p-2 border-bottom d-flex justify-content-between align-items-center">
-                                    <div class="form-check m-0 ms-1">
-                                        <input class="form-check-input" type="checkbox" id="select_all_resolutions">
-                                        <label class="form-check-label small fw-bold text-muted" for="select_all_resolutions">
-                                            Seleccionar todas las visibles
-                                        </label>
+                            
+                            <div class="row g-3 mb-3">
+                                <div class="col-12 col-md-8">
+                                    <label for="asunto" class="form-label fw-bold small text-muted text-uppercase">Se remite (Asunto)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white"><span class="material-symbols-outlined fs-5">forward_to_inbox</span></span>
+                                        <input type="text" class="form-control text-uppercase" id="asunto" name="asunto" required
+                                            placeholder="Ej: DOCUMENTOS ADJUNTOS">
                                     </div>
-                                    <span class="badge bg-secondary rounded-pill" id="resolutions_results_count">0</span>
                                 </div>
-                                <div class="list-group list-group-flush" id="resolutions_list" style="max-height: 250px; overflow-y: auto;">
-                                    {{-- Los items se insertan aquí vía JS --}}
+                                <div class="col-12 col-md-4">
+                                    <label for="document_date" class="form-label fw-bold small text-muted text-uppercase">Fecha Documento</label>
+                                    <input type="date" class="form-control" id="document_date" name="document_date"
+                                        value="{{ date('Y-m-d') }}">
                                 </div>
                             </div>
-                            
-                            <div class="form-text mt-2" id="resolutions_help_text">
-                                <span class="material-symbols-outlined fs-6 align-middle me-1">info</span>Escriba el número o nombre para buscar resoluciones sin cargo en el sistema.
-                            </div>
-                        </div>
-                    </div>
 
-                    {{-- SECCIÓN 3: DETALLES DEL DOCUMENTO --}}
-                    <div class="row g-3 mb-3">
-                        <div class="col-12 col-md-8">
-                            <label for="asunto" class="form-label fw-bold small text-muted text-uppercase">Se remite (Asunto)</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white"><span class="material-symbols-outlined fs-5">forward_to_inbox</span></span>
-                                <input type="text" class="form-control text-uppercase" id="asunto" name="asunto" required
-                                    placeholder="Ej: DOCUMENTOS ADJUNTOS">
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-4">
-                            <label for="document_date" class="form-label fw-bold small text-muted text-uppercase">Fecha Documento</label>
-                            <input type="date" class="form-control" id="document_date" name="document_date"
-                                value="{{ date('Y-m-d') }}">
-                        </div>
-                    </div>
-
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label for="document_file" class="form-label fw-bold small text-muted text-uppercase">Documento de Cargo (PDF)</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white"><span class="material-symbols-outlined fs-5">picture_as_pdf</span></span>
-                                <input type="file" class="form-control" id="document_file" name="document_file" accept=".pdf">
-                            </div>
-                            <div class="form-text">
-                                Opcional. Tamaño máximo permitido: <strong>{{ (int) \App\Models\Setting::getValue('charges_max_file_size', '5120') / 1024 }}MB</strong>.
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label for="document_file" class="form-label fw-bold small text-muted text-uppercase">Documento de Cargo (PDF)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white"><span class="material-symbols-outlined fs-5">picture_as_pdf</span></span>
+                                        <input type="file" class="form-control" id="document_file" name="document_file" accept=".pdf">
+                                    </div>
+                                    <div class="form-text">
+                                        Opcional. Tamaño máximo permitido: <strong>{{ (int) \App\Models\Setting::getValue('charges_max_file_size', '5120') / 1024 }}MB</strong>.
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

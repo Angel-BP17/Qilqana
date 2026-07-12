@@ -52,7 +52,7 @@
                         <button type="button" class="btn btn-outline-primary btn-sm px-3"
                             title="{{ $editTitle }}" data-action="{{ route('legal-entities.update', $legalEntity) }}"
                             data-ruc="{{ $legalEntity->ruc }}" data-razon="{{ $legalEntity->razon_social }}"
-                            data-district="{{ $legalEntity->district }}" data-representative="{{ $legalEntity->representative_id }}" data-representative-dni="{{ $legalEntity->representative?->naturalPerson?->dni }}" data-representative-name="{{ $legalEntity->representative?->naturalPerson?->nombres }}" data-representative-cargo="{{ $legalEntity->representative?->cargo }}" data-representative-since="{{ $legalEntity->representative?->fecha_desde }}"
+                            data-district="{{ $legalEntity->district }}" data-representative="{{ $legalEntity->representative?->id }}" data-representative-dni="{{ $legalEntity->representative?->naturalPerson?->dni }}" data-representative-name="{{ $legalEntity->representative?->naturalPerson?->nombres }}" data-representative-cargo="{{ $legalEntity->representative?->cargo }}" data-representative-since="{{ $legalEntity->representative?->fecha_desde }}"
                             @disabled(!$canEditLegalEntity)>
                             <span class="material-symbols-outlined me-1">edit</span> Editar
                         </button>
@@ -99,7 +99,7 @@
                                     <button type="button" class="btn btn-outline-primary btn-sm"
                                         title="{{ $editTitle }}" data-action="{{ route('legal-entities.update', $legalEntity) }}"
                                         data-ruc="{{ $legalEntity->ruc }}" data-razon="{{ $legalEntity->razon_social }}"
-                                        data-district="{{ $legalEntity->district }}" data-representative="{{ $legalEntity->representative_id }}" data-representative-dni="{{ $legalEntity->representative?->naturalPerson?->dni }}" data-representative-name="{{ $legalEntity->representative?->naturalPerson?->nombres }}" data-representative-cargo="{{ $legalEntity->representative?->cargo }}" data-representative-since="{{ $legalEntity->representative?->fecha_desde }}"
+                                        data-district="{{ $legalEntity->district }}" data-representative="{{ $legalEntity->representative?->id }}" data-representative-dni="{{ $legalEntity->representative?->naturalPerson?->dni }}" data-representative-name="{{ $legalEntity->representative?->naturalPerson?->nombres }}" data-representative-cargo="{{ $legalEntity->representative?->cargo }}" data-representative-since="{{ $legalEntity->representative?->fecha_desde }}"
                                         @disabled(!$canEditLegalEntity)>
                                         <span class="material-symbols-outlined">edit</span>
                                     </button>

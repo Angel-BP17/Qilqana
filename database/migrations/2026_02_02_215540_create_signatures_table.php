@@ -21,6 +21,7 @@ return new class extends Migration
             // Almacenamiento
             $table->string('signature_root')->nullable();
             $table->string('evidence_root')->nullable();
+            $table->json('evidence_location')->nullable();
             $table->string('carta_poder_path')->nullable();
 
             // Usuarios involucrados en la firma

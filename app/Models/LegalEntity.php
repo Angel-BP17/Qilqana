@@ -4,6 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class LegalEntity extends Model
 {
@@ -15,7 +19,6 @@ class LegalEntity extends Model
         'ruc',
         'razon_social',
         'district',
-        'representative_id',
     ];
 
     protected $dates = [
@@ -23,18 +26,34 @@ class LegalEntity extends Model
         'updated_at',
     ];
 
-    public function charges()
+    public function charges(): MorphMany
     {
-        return $this->hasMany(Charge::class);
+        return $this->morphMany(Charge::class, 'interesado');
     }
 
-    public function resolucions()
+    public function resolucions(): MorphToMany
     {
         return $this->morphToMany(Resolucion::class, 'interesado', 'resolucion_interesados');
     }
 
-    public function representative()
+    /**
+     * Obtiene todos los representantes que ha tenido la empresa.
+     */
+    public function representatives(): HasMany
     {
-        return $this->belongsTo(Representative::class);
+        return $this->hasMany(Representative::class, 'legal_entity_id');
+    }
+
+    /**
+     * Obtiene el representante actual y activo.
+     */
+    public function representative(): HasOne
+    {
+        return $this->hasOne(Representative::class, 'legal_entity_id')
+            ->where(function ($query) {
+                $query->whereNull('fecha_hasta')
+                    ->orWhere('fecha_hasta', '>=', now()->toDateString());
+            })
+            ->latestOfMany();
     }
 }

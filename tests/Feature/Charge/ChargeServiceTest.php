@@ -33,11 +33,10 @@ class ChargeServiceTest extends TestCase
     {
         Storage::fake('local');
 
-        $charge = Charge::create([
+        $charge = Charge::factory()->create([
             'n_charge' => '1',
             'user_id' => $this->user->id,
             'asunto' => 'Cargo a eliminar',
-            'tipo_interesado' => 'Persona Natural',
         ]);
 
         $signature = $charge->signature()->create([
@@ -61,11 +60,10 @@ class ChargeServiceTest extends TestCase
     {
         Storage::fake('local');
 
-        $charge = Charge::create([
+        $charge = Charge::factory()->create([
             'n_charge' => '2',
             'user_id' => $this->user->id,
             'asunto' => 'Cargo de prueba de firma',
-            'tipo_interesado' => 'Persona Natural',
         ]);
 
         $data = [

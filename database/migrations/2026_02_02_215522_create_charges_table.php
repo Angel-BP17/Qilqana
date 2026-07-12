@@ -17,18 +17,21 @@ return new class extends Migration
             // Datos generales del cargo
             $table->string('n_charge');
             $table->string('asunto');
+            $table->string('document_path')->nullable();
             $table->string('charge_period', 10)->nullable();
             $table->date('document_date')->nullable();
 
-            // Interesado relacionado al cargo
-            $table->enum('tipo_interesado', ['Persona Juridica', 'Persona Natural', 'Trabajador UGEL']);
-            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('natural_person_id')->nullable()->constrained('natural_people')->nullOnDelete();
-            $table->foreignId('legal_entity_id')->nullable()->constrained('legal_entities')->nullOnDelete();
+            // Interesado relacionado al cargo (Polimórfico)
+            $table->string('interesado_type');
+            $table->unsignedBigInteger('interesado_id');
 
-            // Llave foranea a la tabla resoluciones
-            $table->foreignId('resolucion_id')->nullable()->constrained()->onDelete('cascade');
+            // Creador del cargo
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+
+            // Índices
+            $table->index(['interesado_type', 'interesado_id'], 'charges_interesado_polymorphic_index');
+            $table->index(['user_id', 'charge_period', 'n_charge'], 'charges_user_period_correlative_index');
         });
     }
 

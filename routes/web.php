@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Catalogs\AsuntoTypeController;
 use App\Http\Controllers\Catalogs\LegalEntityController;
+use App\Http\Controllers\Catalogs\LevelModalityController;
 use App\Http\Controllers\Catalogs\NaturalPersonController;
 use App\Http\Controllers\Catalogs\ResolucionTypeController;
 use App\Http\Controllers\Operations\ChargeController;
@@ -38,6 +39,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/import', [ResolucionController::class, 'import'])->name('index.import');
         Route::get('/resoluciones/pdf', [ResolucionController::class, 'generatePDF'])->name('resoluciones.pdf');
         Route::get('/resoluciones/excel', [ResolucionController::class, 'exportExcel'])->name('resoluciones.excel');
+        Route::get('resolucions/{resolucion}/document', [ResolucionController::class, 'getDocument'])->name('resolucions.file.document');
+        Route::patch('resolucions/{resolucion}/work', [ResolucionController::class, 'markAsWorked'])->name('resolucions.work');
     });
 
     // Módulo de Cargos
@@ -47,6 +50,8 @@ Route::middleware(['auth'])->group(function () {
     Route::put('charges/{charge}/sign', [ChargeController::class, 'signStore'])->name('charges.sign.store');
     Route::put('charges/{charge}/reject', [ChargeController::class, 'reject'])->name('charges.reject');
     Route::get('charges/refresh', [ChargeController::class, 'refresh'])->name('charges.refresh');
+    Route::get('notifications/pending-charges', [ChargeController::class, 'pendingNotifications'])->name('notifications.pending-charges');
+    Route::post('notifications/{id}/read', [ChargeController::class, 'markNotificationAsRead'])->name('notifications.read');
     Route::get('charges/{charge}/signature', [ChargeController::class, 'getSignature'])->name('charges.file.signature');
     Route::get('charges/{charge}/evidence', [ChargeController::class, 'getEvidence'])->name('charges.file.evidence');
     Route::get('charges/{charge}/document', [ChargeController::class, 'getDocument'])->name('charges.file.document');
@@ -72,6 +77,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
     Route::resource('resolucion-types', ResolucionTypeController::class)->except('create', 'show', 'edit');
     Route::resource('asunto-types', AsuntoTypeController::class)->except('create', 'show', 'edit');
+    Route::resource('level-modalities', LevelModalityController::class)->except('create', 'show', 'edit');
     Route::get('/descargar-plantilla', [ResolucionController::class, 'downloadTemplate'])->name('download.template');
     Route::get('/', [HomeController::class, 'index'])->name('home');
 

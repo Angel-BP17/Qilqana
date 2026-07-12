@@ -57,9 +57,18 @@ export const RolesManagement = {
                 cb.disabled = isAdmin;
             });
             document.querySelectorAll('.edit-perm-select').forEach(select => {
-                Array.from(select.options).forEach(opt => opt.selected = perms.includes(opt.value));
-                if (window.jQuery) window.jQuery(select).trigger('change.select2');
-                select.disabled = isAdmin;
+                const selectedVals = perms.filter(val => Array.from(select.options).some(opt => opt.value === val));
+                if (select.tomselect) {
+                    select.tomselect.setValue(selectedVals);
+                    if (isAdmin) {
+                        select.tomselect.disable();
+                    } else {
+                        select.tomselect.enable();
+                    }
+                } else {
+                    Array.from(select.options).forEach(opt => opt.selected = perms.includes(opt.value));
+                    select.disabled = isAdmin;
+                }
             });
 
             const bootstrapInstance = window.bootstrap || bootstrap;
@@ -79,12 +88,20 @@ export const RolesManagement = {
         };
 
         const initSelect2 = (modal) => {
-            if (!window.jQuery?.fn?.select2) return;
-            window.jQuery(modal).find('.select2-permissions').each(function() {
-                const $s = window.jQuery(this);
-                $s.select2({ width: '100%', dropdownParent: window.jQuery(modal), closeOnSelect: false });
-                $s.on('change', () => sync(this));
-                sync(this);
+            if (!window.TomSelect) return;
+            modal.querySelectorAll('.select2-permissions').forEach(select => {
+                if (select.tomselect) {
+                    sync(select);
+                    return;
+                }
+                const ts = new TomSelect(select, {
+                    plugins: ['remove_button'],
+                    maxItems: null,
+                    closeOnSelect: false,
+                    placeholder: 'Seleccione permisos...'
+                });
+                ts.on('change', () => sync(select));
+                sync(select);
             });
         };
 

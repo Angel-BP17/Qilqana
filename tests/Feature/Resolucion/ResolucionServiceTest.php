@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Resolucion;
 
+use App\Models\LevelModality;
 use App\Models\Resolucion;
 use App\Models\Setting;
 use App\Models\User;
@@ -74,5 +75,36 @@ class ResolucionServiceTest extends TestCase
 
         $this->assertEquals(1, $result['totalResolucionesPeriodo']);
         $this->assertEquals('2026', $result['chargePeriod']);
+    }
+
+    /** @test */
+    public function it_creates_a_resolucion_with_level_modality()
+    {
+        $modality = LevelModality::create(['name' => 'MODALIDAD TEST']);
+
+        $data = [
+            'rd' => 'RD-002-2026',
+            'fecha' => '2026-03-01',
+            'asunto' => 'Resolucion de prueba con modalidad',
+            'user_id' => $this->user->id,
+            'level_modality_id' => $modality->id,
+            'interesados' => [
+                [
+                    'type' => 'Persona Natural',
+                    'nombres' => 'Juan',
+                    'apellido_paterno' => 'Perez',
+                    'apellido_materno' => 'Gomez',
+                    'dni' => '87654321',
+                ],
+            ],
+        ];
+
+        $result = $this->service->create($data);
+
+        $this->assertTrue($result);
+        $this->assertDatabaseHas('resolucions', [
+            'rd' => 'RD-002-2026',
+            'level_modality_id' => $modality->id,
+        ]);
     }
 }

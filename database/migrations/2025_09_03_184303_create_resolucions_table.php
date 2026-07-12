@@ -13,12 +13,17 @@ return new class extends Migration
     {
         Schema::create('resolucions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('resolucion_type_id')->nullable()->constrained('resolucion_types')->nullOnDelete();
+            $table->foreignId('asunto_type_id')->nullable()->constrained('asunto_types')->nullOnDelete();
             $table->string('rd', 20)->nullable();
-            $table->string('periodo', 20)->nullable();
             $table->dateTime('fecha')->nullable();
+            $table->string('periodo', 20)->nullable();
             $table->string('signature_root')->nullable();
-            $table->string('nombres_apellidos')->nullable();
-            $table->string('dni')->nullable();
+            $table->text('nombres_apellidos')->nullable();
+            $table->text('dni')->nullable();
+            $table->text('cedula')->nullable();
+            $table->text('ruc')->nullable();
+            $table->text('razon_social')->nullable();
             $table->text('asunto')->nullable();
             $table->string('procedencia')->nullable();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();

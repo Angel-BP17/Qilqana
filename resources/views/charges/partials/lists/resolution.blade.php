@@ -64,10 +64,10 @@
                         <div class="card-body py-3">
                             <div class="mb-3">
                                 <label class="text-muted small text-uppercase fw-bold d-block mb-1">Interesado</label>
-                                <div class="fw-semibold text-dark text-truncate" title="{{ $charge->resolucion?->nombres_apellidos }}">
-                                    {{ $charge->resolucion?->nombres_apellidos }}
+                                <div class="fw-semibold text-dark text-truncate" title="{{ $charge->interesado_label }}">
+                                    {{ $charge->interesado_label }}
                                 </div>
-                                <div class="small text-muted">DNI: {{ $charge->resolucion?->dni ?? '---' }}</div>
+                                <div class="small text-muted">Identidad: {{ $charge->interesado_dni }}</div>
                             </div>
 
                             <div class="row g-2 mb-3">
@@ -109,10 +109,10 @@
                         <tr>
                             <th>#</th>
                             <th>No. cargo</th>
-                            <th>RD</th>
+                            <th>Res.</th>
                             <th>Período</th>
-                            <th>Nombres y apellidos</th>
-                            <th>DNI</th>
+                            <th>Nombres y apellidos/Razón social</th>
+                            <th>DNI/RUC</th>
                             <th>Asunto</th>
                             <th>Estado</th>
                             <th class="text-end">Acciones</th>
@@ -126,11 +126,11 @@
                                 <td class="fw-bold">{{ $charge->resolucion?->type?->abreviacion ?? 'RD' }} {{ $charge->resolucion?->rd }}</td>
                                 <td>{{ $charge->resolucion?->periodo }}</td>
                                 <td style="max-width: 250px;">
-                                    <div class="fw-semibold text-truncate" title="{{ $charge->resolucion?->nombres_apellidos }}">
-                                        {{ $charge->resolucion?->nombres_apellidos }}
+                                    <div class="fw-semibold text-truncate" title="{{ $charge->interesado_label }}">
+                                        {{ $charge->interesado_label }}
                                     </div>
                                 </td>
-                                <td>{{ $charge->resolucion?->dni }}</td>
+                                <td>{{ $charge->interesado_dni }}</td>
                                 <td style="max-width: 200px;" class="text-truncate">{{ $charge->asunto }}</td>
                                 <td>@include('charges.partials.status-badge', [
                                     'status' => $charge->signature?->signature_status,

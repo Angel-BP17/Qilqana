@@ -44,7 +44,7 @@ class ChargeReportService
         $search = $data['search'] ?? null;
         $period = $data['period'] ?? $defaultPeriod;
 
-        $charges = Charge::with(['resolucions', 'signature', 'naturalPerson', 'legalEntity'])
+        $charges = Charge::with(['resolucions', 'signature', 'interesado'])
             ->whereHas('resolucions')
             ->whereHas('signature', fn ($q) => $q->where('signature_status', 'firmado'))
             ->when($period, fn ($q) => $q->where('charge_period', $period))

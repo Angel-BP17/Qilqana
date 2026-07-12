@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -12,8 +13,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('resolucions', function (Blueprint $table) {
-            $table->foreignId('resolucion_type_id')->after('id')->nullable()->constrained('resolucion_types')->nullOnDelete();
-            $table->string('ruc', 11)->after('dni')->nullable();
+            $table->foreignId('level_modality_id')
+                ->nullable()
+                ->after('asunto_type_id')
+                ->constrained('level_modalities')
+                ->nullOnDelete();
         });
     }
 
@@ -23,8 +27,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('resolucions', function (Blueprint $table) {
-            $table->dropForeign(['resolucion_type_id']);
-            $table->dropColumn(['resolucion_type_id', 'ruc']);
+            if (DB::getDriverName() !== 'sqlite') {
+                $table->dropForeign(['level_modality_id']);
+                $table->dropColumn('level_modality_id');
+            }
         });
     }
 };

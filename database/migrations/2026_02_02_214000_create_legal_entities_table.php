@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('charges', function (Blueprint $table) {
-            $table->string('document_path')->nullable()->after('asunto');
+        Schema::create('legal_entities', function (Blueprint $table) {
+            $table->id();
+            $table->string('ruc')->nullable();
+            $table->string('razon_social')->nullable();
+            $table->string('district')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -21,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('charges', function (Blueprint $table) {
-            $table->dropColumn('document_path');
-        });
+        Schema::dropIfExists('legal_entities');
     }
 };

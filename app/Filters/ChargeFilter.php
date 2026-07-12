@@ -3,12 +3,15 @@
 namespace App\Filters;
 
 use App\Models\Charge;
+use App\Models\LegalEntity;
+use App\Models\NaturalPerson;
+use App\Models\User;
 
 class ChargeFilter
 {
     public function getAllSentCharges($searchfilters, $user)
     {
-        return Charge::with(['user', 'naturalPerson', 'legalEntity.representative.naturalPerson', 'signature', 'signature.signer', 'signature.assignedTo', 'resolucions'])
+        return Charge::with(['user', 'interesado', 'signature', 'signature.signer', 'signature.assignedTo', 'resolucions'])
             ->where('user_id', $user?->id)
             ->whereDoesntHave('resolucions')
             ->when($searchfilters['period'], function ($q, $period) {
@@ -35,8 +38,7 @@ class ChargeFilter
     {
         return Charge::with([
             'user',
-            'naturalPerson',
-            'legalEntity.representative.naturalPerson',
+            'interesado',
             'signature',
             'signature.signer',
             'signature.assignedTo',
@@ -44,7 +46,7 @@ class ChargeFilter
         ])
             ->whereDoesntHave('resolucions')
             ->whereHas('signature', fn ($q) => $q->where('assigned_to', $user?->id))
-            ->whereNotIn('tipo_interesado', ['Persona Juridica', 'Persona Natural'])
+            ->where('interesado_type', User::class)
             ->when($searchfilters['period'], function ($q, $period) {
                 $q->where(function ($q2) use ($period) {
                     $q2->where('charge_period', $period)->orWhereNull('charge_period');
@@ -74,10 +76,10 @@ class ChargeFilter
 
     public function getAllCreatedCharges($searchfilters, $user)
     {
-        return Charge::with(['user', 'naturalPerson', 'legalEntity.representative.naturalPerson', 'signature', 'signature.signer', 'signature.assignedTo', 'resolucions'])
+        return Charge::with(['user', 'interesado', 'signature', 'signature.signer', 'signature.assignedTo', 'resolucions'])
             ->where('user_id', $user?->id)
             ->whereDoesntHave('resolucions')
-            ->whereIn('tipo_interesado', ['Persona Juridica', 'Persona Natural'])
+            ->where('interesado_type', '!=', User::class)
             ->when($searchfilters['period'], function ($q, $period) {
                 $q->where(function ($q2) use ($period) {
                     $q2->where('charge_period', $period)->orWhereNull('charge_period');
@@ -100,8 +102,18 @@ class ChargeFilter
 
     public function getAllResolutionCharges($searchfilters, $user)
     {
-        return Charge::with(['user', 'naturalPerson', 'legalEntity.representative.naturalPerson', 'signature', 'signature.signer', 'signature.assignedTo', 'resolucions'])
+        return Charge::with(['user', 'interesado', 'signature', 'signature.signer', 'signature.assignedTo', 'resolucions'])
             ->whereHas('resolucions')
+            ->when(! $user?->hasRole('REGISTRADOR RESOLUCIONES'), function ($q) use ($user) {
+                $q->where(function ($q2) use ($user) {
+                    $q2->where(function ($q3) use ($user) {
+                        $q3->where('interesado_id', $user?->id)
+                            ->where('interesado_type', \App\Models\User::class);
+                    })->orWhereHas('signature', function ($q3) use ($user) {
+                        $q3->where('assigned_to', $user?->id);
+                    });
+                });
+            })
             ->when($searchfilters['period'], function ($q, $period) {
                 $q->where(function ($q2) use ($period) {
                     $q2->where('charge_period', $period)
@@ -126,16 +138,17 @@ class ChargeFilter
         $query->where(function ($q) use ($search) {
             $q->where('n_charge', 'like', "%{$search}%")
                 ->orWhere('asunto', 'like', "%{$search}%")
-                ->orWhereHas('naturalPerson', function ($naturalPerson) use ($search) {
-                    $naturalPerson->where('nombres', 'like', "%{$search}%")
-                        ->orWhere('apellido_paterno', 'like', "%{$search}%")
-                        ->orWhere('apellido_materno', 'like', "%{$search}%")
-                        ->orWhere('dni', 'like', "%{$search}%");
-                })
-                ->orWhereHas('legalEntity', function ($legalEntity) use ($search) {
-                    $legalEntity->where('razon_social', 'like', "%{$search}%")
-                        ->orWhere('ruc', 'like', "%{$search}%")
-                        ->orWhere('district', 'like', "%{$search}%");
+                ->orWhereHasMorph('interesado', [NaturalPerson::class, LegalEntity::class], function ($morphQuery, $type) use ($search) {
+                    if ($type === NaturalPerson::class) {
+                        $morphQuery->where('nombres', 'like', "%{$search}%")
+                            ->orWhere('apellido_paterno', 'like', "%{$search}%")
+                            ->orWhere('apellido_materno', 'like', "%{$search}%")
+                            ->orWhere('dni', 'like', "%{$search}%");
+                    } elseif ($type === LegalEntity::class) {
+                        $morphQuery->where('razon_social', 'like', "%{$search}%")
+                            ->orWhere('ruc', 'like', "%{$search}%")
+                            ->orWhere('district', 'like', "%{$search}%");
+                    }
                 });
         });
     }

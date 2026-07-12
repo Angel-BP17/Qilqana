@@ -208,17 +208,21 @@ class InteresadosManager {
 
     handleWorkerAdd() {
         const p = this.prefix === 'create' ? '' : 'edit_';
-        const select = $(`#${p}search_ugel_interesado`);
-        const data = select.select2('data')[0];
+        const selectEl = document.getElementById(`${p}search_ugel_interesado`);
+        if (!selectEl || !selectEl.tomselect) return;
 
-        if (data && data.id) {
-            this.addInteresado({
-                id: data.id,
-                type: 'Trabajador UGEL',
-                text: data.text.split(' - ')[1] || data.text,
-                identity: data.dni || '---'
-            });
-            select.val(null).trigger('change');
+        const val = selectEl.tomselect.getValue();
+        if (val) {
+            const data = selectEl.tomselect.options[val];
+            if (data) {
+                this.addInteresado({
+                    id: data.id,
+                    type: 'Trabajador UGEL',
+                    text: data.text.split(' - ')[1] || data.text,
+                    identity: data.dni || '---'
+                });
+                selectEl.tomselect.clear();
+            }
         }
     }
 
@@ -228,15 +232,40 @@ class InteresadosManager {
         const modalElement = document.getElementById(modalId);
         if (!modalElement) return;
 
-        $(`#${p}search_ugel_interesado`).select2({
-            theme: 'bootstrap-5', dropdownParent: $(modalElement), width: '100%',
-            ajax: {
-                url: route('/search/users'), dataType: 'json', delay: 250,
-                data: params => ({ q: params.term }),
-                processResults: data => ({ results: data.results })
-            },
-            placeholder: 'Buscar trabajador...'
-        });
+        const selectEl = document.getElementById(`${p}search_ugel_interesado`);
+        if (!selectEl) return;
+
+        if (selectEl.tomselect) {
+            selectEl.tomselect.clear();
+            return;
+        }
+
+        if (window.TomSelect) {
+            new TomSelect(`#${p}search_ugel_interesado`, {
+                valueField: 'id',
+                labelField: 'text',
+                searchField: 'text',
+                placeholder: 'Buscar trabajador...',
+                load: function(query, callback) {
+                    if (!query.length) return callback();
+                    fetch(route(`/search/users?q=${encodeURIComponent(query)}`))
+                        .then(response => response.json())
+                        .then(json => {
+                            callback(json.results);
+                        }).catch(() => {
+                            callback();
+                        });
+                },
+                render: {
+                    option: function(item, escape) {
+                        return '<div>' + escape(item.text) + '</div>';
+                    },
+                    item: function(item, escape) {
+                        return '<div>' + escape(item.text) + '</div>';
+                    }
+                }
+            });
+        }
     }
 
     clearTempResults() {
@@ -344,12 +373,15 @@ export const ResolucionsManagement = {
         this.setupDetailsModal();
         this.setupEditModal();
         this.setupDeleteModal();
+        this.setupSelectInteresadoModal();
         this.setupImport();
         this.setupFileLabel();
         this.setupSubfilter();
         this.setupFormSubmissionFeedback();
         this.setupInteresadoToggles();
         this.setupAsuntoTypesDynamic();
+        this.setupWorkConfirmation();
+        this.setupModalAccessibility();
     },
 
     setupModals: function() {
@@ -365,7 +397,7 @@ export const ResolucionsManagement = {
         }
 
         document.addEventListener('focusin', (e) => {
-            if (e.target.closest(".select2-container, .select2-search__field") !== null) {
+            if (e.target.closest(".ts-wrapper, .ts-control, .ts-dropdown") !== null) {
                 e.stopImmediatePropagation();
             }
         });
@@ -376,15 +408,6 @@ export const ResolucionsManagement = {
             if (manager) {
                 manager.initWorkerSelect2();
             }
-        });
-
-        $(document).on('select2:open', () => {
-            setTimeout(() => {
-                const searchField = document.querySelector('.select2-container--open .select2-search__field');
-                if (searchField) {
-                    searchField.focus();
-                }
-            }, 50);
         });
     },
 
@@ -437,6 +460,7 @@ export const ResolucionsManagement = {
 
         setupDynamic('create_resolution_type', 'create_asunto_type');
         setupDynamic('edit_resolution_type', 'edit_asunto_type');
+        setupDynamic('filter_resolution_type', 'filter_asunto_type');
     },
 
     setupInteresadoToggles: function() {
@@ -480,14 +504,49 @@ export const ResolucionsManagement = {
         const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
         const form = document.getElementById('editResolutionForm');
 
+        // Limpiar archivo al abrir modal de edición y de creación
+        $(modalEl).on('show.bs.modal', () => {
+            const fileInput = document.getElementById('edit_resolution_file');
+            if (fileInput) fileInput.value = '';
+        });
+
+        $('#createResolutionModal').on('show.bs.modal', () => {
+            const fileInput = document.getElementById('create_resolution_file');
+            if (fileInput) fileInput.value = '';
+        });
+
         document.querySelectorAll('.btn-edit-resolution').forEach(btn => {
             btn.onclick = () => {
                 form.action = btn.dataset.action;
+                
+                const hiddenEditId = document.getElementById('edit_resolucion_id_hidden');
+                if (hiddenEditId) {
+                    hiddenEditId.value = btn.dataset.id || '';
+                    console.log(`[Resolucions edit] ID de resolución cargado en input oculto: ${hiddenEditId.value}`);
+                }
                 
                 ['rd', 'fecha', 'procedencia', 'asunto'].forEach(f => {
                     const el = document.getElementById(`edit_resolution_${f}`);
                     if (el) el.value = btn.dataset[f] || '';
                 });
+
+                // Manejar botón de visualizar PDF en la edición
+                const pdfContainer = document.getElementById('edit_resolution_pdf_container');
+                if (pdfContainer) {
+                    if (btn.dataset.documentUrl) {
+                        pdfContainer.innerHTML = `
+                            <div class="mb-2">
+                                <a href="${btn.dataset.documentUrl}" target="_blank" class="btn btn-outline-primary btn-sm fw-bold d-inline-flex align-items-center">
+                                    <span class="material-symbols-outlined fs-5 me-1">picture_as_pdf</span> Ver PDF Actual
+                                </a>
+                            </div>
+                        `;
+                        pdfContainer.classList.remove('d-none');
+                    } else {
+                        pdfContainer.innerHTML = '';
+                        pdfContainer.classList.add('d-none');
+                    }
+                }
 
                 const resTypeSelect = document.getElementById('edit_resolution_type');
                 if (resTypeSelect) {
@@ -497,6 +556,11 @@ export const ResolucionsManagement = {
                         asuntoSelect.dataset.selected = btn.dataset.asunto_type_id || '';
                     }
                     resTypeSelect.dispatchEvent(new Event('change'));
+                }
+
+                const levelModalitySelect = document.getElementById('edit_level_modality');
+                if (levelModalitySelect) {
+                    levelModalitySelect.value = btn.dataset.level_modality_id || '';
                 }
 
                 if (self.editInteresadosManager) {
@@ -543,18 +607,54 @@ export const ResolucionsManagement = {
     },
 
     setupFormSubmissionFeedback: function() {
-        const forms = ['createResolutionForm', 'editResolutionForm', 'deleteResolutionForm'];
-        forms.forEach(formId => {
-            const form = document.getElementById(formId);
+        const self = this;
+        const forms = [
+            { id: 'createResolutionForm', manager: () => self.createInteresadosManager, name: 'Creación de Resolución' },
+            { id: 'editResolutionForm', manager: () => self.editInteresadosManager, name: 'Edición de Resolución' }
+        ];
+
+        forms.forEach(item => {
+            const form = document.getElementById(item.id);
             if (!form) return;
-            form.addEventListener('submit', function() {
+            form.addEventListener('submit', function(e) {
+                console.log(`[Resolucions submit] Iniciando envío de formulario: ${item.name}`);
+                const mgr = item.manager();
+                const totalInteresados = mgr ? mgr.interesados.length : 0;
+                console.log(`[Resolucions submit] Interesados agregados en la lista del modal: ${totalInteresados}`);
+
+                if (mgr && totalInteresados === 0) {
+                    console.warn(`[Resolucions submit] Bloqueado: Se intentó guardar sin interesados.`);
+                    e.preventDefault();
+                    alert('Debe agregar al menos un interesado a la lista antes de guardar la resolución.');
+                    return;
+                }
+
+                console.log(`[Resolucions submit] Validación aprobada. Deshabilitando botón de submit en el siguiente tick.`);
                 const btn = this.querySelector('button[type="submit"]');
                 if (btn) {
                     btn.classList.add('btn-loading');
-                    btn.disabled = true;
+                    setTimeout(() => {
+                        btn.disabled = true;
+                        console.log(`[Resolucions submit] Botón de submit deshabilitado.`);
+                    }, 0);
                 }
             });
         });
+
+        // Formulario de eliminación (no requiere interesados)
+        const deleteForm = document.getElementById('deleteResolutionForm');
+        if (deleteForm) {
+            deleteForm.addEventListener('submit', function() {
+                console.log('[Resolucions submit] Enviando formulario de eliminación de resolución.');
+                const btn = this.querySelector('button[type="submit"]');
+                if (btn) {
+                    btn.classList.add('btn-loading');
+                    setTimeout(() => {
+                        btn.disabled = true;
+                    }, 0);
+                }
+            });
+        }
     },
 
     setupSubfilter: function() {
@@ -566,6 +666,92 @@ export const ResolucionsManagement = {
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
                 row.style.display = text.includes(query) ? '' : 'none';
+            });
+        });
+    },
+
+    setupSelectInteresadoModal: function() {
+        const modalEl = document.getElementById('selectInteresadoModal');
+        if (!modalEl) return;
+        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        const form = document.getElementById('selectInteresadoForm');
+        const listContainer = document.getElementById('modal_select_interesados_list');
+        const rdEl = document.getElementById('modal_select_interesado_rd');
+
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn-trigger-select-interesado');
+            if (!btn) return;
+
+            e.preventDefault();
+            
+            const action = btn.dataset.action;
+            const rd = btn.dataset.rd;
+            let interesados = [];
+            try {
+                interesados = JSON.parse(btn.dataset.interesados);
+            } catch (err) {
+                console.error('Error parseando interesados para cargo:', err);
+                return;
+            }
+
+            if (rdEl) rdEl.textContent = rd;
+            if (form) form.action = action;
+            if (listContainer) {
+                listContainer.innerHTML = '';
+                interesados.forEach(i => {
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 border-0 border-bottom';
+                    item.innerHTML = `
+                        <div class="d-flex flex-column text-start">
+                            <span class="fw-bold text-dark small">${i.name}</span>
+                            <span class="text-muted small" style="font-size: 0.75rem;">${i.type}</span>
+                        </div>
+                        <span class="material-symbols-outlined text-primary fs-5">chevron_right</span>
+                    `;
+                    item.onclick = () => {
+                        document.getElementById('modal_select_interesado_id').value = i.id;
+                        document.getElementById('modal_select_interesado_type').value = i.type;
+                        
+                        // Agregar feedback de carga al botón presionado
+                        item.disabled = true;
+                        item.innerHTML = `
+                            <div class="d-flex flex-column text-start">
+                                <span class="fw-bold text-dark small">${i.name}</span>
+                                <span class="text-muted small" style="font-size: 0.75rem;">${i.type}</span>
+                            </div>
+                            <span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>
+                        `;
+                        
+                        form.submit();
+                    };
+                    listContainer.appendChild(item);
+                });
+            }
+
+            modal.show();
+        });
+    },
+
+    setupWorkConfirmation: function() {
+        document.addEventListener('submit', function(e) {
+            const form = e.target.closest('.form-work-resolution');
+            if (form) {
+                const confirmed = confirm('¿Está seguro de marcar esta resolución como trabajada? Esta acción no se puede deshacer.');
+                if (!confirmed) {
+                    e.preventDefault();
+                }
+            }
+        });
+    },
+
+    setupModalAccessibility: function() {
+        document.querySelectorAll('.modal').forEach(modalEl => {
+            modalEl.addEventListener('hidden.bs.modal', () => {
+                if (modalEl.contains(document.activeElement) || document.activeElement === modalEl) {
+                    console.log(`[Accessibility] Foco liberado del modal oculto (${modalEl.id}) hacia document.body.`);
+                    document.body.focus();
+                }
             });
         });
     }

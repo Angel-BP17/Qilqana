@@ -21,6 +21,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             SettingSeeder::class,
+            LevelModalitySeeder::class,
+            ResolucionTypeSeeder::class,
+            AsuntoTypeSeeder::class,
         ]);
     }
 }

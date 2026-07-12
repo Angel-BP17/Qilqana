@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('representatives', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('natural_person_id')->constrained('natural_people')->onDelete('cascade');
+            $table->foreignId('legal_entity_id')->nullable()->constrained('legal_entities')->cascadeOnDelete();
+            $table->foreignId('natural_person_id')->constrained('natural_people')->cascadeOnDelete();
             $table->string('cargo')->nullable();
             $table->date('fecha_desde')->nullable();
+            $table->date('fecha_hasta')->nullable();
             $table->timestamps();
         });
     }

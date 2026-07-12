@@ -35,22 +35,21 @@ class LegalEntityController extends Controller
 
         $data = $this->validateData($request);
 
+        $legalEntity = LegalEntity::create($data);
+
         if (! empty($data['representative_dni'])) {
             $person = NaturalPerson::firstOrCreate(
                 ['dni' => $data['representative_dni']],
                 ['nombres' => $data['representative_name']]
             );
 
-            $representative = Representative::create([
+            Representative::create([
+                'legal_entity_id' => $legalEntity->id,
                 'natural_person_id' => $person->id,
                 'cargo' => $data['representative_cargo'],
                 'fecha_desde' => $data['representative_since'],
             ]);
-
-            $data['representative_id'] = $representative->id;
         }
-
-        LegalEntity::create($data);
 
         return redirect()->route('legal-entities.index')->with('success', 'Persona jurídica creada correctamente');
     }
@@ -75,12 +74,12 @@ class LegalEntityController extends Controller
                     'fecha_desde' => $data['representative_since'],
                 ]);
             } else {
-                $representative = Representative::create([
+                Representative::create([
+                    'legal_entity_id' => $legalEntity->id,
                     'natural_person_id' => $person->id,
                     'cargo' => $data['representative_cargo'],
                     'fecha_desde' => $data['representative_since'],
                 ]);
-                $data['representative_id'] = $representative->id;
             }
         }
 

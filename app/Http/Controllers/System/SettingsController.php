@@ -147,6 +147,12 @@ class SettingsController extends Controller
             'model_has_permissions',
             'role_has_permissions',
             'settings',
+            'level_modalities',
+            'resolucion_types',
+            'asunto_types',
+            'asunto_type_resolucion_type',
+            'resolucion_interesados',
+            'charge_resolucion',
         ];
     }
 

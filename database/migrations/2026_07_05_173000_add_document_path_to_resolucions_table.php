@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('resolucions', function (Blueprint $row) {
-            $row->foreignId('asunto_type_id')->nullable()->after('resolucion_type_id')->constrained()->nullOnDelete();
+        Schema::table('resolucions', function (Blueprint $table) {
+            $table->string('document_path')->nullable()->after('level_modality_id');
         });
     }
 
@@ -21,9 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('resolucions', function (Blueprint $row) {
-            $row->dropForeign(['asunto_type_id']);
-            $row->dropColumn('asunto_type_id');
+        Schema::table('resolucions', function (Blueprint $table) {
+            $table->dropColumn('document_path');
         });
     }
 };

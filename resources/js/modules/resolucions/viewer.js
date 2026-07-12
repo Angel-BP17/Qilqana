@@ -6,6 +6,15 @@ export const ResolucionViewerModule = {
         const detailsEl = document.getElementById('viewResolucionDetailsModal');
         if (detailsEl) {
             this.modals.viewDetails = new bootstrap.Modal(detailsEl);
+            
+            // Limpiar iframe al cerrar el modal para liberar memoria
+            detailsEl.addEventListener('hidden.bs.modal', () => {
+                const resPdfIframe = document.getElementById('view_res_pdf_iframe');
+                if (resPdfIframe) {
+                    resPdfIframe.src = '';
+                }
+            });
+
             this.bindEvents();
         }
     },
@@ -29,6 +38,22 @@ export const ResolucionViewerModule = {
         document.getElementById('view_res_fecha').textContent = d.fecha;
         document.getElementById('view_res_periodo').textContent = d.periodo;
         document.getElementById('view_res_procedencia').textContent = d.procedencia || '---';
+
+        // Documento de la Resolución (PDF)
+        const resDocWrapper = document.getElementById('view_res_document_wrapper');
+        const resPdfLink = document.getElementById('view_res_pdf_link');
+        const resPdfIframe = document.getElementById('view_res_pdf_iframe');
+        if (resDocWrapper && resPdfLink && resPdfIframe) {
+            if (d.resDocumentUrl) {
+                resDocWrapper.classList.remove('d-none');
+                resPdfLink.href = d.resDocumentUrl;
+                resPdfIframe.src = d.resDocumentUrl;
+            } else {
+                resDocWrapper.classList.add('d-none');
+                resPdfLink.href = '#';
+                resPdfIframe.src = '';
+            }
+        }
 
         // Gestión de Información del Cargo
         const chargeInfo = document.getElementById('view_res_charge_info');

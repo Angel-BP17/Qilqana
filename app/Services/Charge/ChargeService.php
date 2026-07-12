@@ -7,6 +7,7 @@ use App\Models\Charge;
 use App\Models\LegalEntity;
 use App\Models\NaturalPerson;
 use App\Models\Representative;
+use App\Models\Resolucion;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\Charge\Contracts\ChargeServiceInterface;
@@ -57,40 +58,98 @@ class ChargeService implements ChargeServiceInterface
     {
         return DB::transaction(function () use ($data) {
             $user = $data['user'];
-            $assignedTo = ($data['tipo_interesado'] === 'Trabajador UGEL') ? ($data['assigned_to'] ?? null) : $user->id;
+            $resolucionIds = $data['resolucion_ids'] ?? [];
+            $cargoPara = $data['cargo_para'] ?? 'otros';
 
             $documentPath = null;
             if (! empty($data['document_file'])) {
                 $documentPath = $data['document_file']->store('private/charges_documents', 'local');
             }
 
-            // Si es Trabajador UGEL, el user_id del cargo (destinatario) es el assigned_to
-            $targetUserId = ($data['tipo_interesado'] === 'Trabajador UGEL') ? $assignedTo : null;
+            // CASO 1: Destinatarios de la resolución ("Interesados de la resolución")
+            if ($cargoPara === 'interesados_resolucion' && ! empty($resolucionIds)) {
+                $resoluciones = Resolucion::with(['naturalPeople', 'legalEntities', 'users'])
+                    ->whereIn('id', $resolucionIds)
+                    ->get();
 
-            $charge = Charge::create([
-                'n_charge' => $this->nextChargeNumberForUser($user->id, $this->getChargePeriod()),
-                'charge_period' => $this->getChargePeriod(),
-                'document_date' => $data['document_date'] ?? null,
-                'user_id' => $user->id,
-                'tipo_interesado' => $data['tipo_interesado'],
-                'natural_person_id' => $this->resolveNaturalPerson($data),
-                'legal_entity_id' => $this->resolveLegalEntity($data),
-                'asunto' => $data['asunto'],
-                'document_path' => $documentPath,
-            ]);
+                $interesadosUnicos = [];
 
-            // Vincular múltiples resoluciones
-            if (! empty($data['resolucion_ids'])) {
-                $charge->resolucions()->attach($data['resolucion_ids']);
+                foreach ($resoluciones as $res) {
+                    foreach ($res->naturalPeople as $person) {
+                        $key = 'App\Models\NaturalPerson_'.$person->id;
+                        $interesadosUnicos[$key] = [
+                            'tipo' => 'Persona Natural',
+                            'model' => $person,
+                            'assigned_to' => $user->id,
+                        ];
+                    }
+                    foreach ($res->legalEntities as $entity) {
+                        $key = 'App\Models\LegalEntity_'.$entity->id;
+                        $interesadosUnicos[$key] = [
+                            'tipo' => 'Persona Juridica',
+                            'model' => $entity,
+                            'assigned_to' => $user->id,
+                        ];
+                    }
+                    foreach ($res->users as $u) {
+                        $key = 'App\Models\User_'.$u->id;
+                        $interesadosUnicos[$key] = [
+                            'tipo' => 'Trabajador UGEL',
+                            'model' => $u,
+                            'assigned_to' => $u->id,
+                        ];
+                    }
+                }
+
+                if (empty($interesadosUnicos)) {
+                    // Si no tiene interesados, crear uno genérico asignado al creador
+                    $this->crearCargoFisico($user->id, $this->getChargePeriod(), $data['document_date'] ?? null, $user->id, $user, $data['asunto'], $documentPath, $resolucionIds);
+                } else {
+                    foreach ($interesadosUnicos as $item) {
+                        $this->crearCargoFisico($user->id, $this->getChargePeriod(), $data['document_date'] ?? null, $user->id, $item['model'], $data['asunto'], $documentPath, $resolucionIds, $item['assigned_to']);
+                    }
+                }
+
+                return true;
             }
 
-            $charge->signature()->create([
-                'assigned_to' => $assignedTo,
-                'signature_status' => 'pendiente',
-                'signature_requested_at' => $assignedTo ? now() : null,
-            ]);
+            // CASO 2: Destinatarios ajenos ("Otros") - Array estructurado
+            if ($cargoPara === 'otros' && ! empty($data['destinatarios'])) {
+                foreach ($data['destinatarios'] as $dest) {
+                    $interesado = $this->resolverDestinatarioIndividual($dest);
+                    if ($interesado) {
+                        $assignedTo = ($dest['tipo'] === 'Trabajador UGEL') ? ($dest['assigned_to'] ?? $user->id) : $user->id;
+                        $this->crearCargoFisico($user->id, $this->getChargePeriod(), $data['document_date'] ?? null, $user->id, $interesado, $data['asunto'], $documentPath, $resolucionIds, $assignedTo);
+                    }
+                }
 
-            return true;
+                return true;
+            }
+
+            // CASO 3: Retrocompatibilidad (Formato plano anterior o tests)
+            if (! empty($data['tipo_interesado'])) {
+                $interesado = null;
+                $assignedTo = $user->id;
+
+                if ($data['tipo_interesado'] === 'Persona Natural') {
+                    $personId = $this->resolveNaturalPerson($data);
+                    $interesado = NaturalPerson::find($personId);
+                } elseif ($data['tipo_interesado'] === 'Persona Juridica') {
+                    $entityId = $this->resolveLegalEntity($data);
+                    $interesado = LegalEntity::find($entityId);
+                } elseif ($data['tipo_interesado'] === 'Trabajador UGEL') {
+                    $assignedTo = $data['assigned_to'] ?? $user->id;
+                    $interesado = User::find($assignedTo);
+                }
+
+                if ($interesado) {
+                    $this->crearCargoFisico($user->id, $this->getChargePeriod(), $data['document_date'] ?? null, $user->id, $interesado, $data['asunto'], $documentPath, $resolucionIds, $assignedTo);
+
+                    return true;
+                }
+            }
+
+            return false;
         });
     }
 
@@ -124,7 +183,6 @@ class ChargeService implements ChargeServiceInterface
             $model->update([
                 'document_date' => $data['document_date'] ?? null,
                 'asunto' => $data['asunto'],
-                'tipo_interesado' => $data['tipo_interesado'],
                 'document_path' => $documentPath,
             ]);
 
@@ -254,12 +312,12 @@ class ChargeService implements ChargeServiceInterface
                     'fecha_desde' => $data['representative_since'] ?? null,
                 ]);
             } else {
-                $representative = Representative::create([
+                Representative::create([
+                    'legal_entity_id' => $entity->id,
                     'natural_person_id' => $person->id,
                     'cargo' => $data['representative_cargo'] ?? null,
                     'fecha_desde' => $data['representative_since'] ?? null,
                 ]);
-                $entity->update(['representative_id' => $representative->id]);
             }
         }
 
@@ -268,15 +326,122 @@ class ChargeService implements ChargeServiceInterface
 
     private function syncInteresado(Charge $model, array $data): void
     {
-        if (in_array($data['tipo_interesado'], ['Persona Natural', 'Trabajador UGEL'], true)) {
+        if ($data['tipo_interesado'] === 'Persona Natural') {
             $payload = ['dni' => $data['dni'] ?? null, 'nombres' => $data['nombres'] ?? null, 'apellido_paterno' => $data['apellido_paterno'] ?? null, 'apellido_materno' => $data['apellido_materno'] ?? null];
-            $person = $model->naturalPerson ?: NaturalPerson::create($payload);
+            $person = ($model->interesado instanceof NaturalPerson) ? $model->interesado : NaturalPerson::create($payload);
             $person->update($payload);
-            $model->update(['natural_person_id' => $person->id, 'legal_entity_id' => null]);
+            $model->update([
+                'interesado_type' => 'App\Models\NaturalPerson',
+                'interesado_id' => $person->id,
+            ]);
         } elseif ($data['tipo_interesado'] === 'Persona Juridica') {
             $legalEntityId = $this->resolveLegalEntity($data);
-            $model->update(['natural_person_id' => null, 'legal_entity_id' => $legalEntityId]);
+            $model->update([
+                'interesado_type' => 'App\Models\LegalEntity',
+                'interesado_id' => $legalEntityId,
+            ]);
+        } elseif ($data['tipo_interesado'] === 'Trabajador UGEL') {
+            $assignedTo = $data['assigned_to'] ?? $data['user']->id;
+            $model->update([
+                'interesado_type' => 'App\Models\User',
+                'interesado_id' => $assignedTo,
+            ]);
         }
+    }
+
+    private function crearCargoFisico(int $creatorId, ?string $period, ?string $docDate, int $userId, $interesado, string $asunto, ?string $documentPath, array $resolucionIds, ?int $assignedTo = null): void
+    {
+        $assignedTo = $assignedTo ?? $creatorId;
+
+        $charge = Charge::create([
+            'n_charge' => $this->nextChargeNumberForUser($creatorId, $period),
+            'charge_period' => $period,
+            'document_date' => $docDate,
+            'user_id' => $creatorId,
+            'interesado_type' => get_class($interesado),
+            'interesado_id' => $interesado->id,
+            'asunto' => $asunto,
+            'document_path' => $documentPath,
+        ]);
+
+        if (! empty($resolucionIds)) {
+            $charge->resolucions()->attach($resolucionIds);
+        }
+
+        $charge->signature()->create([
+            'assigned_to' => $assignedTo,
+            'signature_status' => 'pendiente',
+            'signature_requested_at' => now(),
+        ]);
+
+        $assignedUser = \App\Models\User::find($assignedTo);
+        if ($assignedUser) {
+            $assignedUser->notify(new \App\Notifications\PendingChargeNotification($charge));
+        }
+    }
+
+    private function resolverDestinatarioIndividual(array $dest)
+    {
+        if ($dest['tipo'] === 'Persona Natural') {
+            $payload = [
+                'dni' => $dest['dni'] ?? null,
+                'nombres' => $dest['nombres'] ?? null,
+                'apellido_paterno' => $dest['apellido_paterno'] ?? null,
+                'apellido_materno' => $dest['apellido_materno'] ?? null,
+            ];
+            $dni = trim((string) ($payload['dni'] ?? ''));
+
+            return ($dni !== '') ? NaturalPerson::firstOrCreate(['dni' => $dni], $payload) : NaturalPerson::create($payload);
+        }
+
+        if ($dest['tipo'] === 'Persona Juridica') {
+            $payload = [
+                'ruc' => $dest['ruc'] ?? null,
+                'razon_social' => $dest['razon_social'] ?? null,
+                'district' => $dest['district'] ?? null,
+            ];
+            $ruc = trim((string) ($payload['ruc'] ?? ''));
+
+            $entity = ($ruc !== '')
+                ? LegalEntity::firstOrCreate(['ruc' => $ruc], $payload)
+                : LegalEntity::create($payload);
+
+            // Resolver representante
+            if (! empty($dest['representative_dni'])) {
+                $person = NaturalPerson::updateOrCreate(
+                    ['dni' => $dest['representative_dni']],
+                    [
+                        'nombres' => $dest['representative_nombres'] ?? '',
+                        'apellido_paterno' => $dest['representative_apellido_paterno'] ?? '',
+                        'apellido_materno' => $dest['representative_apellido_materno'] ?? '',
+                    ]
+                );
+
+                $representative = $entity->representative;
+                if ($representative) {
+                    $representative->update([
+                        'natural_person_id' => $person->id,
+                        'cargo' => $dest['representative_cargo'] ?? null,
+                        'fecha_desde' => $dest['representative_since'] ?? null,
+                    ]);
+                } else {
+                    Representative::create([
+                        'legal_entity_id' => $entity->id,
+                        'natural_person_id' => $person->id,
+                        'cargo' => $dest['representative_cargo'] ?? null,
+                        'fecha_desde' => $dest['representative_since'] ?? null,
+                    ]);
+                }
+            }
+
+            return $entity;
+        }
+
+        if ($dest['tipo'] === 'Trabajador UGEL') {
+            return User::find($dest['assigned_to']);
+        }
+
+        return null;
     }
 
     private function getPeriodOptions(?string $defaultPeriod): array

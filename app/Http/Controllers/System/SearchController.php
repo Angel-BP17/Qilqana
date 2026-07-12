@@ -119,6 +119,12 @@ class SearchController extends Controller
                         ->orWhere('asunto', 'like', "%{$search}%");
                 });
             })
+            ->when($request->periodo, fn ($q, $periodo) => $q->where('periodo', $periodo))
+            ->when($request->resolucion_type_id, fn ($q, $typeId) => $q->where('resolucion_type_id', $typeId))
+            ->when($request->asunto_type_id, fn ($q, $asuntoId) => $q->where('asunto_type_id', $asuntoId))
+            ->when($request->level_modality_id, fn ($q, $modalityId) => $q->where('level_modality_id', $modalityId))
+            ->when($request->desde, fn ($q, $desde) => $q->whereDate('fecha', '>=', $desde))
+            ->when($request->hasta, fn ($q, $hasta) => $q->whereDate('fecha', '<=', $hasta))
             ->orderByDesc('fecha')
             ->limit(30)
             ->get(['id', 'rd', 'nombres_apellidos', 'fecha', 'resolucion_type_id']);

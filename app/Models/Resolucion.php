@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 
 class Resolucion extends Model
@@ -12,6 +13,7 @@ class Resolucion extends Model
 
     protected $casts = [
         'fecha' => 'datetime',
+        'is_worked' => 'boolean',
     ];
 
     protected $fillable = [
@@ -28,7 +30,25 @@ class Resolucion extends Model
         'asunto',
         'procedencia',
         'user_id',
+        'level_modality_id',
+        'document_path',
+        'is_worked',
     ];
+
+    public function type()
+    {
+        return $this->belongsTo(ResolucionType::class, 'resolucion_type_id');
+    }
+
+    public function levelModality(): BelongsTo
+    {
+        return $this->belongsTo(LevelModality::class, 'level_modality_id');
+    }
+
+    public function asuntoType(): BelongsTo
+    {
+        return $this->belongsTo(AsuntoType::class, 'asunto_type_id');
+    }
 
     public function naturalPeople()
     {
@@ -127,14 +147,47 @@ class Resolucion extends Model
 
     public function getCanSignAttribute(): bool
     {
-        return $this->charge && $this->signature_status === 'pendiente';
+        return $this->charges()->whereHas('signature', function ($q) {
+            $q->where('signature_status', 'pendiente');
+        })->exists();
     }
 
     public function getCanCreateChargeAttribute(): bool
     {
-        // Se puede crear cargo solo si no tiene ninguno que NO esté rechazado
-        return ! $this->charges()->whereHas('signature', function ($q) {
+        $totalInteresados = $this->naturalPeople()->count() + $this->legalEntities()->count() + $this->users()->count();
+        
+        $cargosActivos = $this->charges()->whereHas('signature', function ($q) {
             $q->where('signature_status', '!=', 'rechazado');
-        })->exists();
+        })->count();
+
+        // Se puede crear cargo si hay al menos un interesado que no tenga cargo activo (no rechazado)
+        return $cargosActivos < $totalInteresados;
+    }
+
+    /**
+     * Obtiene los datos de cargos pendientes de firma para esta resolución.
+     */
+    public function getPendingChargesDataAttribute(): array
+    {
+        return $this->charges()
+            ->whereHas('signature', function ($q) {
+                $q->where('signature_status', 'pendiente');
+            })
+            ->with(['signature', 'signature.assignedTo'])
+            ->get()
+            ->map(function ($c) {
+                return [
+                    'id' => $c->id,
+                    'interesado_name' => $c->interesado_label,
+                    'interesado_type' => $c->tipo_interesado,
+                    'action_url' => route('charges.sign.store', $c),
+                ];
+            })
+            ->toArray();
+    }
+
+    public function getFileDocumentUrlAttribute(): string
+    {
+        return $this->document_path ? route('resolucions.file.document', $this) : '';
     }
 }

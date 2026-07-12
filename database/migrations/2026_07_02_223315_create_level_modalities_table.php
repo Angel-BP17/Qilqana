@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('signatures', function (Blueprint $table) {
-            $table->json('evidence_location')->nullable()->after('evidence_root');
+        Schema::create('level_modalities', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->text('description')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('signatures', function (Blueprint $table) {
-            $table->dropColumn('evidence_location');
-        });
+        Schema::dropIfExists('level_modalities');
     }
 };

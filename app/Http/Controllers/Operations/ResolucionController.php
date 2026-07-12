@@ -9,6 +9,7 @@ use App\Http\Requests\Resolucion\DeleteResolucionRequest;
 use App\Http\Requests\Resolucion\ImportResolucionRequest;
 use App\Http\Requests\Resolucion\UpdateResolucionRequest;
 use App\Imports\ResolucionesImport;
+use App\Models\LevelModality;
 use App\Models\Resolucion;
 use App\Models\ResolucionType;
 use App\Models\User;
@@ -30,9 +31,10 @@ class ResolucionController extends Controller
 
     public function index(Request $request)
     {
-        $data = $this->service->getAll($request->only(['search', 'periodo']));
+        $data = $this->service->getAll($request->only(['search', 'periodo', 'resolucion_type_id', 'asunto_type_id', 'level_modality_id', 'desde', 'hasta']));
         $data['types'] = ResolucionType::orderBy('name')->get();
         $data['users'] = User::orderBy('name')->get();
+        $data['level_modalities'] = LevelModality::orderBy('name')->get();
 
         return view('resolucions.index', $data);
     }
@@ -56,11 +58,46 @@ class ResolucionController extends Controller
             abort(403);
         }
 
-        if ($resolucion->charges()->exists()) {
-            return redirect()->back()->with('info', 'La resolución ya tiene un cargo asociado.');
+        $interesadoId = $request->input('interesado_id');
+        $interesadoType = $request->input('interesado_type');
+
+        if ($interesadoId && $interesadoType) {
+            // Mapear tipo amigable a clase si viene en formato texto
+            $typeMap = [
+                'Persona Natural' => \App\Models\NaturalPerson::class,
+                'Persona Juridica' => \App\Models\LegalEntity::class,
+                'Trabajador UGEL' => \App\Models\User::class,
+                'App\Models\NaturalPerson' => \App\Models\NaturalPerson::class,
+                'App\Models\LegalEntity' => \App\Models\LegalEntity::class,
+                'App\Models\User' => \App\Models\User::class,
+            ];
+            $interesadoClass = $typeMap[$interesadoType] ?? $interesadoType;
+
+            // Verificar si este interesado ya tiene un cargo activo para esta resolución
+            $hasChargeForInteresado = $resolucion->charges()
+                ->where('interesado_type', $interesadoClass)
+                ->where('interesado_id', $interesadoId)
+                ->whereHas('signature', function ($q) {
+                    $q->where('signature_status', '!=', 'rechazado');
+                })
+                ->exists();
+
+            if ($hasChargeForInteresado) {
+                return redirect()->back()->with('info', 'El interesado seleccionado ya tiene un cargo activo asociado en esta resolución.');
+            }
+        } else {
+            // Si no se especifica interesado, se verifica si todos ya tienen cargo activo
+            $totalInteresados = $resolucion->naturalPeople()->count() + $resolucion->legalEntities()->count() + $resolucion->users()->count();
+            $cargosActivos = $resolucion->charges()->whereHas('signature', function ($q) {
+                $q->where('signature_status', '!=', 'rechazado');
+            })->count();
+
+            if ($cargosActivos >= $totalInteresados) {
+                return redirect()->back()->with('info', 'Todos los interesados de esta resolución ya tienen cargos activos asociados.');
+            }
         }
 
-        $created = $this->service->generateChargeForResolucion($resolucion->id, $user);
+        $created = $this->service->generateChargeForResolucion($resolucion->id, $user, $interesadoId, $interesadoType);
 
         if ($created) {
             return redirect()->back()->with('success', 'Cargo creado para la resolución.');
@@ -203,5 +240,26 @@ class ResolucionController extends Controller
                 'Content-Disposition' => 'attachment; filename="'.$fileName.'"',
             ]
         );
+    }
+
+    public function getDocument(Resolucion $resolucion)
+    {
+        if (! $resolucion->document_path) {
+            abort(404);
+        }
+
+        $path = $resolucion->document_path;
+        if (! \Storage::disk('local')->exists($path)) {
+            abort(404);
+        }
+
+        return response()->file(\Storage::disk('local')->path($path));
+    }
+
+    public function markAsWorked(Resolucion $resolucion)
+    {
+        $resolucion->update(['is_worked' => true]);
+
+        return redirect()->back()->with('success', 'Resolución marcada como trabajada correctamente.');
     }
 }

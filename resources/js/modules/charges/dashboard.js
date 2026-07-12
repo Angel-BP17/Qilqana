@@ -93,11 +93,15 @@ export const DashboardModule = {
                     }
                 }
 
-                // Llenar resoluciones vinculadas (Select2)
-                const resSelect = $('#edit_resolucion_ids');
-                if (resSelect.length && charge.resolucions) {
+                // Llenar resoluciones vinculadas (Tom Select)
+                const resSelectEl = document.getElementById('edit_resolucion_ids');
+                if (resSelectEl && charge.resolucions) {
                     const ids = charge.resolucions.map(r => r.id);
-                    resSelect.val(ids).trigger('change');
+                    if (resSelectEl.tomselect) {
+                        resSelectEl.tomselect.setValue(ids);
+                    } else {
+                        $(resSelectEl).val(ids);
+                    }
                 }
 
                 document.getElementById('edit_tipo_interesado').dispatchEvent(new Event('change'));

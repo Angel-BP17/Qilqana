@@ -4,10 +4,26 @@
     $fechaValue = $res?->fecha ? $res->fecha->format('Y-m-d') : '';
 @endphp
 
-<form id="editResolutionForm" method="POST" action="{{ $formAction }}">
+<form id="editResolutionForm" method="POST" enctype="multipart/form-data">
     @csrf
     @method('PUT')
+    <input type="hidden" name="action_origin" value="edit">
+    <input type="hidden" name="edit_resolucion_id" id="edit_resolucion_id_hidden" value="">
     <div class="modal-body px-4">
+        {{-- Alert para errores de validación de Laravel --}}
+        @if ($errors->any())
+            <div class="alert alert-danger border-danger-subtle py-2 mb-4">
+                <h6 class="fw-bold mb-1 small text-danger d-flex align-items-center">
+                    <span class="material-symbols-outlined fs-5 me-1">error</span>
+                    Errores de Validación (Edición):
+                </h6>
+                <ul class="mb-0 small ps-3">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         
         {{-- NIVEL 1: TIPO DE RESOLUCIÓN --}}
         <div class="mb-4 pb-3 border-bottom">
@@ -174,19 +190,48 @@
 
             <div class="row g-3 mb-3">
                 <div class="col-12">
+                    <label class="form-label small text-muted fw-bold text-uppercase">Modalidad / Nivel</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><span class="material-symbols-outlined fs-5">school</span></span>
+                        <select name="level_modality_id" class="form-select border-warning-subtle bg-white" id="edit_level_modality">
+                            <option value="">Seleccione modalidad / nivel (opcional)...</option>
+                            @foreach ($level_modalities as $modality)
+                                <option value="{{ $modality->id }}" {{ ($res?->level_modality_id == $modality->id) ? 'selected' : '' }}>{{ $modality->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-12">
                     <label for="edit_resolution_asunto" class="form-label small text-muted fw-bold text-uppercase">Asunto / Resumen</label>
                     <textarea class="form-control text-uppercase" name="asunto" id="edit_resolution_asunto" rows="2"
                         placeholder="INGRESE DETALLES ADICIONALES (OPCIONAL)" required>{{ old('asunto', $res?->asunto ?? '') }}</textarea>
                 </div>
             </div>
 
-            <div class="row g-3">
+            <div class="row g-3 mb-3">
                 <div class="col-12">
                     <label for="edit_resolution_procedencia" class="form-label small text-muted fw-bold text-uppercase">Procedencia / Oficina de Origen</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light"><span class="material-symbols-outlined fs-5">business_center</span></span>
                         <input type="text" class="form-control text-uppercase" name="procedencia" id="edit_resolution_procedencia"
                             placeholder="EJ: DIRECCIÓN / ÁREA DE GESTIÓN" value="{{ old('procedencia', $res?->procedencia ?? '') }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-12">
+                    <label for="edit_resolution_file" class="form-label small text-muted fw-bold text-uppercase">Documento de Resolución (PDF)</label>
+                    <div id="edit_resolution_pdf_container" class="d-none"></div>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><span class="material-symbols-outlined fs-5 text-muted">picture_as_pdf</span></span>
+                        <input type="file" class="form-control border-secondary-subtle" id="edit_resolution_file" name="document_file" accept=".pdf">
+                    </div>
+                    <div class="form-text">
+                        Opcional. Tamaño máximo permitido: <strong>{{ (int) \App\Models\Setting::getValue('charges_max_file_size', '5') }}MB</strong>.
                     </div>
                 </div>
             </div>

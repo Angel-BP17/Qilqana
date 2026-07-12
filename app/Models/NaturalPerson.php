@@ -30,7 +30,7 @@ class NaturalPerson extends Model
 
     public function charges()
     {
-        return $this->hasMany(Charge::class);
+        return $this->morphMany(Charge::class, 'interesado');
     }
 
     public function resolucions()

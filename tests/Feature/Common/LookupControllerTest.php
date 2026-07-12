@@ -3,6 +3,7 @@
 namespace Tests\Feature\Common;
 
 use App\Models\NaturalPerson;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -14,6 +15,7 @@ class LookupControllerTest extends TestCase
     /** @test */
     public function it_returns_person_from_database_if_exists()
     {
+        $user = User::factory()->create();
         NaturalPerson::create([
             'dni' => '12345678',
             'nombres' => 'JUAN',
@@ -21,7 +23,7 @@ class LookupControllerTest extends TestCase
             'apellido_materno' => 'GOMEZ',
         ]);
 
-        $response = $this->getJson('/api/natural-people/by-dni/12345678');
+        $response = $this->actingAs($user)->getJson('/search/natural-people/by-dni/12345678');
 
         $response->assertStatus(200)
             ->assertJsonPath('data.nombres', 'JUAN');
@@ -30,6 +32,7 @@ class LookupControllerTest extends TestCase
     /** @test */
     public function it_calls_external_api_if_not_in_database()
     {
+        $user = User::factory()->create();
         config(['services.apisperu.key' => 'fake-key']);
 
         Http::fake([
@@ -41,7 +44,7 @@ class LookupControllerTest extends TestCase
             ], 200),
         ]);
 
-        $response = $this->getJson('/api/natural-people/by-dni/87654321');
+        $response = $this->actingAs($user)->getJson('/search/natural-people/by-dni/87654321');
 
         $response->assertStatus(200)
             ->assertJsonPath('data.nombres', 'MARIA');
@@ -54,9 +57,10 @@ class LookupControllerTest extends TestCase
     /** @test */
     public function it_returns_404_if_api_key_missing_and_not_in_db()
     {
+        $user = User::factory()->create();
         config(['services.apisperu.key' => '']);
 
-        $response = $this->getJson('/api/natural-people/by-dni/00000000');
+        $response = $this->actingAs($user)->getJson('/search/natural-people/by-dni/00000000');
 
         $response->assertStatus(404);
     }

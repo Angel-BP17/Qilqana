@@ -16,6 +16,9 @@
 
         @php
             $hasChargePeriod = !empty($chargePeriod);
+            $canSignResolution = Auth::user()->hasRole('ADMINISTRADOR') || Auth::user()->can('modulo cargos') || Auth::user()->can('modulo resoluciones');
+            $canCreateCharge = Auth::user()->hasRole('ADMINISTRADOR') || Auth::user()->can('modulo cargos');
+            $canDeleteResolution = Auth::user()->hasRole('ADMINISTRADOR');
         @endphp
         <div class="row g-3 mb-4">
             @if (Auth::user()->hasRole('ADMINISTRADOR') || Auth::user()->can('resolucion ingresar'))
@@ -26,26 +29,38 @@
                                     class="material-symbols-outlined me-1">add</span>Nuevo
                                 registro</div>
                             @if ($hasChargePeriod)
-                                <div class="d-grid gap-3">
-                                    <button type="button" class="btn btn-success py-2 shadow-sm d-flex align-items-center justify-content-center gap-2 fw-bold" 
-                                        data-bs-toggle="modal" data-bs-target="#createResolutionModal">
-                                        <span class="material-symbols-outlined fs-5">description</span> Registrar Resolucion
-                                    </button>
-                                    <button type="button" class="btn btn-primary py-2 shadow-sm d-flex align-items-center justify-content-center gap-2 fw-bold" 
-                                        data-bs-toggle="modal" data-bs-target="#createChargeModal">
-                                        <span class="material-symbols-outlined fs-5">note_add</span> Crear Cargo
-                                    </button>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <button type="button" class="btn btn-success py-2 px-1 w-100 shadow-sm d-flex align-items-center justify-content-center gap-1 fw-bold small text-truncate" 
+                                            data-bs-toggle="modal" data-bs-target="#createResolutionModal" title="Registrar Resolucion">
+                                            <span class="material-symbols-outlined fs-5">description</span> 
+                                            <span class="small">Resolucion</span>
+                                        </button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button type="button" class="btn btn-primary py-2 px-1 w-100 shadow-sm d-flex align-items-center justify-content-center gap-1 fw-bold small text-truncate" 
+                                            data-bs-toggle="modal" data-bs-target="#createChargeModal" title="Registrar cargo">
+                                            <span class="material-symbols-outlined fs-5">note_add</span> 
+                                            <span class="small">Registrar cargo</span>
+                                        </button>
+                                    </div>
                                 </div>
                             @else
-                                <div class="d-grid gap-3">
-                                    <button type="button" class="btn btn-success py-2 opacity-75 d-flex align-items-center justify-content-center gap-2" disabled
-                                        title="Configura el periodo en el modulo de configuracion">
-                                        <span class="material-symbols-outlined fs-5">description</span> Registrar Resolucion
-                                    </button>
-                                    <button type="button" class="btn btn-primary py-2 opacity-75 d-flex align-items-center justify-content-center gap-2" disabled
-                                        title="Configura el periodo en el modulo de configuracion">
-                                        <span class="material-symbols-outlined fs-5">note_add</span> Crear Cargo
-                                    </button>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <button type="button" class="btn btn-success py-2 px-1 w-100 opacity-75 d-flex align-items-center justify-content-center gap-1 small text-truncate" disabled
+                                            title="Configura el periodo en el modulo de configuracion">
+                                            <span class="material-symbols-outlined fs-5">description</span> 
+                                            <span class="small">Resolucion</span>
+                                        </button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button type="button" class="btn btn-primary py-2 px-1 w-100 opacity-75 d-flex align-items-center justify-content-center gap-1 small text-truncate" disabled
+                                            title="Configura el periodo en el modulo de configuracion">
+                                            <span class="material-symbols-outlined fs-5">note_add</span> 
+                                            <span class="small">Registrar cargo</span>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="alert alert-warning py-2 px-3 mt-3 border-0 small shadow-sm d-flex align-items-center gap-2">
                                     <span class="material-symbols-outlined fs-6">warning</span>
@@ -144,11 +159,16 @@
                                             <form method="GET" action="{{ route('resoluciones.pdf') }}" target="_blank">
                                                 <input type="hidden" name="search" value="{{ request('search') }}">
                                                 <input type="hidden" name="periodo" value="{{ request('periodo') }}">
+                                                <input type="hidden" name="resolucion_type_id" value="{{ request('resolucion_type_id') }}">
+                                                <input type="hidden" name="asunto_type_id" value="{{ request('asunto_type_id') }}">
+                                                <input type="hidden" name="level_modality_id" value="{{ request('level_modality_id') }}">
+                                                <input type="hidden" name="desde" value="{{ request('desde') }}">
+                                                <input type="hidden" name="hasta" value="{{ request('hasta') }}">
                                                 <button type="submit" class="btn btn-danger" @disabled($resoluciones->isEmpty())>
                                                     <span class="material-symbols-outlined">picture_as_pdf</span> PDF
                                                 </button>
                                             </form>
-                                            <a href="{{ route('resoluciones.excel') }}?search={{ request('search') }}&periodo={{ request('periodo') }}"
+                                            <a href="{{ route('resoluciones.excel') }}?search={{ request('search') }}&periodo={{ request('periodo') }}&resolucion_type_id={{ request('resolucion_type_id') }}&asunto_type_id={{ request('asunto_type_id') }}&level_modality_id={{ request('level_modality_id') }}&desde={{ request('desde') }}&hasta={{ request('hasta') }}"
                                                 class="btn btn-success d-flex align-items-center">
                                                 <span class="material-symbols-outlined me-1">table_chart</span> Excel
                                             </a>
@@ -202,55 +222,50 @@
                 <div class="card border-0 shadow-sm">
                     <div class="card-header bg-info text-white border-0 py-3">
                         <div class="row g-2 align-items-center">
-                            <div class="col-12 col-lg-3">
+                            <div class="col-12 col-lg-4">
                                 <div class="h-100 d-flex flex-column justify-content-center">
                                     <h5 class="mb-1 fw-bold"><span
                                             class="material-symbols-outlined me-2">folder_open</span>Resoluciones</h5>
                                     <small class="opacity-75">Gestione resoluciones, cargos y firmas</small>
-                                    <div class="d-flex gap-2 mt-3 d-md-none">
-                                        <button type="button" class="btn btn-outline-light w-100"
-                                            data-bs-toggle="collapse" data-bs-target="#resolutionFilters"
-                                            aria-expanded="false" aria-controls="resolutionFilters">
-                                            <span class="material-symbols-outlined">tune</span> Filtros
-                                        </button>
-                                    </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-lg-9">
-                                <div class="collapse d-md-block h-100" id="resolutionFilters">
+                            <div class="col-12 col-lg-8">
+                                <div class="h-100">
                                     <form method="GET" action="{{ route('resolucions.index') }}"
-                                        id="resolutionFilterForm" class="h-100">
+                                        id="resolutionSearchForm" class="h-100">
+                                        {{-- Conservar filtros activos al buscar texto --}}
+                                        <input type="hidden" name="periodo" value="{{ request('periodo') }}">
+                                        <input type="hidden" name="resolucion_type_id" value="{{ request('resolucion_type_id') }}">
+                                        <input type="hidden" name="asunto_type_id" value="{{ request('asunto_type_id') }}">
+                                        <input type="hidden" name="level_modality_id" value="{{ request('level_modality_id') }}">
+                                        <input type="hidden" name="desde" value="{{ request('desde') }}">
+                                        <input type="hidden" name="hasta" value="{{ request('hasta') }}">
+
                                         <div class="row g-2 align-items-end">
-                                            <div class="col-12 col-md-6 col-lg-6">
-                                                <label class="form-label mb-1">Buscar</label>
-                                                <input type="text" name="search" class="form-control"
-                                                    placeholder="Buscar..." value="{{ request('search') }}">
-                                            </div>
-                                            <div class="col-12 col-md-6 col-lg-3">
-                                                <label class="form-label mb-1">Periodo</label>
-                                                <select name="periodo" class="form-select">
-                                                    <option value="">Todos los periodos</option>
-                                                    @foreach ($periodos as $periodo)
-                                                        @if ($periodo !== null)
-                                                            <option value="{{ $periodo }}"
-                                                                {{ request('periodo') == $periodo ? 'selected' : '' }}>
-                                                                {{ $periodo }}
-                                                            </option>
-                                                        @endif
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <div class="col-12 col-lg-3">
-                                                <label class="form-label mb-1 d-none d-md-block">Acciones</label>
-                                                <div
-                                                    class="d-flex flex-wrap gap-2 justify-content-md-end justify-content-lg-start">
-                                                    <button type="submit" class="btn btn-dark shadow-sm">
-                                                        <span class="material-symbols-outlined">filter_alt</span> Filtrar
+                                            <div class="col-12 col-md-8">
+                                                <label class="form-label mb-1 text-white-50 small fw-bold text-uppercase">Buscar</label>
+                                                <div class="input-group shadow-sm">
+                                                    <input type="text" name="search" class="form-control border-0"
+                                                        placeholder="Buscar por interesado, RD, asunto..." value="{{ request('search') }}">
+                                                    <button type="submit" class="btn btn-dark d-flex align-items-center">
+                                                        <span class="material-symbols-outlined fs-5">search</span>
                                                     </button>
-                                                    <a href="{{ route('resolucions.index') }}?{{ http_build_query(request()->query()) }}"
-                                                        class="btn btn-light shadow-sm text-dark">
-                                                        <span class="material-symbols-outlined">refresh</span> Limpiar
-                                                    </a>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-4">
+                                                <label class="form-label mb-1 d-none d-md-block">&nbsp;</label>
+                                                <div class="d-flex gap-2">
+                                                    <button type="button" class="btn btn-dark shadow-sm w-100 d-flex align-items-center justify-content-center"
+                                                        data-bs-toggle="modal" data-bs-target="#filterResolutionModal">
+                                                        <span class="material-symbols-outlined me-1">tune</span> Filtros
+                                                    </button>
+                                                    @if (request()->filled('search') || request()->filled('periodo') || request()->filled('resolucion_type_id') || request()->filled('asunto_type_id') || request()->filled('level_modality_id') || request()->filled('desde') || request()->filled('hasta'))
+                                                        <a href="{{ route('resolucions.index') }}"
+                                                            class="btn btn-light shadow-sm text-dark d-flex align-items-center justify-content-center"
+                                                            title="Limpiar todos los filtros">
+                                                            <span class="material-symbols-outlined">refresh</span>
+                                                        </a>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
@@ -261,7 +276,7 @@
                     </div>
 
                     <div class="card-body p-0">
-                        @if (request()->filled('search') || request()->filled('periodo'))
+                        @if (request()->filled('search') || request()->filled('periodo') || request()->filled('resolucion_type_id') || request()->filled('asunto_type_id') || request()->filled('level_modality_id') || request()->filled('desde') || request()->filled('hasta'))
                             <div class="px-3 py-3 border-bottom bg-light bg-opacity-50">
                                 <div class="row align-items-center">
                                     <div class="col-12 col-md-4">
@@ -299,17 +314,20 @@
 
                             <!-- Vista Móvil -->
                             <section class="d-md-none p-3" aria-label="Lista de resoluciones para móviles">
-                                @php
-                                    $canSignResolution = Auth::user()->hasRole('ADMINISTRADOR') || Auth::user()->can('modulo cargos') || Auth::user()->can('modulo resoluciones');
-                                    $canCreateCharge = Auth::user()->hasRole('ADMINISTRADOR') || Auth::user()->can('modulo cargos');
-                                    $canDeleteResolution = Auth::user()->hasRole('ADMINISTRADOR');
-                                @endphp
+
                                 @forelse ($resoluciones as $resolucion)
                                     <article class="card border-0 shadow-sm mb-3 overflow-hidden">
                                         <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
                                             <div class="d-flex justify-content-between align-items-start">
                                                 <div>
-                                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle mb-1">{{ $resolucion->type?->abreviacion ?? 'RD' }} {{ $resolucion->rd }}</span>
+                                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ $resolucion->type?->abreviacion ?? 'RD' }} {{ $resolucion->rd }}</span>
+                                                        @if ($resolucion->document_path)
+                                                            <a href="{{ route('resolucions.file.document', $resolucion) }}" target="_blank" class="text-danger d-flex align-items-center" title="Ver documento de resolución (PDF)">
+                                                                <span class="material-symbols-outlined fs-5">picture_as_pdf</span>
+                                                            </a>
+                                                        @endif
+                                                    </div>
                                                     <div class="small text-muted d-flex align-items-center">
                                                         <span class="material-symbols-outlined fs-6 me-1" aria-hidden="true">calendar_today</span>
                                                         {{ $resolucion->formatted_fecha }}
@@ -337,12 +355,32 @@
                                                 </div>
                                             </div>
 
-                                            <div class="mb-3">
-                                                <p class="text-muted small text-uppercase fw-bold mb-1">Asunto</p>
-                                                <div class="small text-dark lh-sm">{{ Str::limit($resolucion->asunto, 100) }}</div>
+                                            <div class="row g-2 mb-3">
+                                                <div class="col-6">
+                                                    <p class="text-muted small text-uppercase fw-bold mb-1">Tipo de Asunto</p>
+                                                    <span class="text-dark small fw-semibold d-block text-truncate" title="{{ $resolucion->asuntoType?->name ?? '---' }}">{{ $resolucion->asuntoType?->name ?? '---' }}</span>
+                                                </div>
+                                                <div class="col-6">
+                                                    <p class="text-muted small text-uppercase fw-bold mb-1">Nivel/Modalidad</p>
+                                                    <span class="text-dark small d-block text-truncate" title="{{ $resolucion->levelModality?->name ?? '---' }}">{{ $resolucion->levelModality?->name ?? '---' }}</span>
+                                                </div>
                                             </div>
 
-                                            <div class="d-flex flex-wrap gap-2 pt-2 border-top">
+                                            <div class="d-flex flex-wrap gap-2 pt-2 border-top align-items-center">
+                                                 @if (!$resolucion->is_worked)
+                                                     <form method="POST" action="{{ route('resolucions.work', $resolucion) }}" class="d-inline m-0 form-work-resolution">
+                                                         @csrf
+                                                         @method('PATCH')
+                                                         <button type="submit" class="btn btn-outline-success btn-sm d-flex align-items-center" title="Marcar como trabajada" aria-label="Marcar como trabajada">
+                                                             <span class="material-symbols-outlined fs-6 me-1" aria-hidden="true">task_alt</span> Trabajar
+                                                         </button>
+                                                     </form>
+                                                 @else
+                                                     <span class="badge bg-success-subtle text-success border border-success-subtle d-inline-flex align-items-center py-1 px-2" title="Resolución Trabajada">
+                                                         <span class="material-symbols-outlined fs-6 me-1">done_all</span> Trabajada
+                                                     </span>
+                                                 @endif
+
                                                 <button type="button" class="btn btn-outline-info btn-sm btn-view-res-details d-flex align-items-center"
                                                     title="Ver detalles" aria-label="Ver detalles completos de la resolución {{ $resolucion->rd }}"
                                                     data-rd="{{ $resolucion->rd }}"
@@ -352,6 +390,7 @@
                                                     data-fecha="{{ $resolucion->formatted_fecha }}"
                                                     data-periodo="{{ $resolucion->periodo }}"
                                                     data-procedencia="{{ $resolucion->procedencia }}"
+                                                    data-res-document-url="{{ $resolucion->file_document_url }}"
                                                     data-has-charge="{{ $resolucion->charge ? '1' : '0' }}"
                                                     data-has-signature="{{ $resolucion->charge?->has_signature ? '1' : '0' }}"
                                                     data-signature-url="{{ $resolucion->charge?->file_signature_url }}"
@@ -368,20 +407,35 @@
                                                 </button>
 
                                                 @if ($resolucion->can_create_charge && $canCreateCharge)
-                                                    <form method="POST" action="{{ route('resolucions.charge.create', $resolucion) }}" class="d-inline">
-                                                        @csrf
-                                                        <button type="submit" class="btn btn-outline-primary btn-sm d-flex align-items-center" aria-label="Crear cargo para esta resolución">
-                                                            <span class="material-symbols-outlined fs-6 me-1" aria-hidden="true">add</span> Cargo
+                                                    @php
+                                                        $interesadosList = $resolucion->naturalPeople->map(fn($p) => ['id' => $p->id, 'type' => 'Persona Natural', 'name' => "{$p->nombres} {$p->apellido_paterno} {$p->apellido_materno}"])
+                                                            ->merge($resolucion->legalEntities->map(fn($e) => ['id' => $e->id, 'type' => 'Persona Juridica', 'name' => $e->razon_social]))
+                                                            ->merge($resolucion->users->map(fn($u) => ['id' => $u->id, 'type' => 'Trabajador UGEL', 'name' => "{$u->name} {$u->last_name}"]))
+                                                            ->values();
+                                                        $totalInteresados = $interesadosList->count();
+                                                    @endphp
+                                                    @if ($totalInteresados > 1)
+                                                        <button type="button" class="btn btn-outline-primary btn-sm d-flex align-items-center btn-trigger-select-interesado" 
+                                                            data-action="{{ route('resolucions.charge.create', $resolucion) }}"
+                                                            data-interesados='@json($interesadosList)'
+                                                            data-rd="{{ $resolucion->rd }}"
+                                                            aria-label="Elegir destinatario del cargo para la resolución {{ $resolucion->rd }}">
+                                                            <span class="material-symbols-outlined fs-6 me-1" aria-hidden="true">group</span> Cargo
                                                         </button>
-                                                    </form>
+                                                    @else
+                                                        <form method="POST" action="{{ route('resolucions.charge.create', $resolucion) }}" class="d-inline">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-outline-primary btn-sm d-flex align-items-center" aria-label="Crear cargo para esta resolución">
+                                                                <span class="material-symbols-outlined fs-6 me-1" aria-hidden="true">add</span> Cargo
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                 @endif
 
                                                 <button type="button" class="btn btn-outline-success btn-sm btn-sign-resolution d-flex align-items-center"
                                                     title="Firmar" aria-label="Firmar cargo de la resolución {{ $resolucion->rd }}"
                                                     data-action="{{ $resolucion->charge ? route('charges.sign.store', $resolucion->charge) : '' }}"
-                                                    data-charge='@json($resolucion->charge)'
-                                                    data-signature='@json($resolucion->signature_content ?? '')'
-                                                    data-signer="{{ $resolucion->charge?->signature?->signer?->name ?? '' }}"
+                                                    data-charges='@json($resolucion->pending_charges_data)'
                                                     data-show-external="1" @disabled(!$resolucion->can_sign || !$canSignResolution)>
                                                     <span class="material-symbols-outlined fs-6 me-1" aria-hidden="true">history_edu</span> Firmar
                                                 </button>
@@ -395,6 +449,7 @@
                                                             data-fecha="{{ $resolucion->fecha ? $resolucion->fecha->format('Y-m-d') : '' }}"
                                                             data-resolucion_type_id="{{ $resolucion->resolucion_type_id ?? '' }}"
                                                             data-asunto_type_id="{{ $resolucion->asunto_type_id ?? '' }}"
+                                                            data-level_modality_id="{{ $resolucion->level_modality_id ?? '' }}"
                                                             data-procedencia="{{ $resolucion->procedencia ?? '' }}"
                                                             data-asunto="{{ $resolucion->asunto }}"
                                                             data-interesados="{{ $resolucion->naturalPeople->map(fn($p) => ['id' => $p->id, 'type' => 'Persona Natural', 'text' => "{$p->nombres} {$p->apellido_paterno} {$p->apellido_materno}", 'identity' => $p->dni ?: $p->cedula])
@@ -431,7 +486,8 @@
                                             <th class="ps-3 small fw-bold py-3" style="width: 50px;">#</th>
                                             <th class="small fw-bold py-3">Resolución</th>
                                             <th class="small fw-bold py-3">Interesado</th>
-                                            <th class="small fw-bold py-3">Asunto</th>
+                                            <th class="small fw-bold py-3">Tipo de Asunto</th>
+                                            <th class="small fw-bold py-3">Nivel / Modalidad</th>
                                             <th class="text-center small fw-bold py-3">Estado</th>
                                             @if (!Auth::user()->hasRole('VISUALIZADOR'))
                                                 <th class="text-end pe-3 small fw-bold py-3">Acciones</th>
@@ -445,7 +501,14 @@
                                                     {{ ($resoluciones->currentPage() - 1) * $resoluciones->perPage() + $key + 1 }}
                                                 </td>
                                                 <td>
-                                                    <div class="fw-bold text-primary">{{ $resolucion->type?->abreviacion ?? 'RD' }} {{ $resolucion->rd }}</div>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <div class="fw-bold text-primary">{{ $resolucion->type?->abreviacion ?? 'RD' }} {{ $resolucion->rd }}</div>
+                                                        @if ($resolucion->document_path)
+                                                            <a href="{{ route('resolucions.file.document', $resolucion) }}" target="_blank" class="text-danger d-flex align-items-center" title="Ver documento de resolución (PDF)">
+                                                                <span class="material-symbols-outlined fs-5">picture_as_pdf</span>
+                                                            </a>
+                                                        @endif
+                                                    </div>
                                                     <div class="small text-muted d-flex align-items-center">
                                                         <span class="material-symbols-outlined fs-6 me-1" aria-hidden="true">calendar_today</span>
                                                         {{ $resolucion->formatted_fecha }}
@@ -458,8 +521,18 @@
                                                     <div class="small text-muted">DNI: {{ $resolucion->dni ?? '---' }}</div>
                                                 </td>
                                                 <td>
-                                                    <div class="text-muted small lh-sm text-truncate" style="max-width: 250px;" title="{{ $resolucion->asunto }}">
-                                                        {{ $resolucion->asunto }}
+                                                    <div class="fw-semibold text-dark text-truncate" style="max-width: 200px;" title="{{ $resolucion->asuntoType?->name ?? '---' }}">
+                                                        {{ $resolucion->asuntoType?->name ?? '---' }}
+                                                    </div>
+                                                    @if($resolucion->asuntoType?->description)
+                                                        <div class="small text-muted text-truncate" style="max-width: 200px;" title="{{ $resolucion->asuntoType->description }}">
+                                                            {{ $resolucion->asuntoType->description }}
+                                                        </div>
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <div class="text-muted small">
+                                                        {{ $resolucion->levelModality?->name ?? '---' }}
                                                     </div>
                                                     <div class="mt-1">
                                                         <span class="badge bg-light text-muted border small fw-normal">{{ $resolucion->procedencia }}</span>
@@ -468,10 +541,23 @@
                                                 </td>
                                                 <td class="text-center">
                                                     @include('charges.partials.status-badge', ['status' => $resolucion->signature_status])
-                                                </td>
-                                                @if (!Auth::user()->hasRole('VISUALIZADOR'))
+                                                                                        @if (!Auth::user()->hasRole('VISUALIZADOR'))
                                                     <td class="text-end pe-3">
-                                                        <div class="d-flex justify-content-end gap-1">
+                                                        <div class="d-flex justify-content-end align-items-center gap-1">
+                                                            @if (!$resolucion->is_worked)
+                                                                <form method="POST" action="{{ route('resolucions.work', $resolucion) }}" class="d-inline m-0 form-work-resolution">
+                                                                    @csrf
+                                                                    @method('PATCH')
+                                                                    <button type="submit" class="btn btn-outline-success btn-sm d-flex align-items-center" title="Marcar como trabajada">
+                                                                        <span class="material-symbols-outlined fs-5">task_alt</span>
+                                                                    </button>
+                                                                </form>
+                                                            @else
+                                                                <span class="badge bg-success-subtle text-success border border-success-subtle d-inline-flex align-items-center py-1 px-2" title="Resolución Trabajada">
+                                                                    <span class="material-symbols-outlined fs-6 me-1">done_all</span> Trabajada
+                                                                </span>
+                                                            @endif
+
                                                             {{-- Acción: Ver Detalles --}}
                                                             <button type="button" class="btn btn-outline-info btn-sm btn-view-res-details"
                                                                 title="Ver detalles" aria-label="Ver detalles completos de la resolución {{ $resolucion->rd }}"
@@ -482,6 +568,7 @@
                                                                 data-fecha="{{ $resolucion->formatted_fecha }}"
                                                                 data-periodo="{{ $resolucion->periodo }}"
                                                                 data-procedencia="{{ $resolucion->procedencia }}"
+                                                                data-res-document-url="{{ $resolucion->file_document_url }}"
                                                                 data-has-charge="{{ $resolucion->charge ? '1' : '0' }}"
                                                                 data-has-signature="{{ $resolucion->charge?->has_signature ? '1' : '0' }}"
                                                                 data-signature-url="{{ $resolucion->charge?->file_signature_url }}"
@@ -497,49 +584,77 @@
                                                                 <span class="material-symbols-outlined fs-5" aria-hidden="true">visibility</span>
                                                             </button>
 
-                                                            @if ($resolucion->can_create_charge && $canCreateCharge)
-                                                                <form method="POST" action="{{ route('resolucions.charge.create', $resolucion) }}" class="d-inline">
-                                                                    @csrf
-                                                                    <button type="submit" class="btn btn-outline-primary btn-sm" title="Crear cargo pendiente" aria-label="Generar cargo pendiente para esta resolución">
-                                                                        <span class="material-symbols-outlined fs-5" aria-hidden="true">add_notes</span>
-                                                                    </button>
-                                                                </form>
-                                                            @endif
-
                                                             {{-- Acción: Firmar --}}
                                                             <button type="button" class="btn btn-outline-success btn-sm btn-sign-resolution"
                                                                 title="Firmar cargo" aria-label="Firmar documento de la resolución {{ $resolucion->rd }}"
                                                                 data-action="{{ $resolucion->charge ? route('charges.sign.store', $resolucion->charge) : '' }}"
-                                                                data-charge='@json($resolucion->charge)'
-                                                                data-signature='@json($resolucion->signature_content ?? '')'
-                                                                data-signer="{{ $resolucion->charge?->signature?->signer?->name ?? '' }}"
+                                                                data-charges='@json($resolucion->pending_charges_data)'
                                                                 data-show-external="1" @disabled(!$resolucion->can_sign || !$canSignResolution)>
                                                                 <span class="material-symbols-outlined fs-5" aria-hidden="true">history_edu</span>
                                                             </button>
-
-                                                            <div class="btn-group ms-1" role="group" aria-label="Acciones de edición y eliminación">
-                                                                <button type="button" class="btn btn-outline-warning btn-sm btn-edit-resolution"
-                                                                    aria-label="Editar resolución"
-                                                                    data-action="{{ route('resolucions.update', $resolucion) }}"
-                                                                    data-rd="{{ $resolucion->rd }}"
-                                                                    data-fecha="{{ $resolucion->fecha ? $resolucion->fecha->format('Y-m-d') : '' }}"
-                                                                    data-resolucion_type_id="{{ $resolucion->resolucion_type_id ?? '' }}"
-                                                                    data-asunto_type_id="{{ $resolucion->asunto_type_id ?? '' }}"
-                                                                    data-procedencia="{{ $resolucion->procedencia ?? '' }}"
-                                                                    data-asunto="{{ $resolucion->asunto }}"
-                                                                    data-interesados="{{ $resolucion->naturalPeople->map(fn($p) => ['id' => $p->id, 'type' => 'Persona Natural', 'text' => "{$p->nombres} {$p->apellido_paterno} {$p->apellido_materno}", 'identity' => $p->dni ?: $p->cedula])
-                                                                        ->merge($resolucion->legalEntities->map(fn($e) => ['id' => $e->id, 'type' => 'Persona Juridica', 'text' => $e->razon_social, 'identity' => $e->ruc]))
-                                                                        ->merge($resolucion->users->map(fn($u) => ['id' => $u->id, 'type' => 'Trabajador UGEL', 'text' => "{$u->name} {$u->last_name}", 'identity' => $u->dni]))
-                                                                        ->toJson() }}" title="Editar">
-                                                                    <span class="material-symbols-outlined fs-5" aria-hidden="true">edit</span>
-                                                                </button>
-                                                                <button type="button" class="btn btn-outline-danger btn-sm btn-delete-resolution"
-                                                                    aria-label="Eliminar resolución"
-                                                                    data-action="{{ route('resolucions.destroy', $resolucion) }}"
-                                                                    title="{{ $canDeleteResolution ? 'Eliminar' : 'Solo administradores' }}"
-                                                                    @disabled(!$canDeleteResolution)>
-                                                                    <span class="material-symbols-outlined fs-5" aria-hidden="true">delete</span>
-                                                                </button>
+ 
+                                                             {{-- Menú de Más Acciones --}}
+                                                             <div class="dropdown d-inline-block">
+                                                                 <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Más opciones" data-bs-boundary="viewport" data-bs-config='{"popperConfig":{"strategy":"fixed"}}'>
+                                                                     <span class="material-symbols-outlined align-middle fs-5">more_vert</span>
+                                                                 </button>
+                                                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                                                     @if ($resolucion->can_create_charge && $canCreateCharge)
+                                                                         @php
+                                                                             $interesadosList = $resolucion->naturalPeople->map(fn($p) => ['id' => $p->id, 'type' => 'Persona Natural', 'name' => "{$p->nombres} {$p->apellido_paterno} {$p->apellido_materno}"])
+                                                                                 ->merge($resolucion->legalEntities->map(fn($e) => ['id' => $e->id, 'type' => 'Persona Juridica', 'name' => $e->razon_social]))
+                                                                                 ->merge($resolucion->users->map(fn($u) => ['id' => $u->id, 'type' => 'Trabajador UGEL', 'name' => "{$u->name} {$u->last_name}"]))
+                                                                                 ->values();
+                                                                             $totalInteresados = $interesadosList->count();
+                                                                         @endphp
+                                                                         <li>
+                                                                             @if ($totalInteresados > 1)
+                                                                                 <button type="button" class="dropdown-item d-flex align-items-center py-2 btn-trigger-select-interesado" 
+                                                                                     data-action="{{ route('resolucions.charge.create', $resolucion) }}"
+                                                                                     data-interesados='@json($interesadosList)'
+                                                                                     data-rd="{{ $resolucion->rd }}"
+                                                                                     title="Seleccionar destinatario para el cargo">
+                                                                                     <span class="material-symbols-outlined me-2 fs-5 text-primary">group</span> Crear cargo
+                                                                                 </button>
+                                                                             @else
+                                                                                 <form method="POST" action="{{ route('resolucions.charge.create', $resolucion) }}" class="d-block m-0">
+                                                                                     @csrf
+                                                                                     <button type="submit" class="dropdown-item d-flex align-items-center py-2" title="Crear cargo pendiente">
+                                                                                         <span class="material-symbols-outlined me-2 fs-5 text-primary">add_notes</span> Crear cargo
+                                                                                     </button>
+                                                                                 </form>
+                                                                             @endif
+                                                                         </li>
+                                                                     @endif
+                                                                     <li>
+                                                                         <button type="button" class="dropdown-item d-flex align-items-center py-2 btn-edit-resolution"
+                                                                             data-action="{{ route('resolucions.update', $resolucion) }}"
+                                                                             data-rd="{{ $resolucion->rd }}"
+                                                                             data-fecha="{{ $resolucion->fecha ? $resolucion->fecha->format('Y-m-d') : '' }}"
+                                                                             data-resolucion_type_id="{{ $resolucion->resolucion_type_id ?? '' }}"
+                                                                             data-asunto_type_id="{{ $resolucion->asunto_type_id ?? '' }}"
+                                                                             data-level_modality_id="{{ $resolucion->level_modality_id ?? '' }}"
+                                                                             data-procedencia="{{ $resolucion->procedencia ?? '' }}"
+                                                                             data-asunto="{{ $resolucion->asunto }}"
+                                                                             data-document-url="{{ $resolucion->file_document_url }}"
+                                                                            data-interesados="{{ $resolucion->naturalPeople->map(fn($p) => ['id' => $p->id, 'type' => 'Persona Natural', 'text' => "{$p->nombres} {$p->apellido_paterno} {$p->apellido_materno}", 'identity' => $p->dni ?: $p->cedula])
+                                                                                ->merge($resolucion->legalEntities->map(fn($e) => ['id' => $e->id, 'type' => 'Persona Juridica', 'text' => $e->razon_social, 'identity' => $e->ruc]))
+                                                                                ->merge($resolucion->users->map(fn($u) => ['id' => $u->id, 'type' => 'Trabajador UGEL', 'text' => "{$u->name} {$u->last_name}", 'identity' => $u->dni]))
+                                                                                ->toJson() }}" title="Editar">
+                                                                            <span class="material-symbols-outlined me-2 fs-5 text-warning">edit</span> Editar resolución
+                                                                        </button>
+                                                                    </li>
+                                                                    @if ($canDeleteResolution)
+                                                                        <li><hr class="dropdown-divider"></li>
+                                                                        <li>
+                                                                            <button type="button" class="dropdown-item text-danger d-flex align-items-center py-2 btn-delete-resolution"
+                                                                                data-action="{{ route('resolucions.destroy', $resolucion) }}"
+                                                                                title="Eliminar resolución">
+                                                                                <span class="material-symbols-outlined me-2 fs-5 text-danger">delete</span> Eliminar resolución
+                                                                            </button>
+                                                                        </li>
+                                                                    @endif
+                                                                </ul>
                                                             </div>
                                                         </div>
                                                     </td>
@@ -586,9 +701,7 @@
                         <h5 class="modal-title">Ingresar resolución</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
-                    <div class="modal-body">
-                        @include('resolucions.forms.create')
-                    </div>
+                    @include('resolucions.forms.create')
                 </div>
             </div>
         </div>
@@ -602,9 +715,7 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                             aria-label="Cerrar"></button>
                     </div>
-                    <div class="modal-body">
-                        @include('resolucions.forms.edit')
-                    </div>
+                    @include('resolucions.forms.edit')
                 </div>
             </div>
         </div>
@@ -638,4 +749,200 @@
         @include('charges.forms.sign')
         @include('resolucions.forms.create-charge')
         @include('resolucions.forms.view-details')
+
+        <!-- Modal intermedia para elegir qué interesado firmará -->
+        <div class="modal fade" id="selectSigneeModal" tabindex="-1" aria-labelledby="selectSigneeModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header bg-success text-white py-3">
+                        <h5 class="modal-title fw-bold d-flex align-items-center" id="selectSigneeModalLabel">
+                            <span class="material-symbols-outlined me-2 fs-4">group</span>Seleccionar Firmante
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body px-4 py-3">
+                        <p class="text-muted small">Esta resolución tiene múltiples cargos pendientes de firma. Por favor, seleccione quién firmará el documento en este momento:</p>
+                        <div class="list-group shadow-sm" id="select_signee_list">
+                            <!-- Los items de interesados se insertarán dinámicamente aquí -->
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-top py-2">
+                        <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para Filtros Avanzados -->
+        <div class="modal fade" id="filterResolutionModal" tabindex="-1" aria-labelledby="filterResolutionModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header bg-dark text-white py-3">
+                        <h5 class="modal-title fw-bold d-flex align-items-center" id="filterResolutionModalLabel">
+                            <span class="material-symbols-outlined me-2">tune</span>Filtros de Resoluciones
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <form method="GET" action="{{ route('resolucions.index') }}" id="modalFilterForm">
+                        {{-- Conservar la búsqueda rápida actual --}}
+                        <input type="hidden" name="search" value="{{ request('search') }}">
+
+                        <div class="modal-body px-4 py-3">
+                            {{-- Filtro de Rango de Fechas --}}
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Rango de Fechas (Resolución)</label>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <label for="filter_desde" class="form-label text-muted small mb-1">Desde</label>
+                                        <input type="date" name="desde" id="filter_desde" class="form-control border-secondary-subtle" value="{{ request('desde') }}">
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="filter_hasta" class="form-label text-muted small mb-1">Hasta</label>
+                                        <input type="date" name="hasta" id="filter_hasta" class="form-control border-secondary-subtle" value="{{ request('hasta') }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Filtro de Periodo --}}
+                            <div class="mb-3">
+                                <label for="filter_periodo" class="form-label fw-bold text-muted small text-uppercase">Periodo</label>
+                                <select name="periodo" id="filter_periodo" class="form-select border-secondary-subtle">
+                                    <option value="">Todos los periodos</option>
+                                    @foreach ($periodos as $periodo)
+                                        @if ($periodo !== null)
+                                            <option value="{{ $periodo }}" {{ request('periodo') == $periodo ? 'selected' : '' }}>
+                                                {{ $periodo }}
+                                            </option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            {{-- Filtro de Tipo de Resolución --}}
+                            <div class="mb-3">
+                                <label for="filter_resolution_type" class="form-label fw-bold text-muted small text-uppercase">Tipo de Resolución</label>
+                                <select name="resolucion_type_id" id="filter_resolution_type" class="form-select border-secondary-subtle">
+                                    <option value="">Todos los tipos...</option>
+                                    @foreach ($types as $type)
+                                        <option value="{{ $type->id }}" {{ request('resolucion_type_id') == $type->id ? 'selected' : '' }}>
+                                            {{ $type->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            {{-- Filtro de Tipo de Asunto --}}
+                            <div class="mb-3">
+                                <label for="filter_asunto_type" class="form-label fw-bold text-muted small text-uppercase">Tipo de Asunto</label>
+                                <select name="asunto_type_id" id="filter_asunto_type" class="form-select border-secondary-subtle" disabled data-selected="{{ request('asunto_type_id') }}">
+                                    <option value="">Seleccione tipo de resolución primero...</option>
+                                </select>
+                            </div>
+
+                            {{-- Filtro de Modalidad / Nivel --}}
+                            <div class="mb-3">
+                                <label for="filter_level_modality" class="form-label fw-bold text-muted small text-uppercase">Modalidad / Nivel</label>
+                                <select name="level_modality_id" id="filter_level_modality" class="form-select border-secondary-subtle">
+                                    <option value="">Todas las modalidades...</option>
+                                    @foreach ($level_modalities as $modality)
+                                        <option value="{{ $modality->id }}" {{ request('level_modality_id') == $modality->id ? 'selected' : '' }}>
+                                            {{ $modality->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer bg-light border-top py-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
+                            <a href="{{ route('resolucions.index') }}" class="btn btn-light border btn-sm px-3">Limpiar Filtros</a>
+                            <button type="submit" class="btn btn-primary btn-sm px-3 shadow-sm">
+                                <span class="material-symbols-outlined align-middle fs-6 me-1">filter_alt</span>Aplicar Filtros
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Seleccionar Interesado para Cargo -->
+        <div class="modal fade" id="selectInteresadoModal" tabindex="-1" aria-labelledby="selectInteresadoModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header bg-primary text-white py-3">
+                        <h5 class="modal-title fw-bold d-flex align-items-center" id="selectInteresadoModalLabel">
+                            <span class="material-symbols-outlined me-2 fs-4">group</span>Seleccionar Destinatario
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form method="POST" id="selectInteresadoForm">
+                        @csrf
+                        <input type="hidden" name="interesado_id" id="modal_select_interesado_id">
+                        <input type="hidden" name="interesado_type" id="modal_select_interesado_type">
+                        
+                        <div class="modal-body p-4">
+                            <p class="text-muted small mb-3">La resolución <strong id="modal_select_interesado_rd" class="text-dark"></strong> contiene múltiples interesados. Por favor, seleccione para cuál de ellos desea registrar el cargo de notificación:</p>
+                            <div class="list-group shadow-sm" id="modal_select_interesados_list">
+                                {{-- Cargados dinámicamente --}}
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light border-top py-2 px-4">
+                            <button type="button" class="btn btn-outline-secondary px-4 btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        @if ($errors->any())
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    console.info('[Resolucions index] Inicializando autoapertura por errores detectados en el servidor.');
+                    const keys = {!! json_encode($errors->keys()) !!};
+                    console.log('[Resolucions index] Claves de error del backend:', keys);
+
+                    const chargeErrors = [
+                        'asunto',
+                        'resolucion_ids',
+                        'destinatarios',
+                        'document_file',
+                        'document_date'
+                    ];
+                    const hasChargeError = keys.some(k => chargeErrors.includes(k) || k.startsWith('destinatarios.'));
+
+                    if (hasChargeError) {
+                        console.log('[Resolucions index] Detectado error en cargos. Reabriendo #createChargeModal.');
+                        const modalEl = document.getElementById('createChargeModal');
+                        if (modalEl) {
+                            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                        }
+                    } else {
+                        // Error de resolución. Verificar origen (create o edit)
+                        const origin = "{{ old('action_origin') }}";
+                        console.log('[Resolucions index] Detectado error en resoluciones. Origen de acción:', origin);
+
+                        if (origin === 'create') {
+                            console.log('[Resolucions index] Reabriendo #createResolutionModal.');
+                            const modalEl = document.getElementById('createResolutionModal');
+                            if (modalEl) {
+                                bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                            }
+                        } else if (origin === 'edit') {
+                            const editId = "{{ old('edit_resolucion_id') }}";
+                            console.log(`[Resolucions index] Reabriendo modal de edición para ID: ${editId}`);
+                            if (editId) {
+                                // Buscar el botón de editar correspondiente en la tabla y disparar su evento click
+                                const btnEdit = document.querySelector(`.btn-edit-resolution[data-id="${editId}"]`);
+                                if (btnEdit) {
+                                    console.log('[Resolucions index] Botón de edición encontrado en tabla. Ejecutando click simulado.');
+                                    btnEdit.click();
+                                } else {
+                                    console.warn(`[Resolucions index] No se encontró el botón de edición para ID: ${editId} en la tabla.`);
+                                }
+                            }
+                        }
+                    }
+                });
+            </script>
+        @endif
     @endsection

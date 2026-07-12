@@ -68,6 +68,11 @@ class ChargeController extends Controller
 
         $this->service->signStore($data, $files, $charge->id, $request->user()->id);
 
+        $request->user()->unreadNotifications()
+            ->where('data->charge_id', $charge->id)
+            ->get()
+            ->markAsRead();
+
         return redirect()->back()->with('success', 'Cargo firmado correctamente.');
     }
 
@@ -75,6 +80,11 @@ class ChargeController extends Controller
     {
         $data = $request->validated();
         $this->service->reject($data, $charge->id, $request->user()->id);
+
+        $request->user()->unreadNotifications()
+            ->where('data->charge_id', $charge->id)
+            ->get()
+            ->markAsRead();
 
         return redirect()->back()->with('success', 'Cargo rechazado correctamente.');
     }
@@ -197,5 +207,47 @@ class ChargeController extends Controller
             'user' => $request->user(),
             'default_period' => $defaultPeriod,
         ];
+    }
+
+    public function pendingNotifications()
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['count' => 0, 'charges' => []]);
+        }
+
+        $notifications = $user->unreadNotifications()
+            ->where('type', \App\Notifications\PendingChargeNotification::class)
+            ->get();
+
+        $data = $notifications->map(function ($notif) {
+            $chargeData = $notif->data;
+            return [
+                'id' => $notif->id, // ID de la notificación para poder marcarla como leída
+                'charge_id' => $chargeData['charge_id'] ?? null,
+                'label' => $chargeData['label'] ?? 'Cargo Pendiente',
+                'asunto' => \Str::limit($chargeData['asunto'] ?? '', 50),
+                'created_at' => $notif->created_at->diffForHumans(null, true),
+                'url' => route('charges.index')
+            ];
+        });
+
+        return response()->json([
+            'count' => $notifications->count(),
+            'charges' => $data
+        ]);
+    }
+
+    public function markNotificationAsRead(Request $request, $id)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['success' => false], 401);
+        }
+
+        $notification = $user->notifications()->findOrFail($id);
+        $notification->markAsRead();
+
+        return response()->json(['success' => true]);
     }
 }

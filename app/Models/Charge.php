@@ -14,11 +14,14 @@ class Charge extends Model
         'charge_period',
         'document_date',
         'user_id',
-        'tipo_interesado',
-        'natural_person_id',
-        'legal_entity_id',
+        'interesado_type',
+        'interesado_id',
         'asunto',
         'document_path',
+    ];
+
+    protected $appends = [
+        'tipo_interesado',
     ];
 
     public function user()
@@ -36,14 +39,9 @@ class Charge extends Model
         return $this->resolucions->first();
     }
 
-    public function naturalPerson()
+    public function interesado()
     {
-        return $this->belongsTo(NaturalPerson::class);
-    }
-
-    public function legalEntity()
-    {
-        return $this->belongsTo(LegalEntity::class);
+        return $this->morphTo();
     }
 
     /**
@@ -51,7 +49,7 @@ class Charge extends Model
      */
     public function getRepresentativeAttribute()
     {
-        return $this->legalEntity?->representative;
+        return ($this->interesado instanceof LegalEntity) ? $this->interesado->representative : null;
     }
 
     public function signature()
@@ -61,26 +59,60 @@ class Charge extends Model
 
     /* Accessors para optimizar vistas */
 
+    public function getTipoInteresadoAttribute(): string
+    {
+        return match ($this->interesado_type) {
+            NaturalPerson::class => 'Persona Natural',
+            LegalEntity::class => 'Persona Juridica',
+            User::class => 'Trabajador UGEL',
+            default => 'Desconocido',
+        };
+    }
+
     public function getInteresadoLabelAttribute(): string
     {
-        switch ($this->tipo_interesado) {
-            case 'Persona Juridica':
-                return $this->legalEntity?->razon_social ?: $this->legalEntity?->ruc ?: '---';
-            case 'Persona Natural':
-                $person = $this->naturalPerson;
-                if (! $person) {
-                    return '---';
-                }
-                $fullName = trim(($person->nombres ?? '').' '.($person->apellido_paterno ?? '').' '.($person->apellido_materno ?? ''));
-
-                return $fullName !== '' ? $fullName : ($person->dni ?? '---');
-            case 'Trabajador UGEL':
-                $targetUser = $this->signature?->assignedTo;
-
-                return $targetUser ? trim(($targetUser->name ?? '').' '.($targetUser->last_name ?? '')) : '---';
-            default:
-                return '---';
+        if (! $this->interesado) {
+            return '---';
         }
+
+        if ($this->interesado instanceof User) {
+            $targetUser = $this->signature?->assignedTo;
+
+            return $targetUser ? trim(($targetUser->name ?? '').' '.($targetUser->last_name ?? '')) : '---';
+        }
+
+        if ($this->interesado instanceof LegalEntity) {
+            return $this->interesado->razon_social ?: $this->interesado->ruc ?: '---';
+        }
+
+        if ($this->interesado instanceof NaturalPerson) {
+            $fullName = trim(($this->interesado->nombres ?? '').' '.($this->interesado->apellido_paterno ?? '').' '.($this->interesado->apellido_materno ?? ''));
+
+            return $fullName !== '' ? $fullName : ($this->interesado->dni ?? '---');
+        }
+
+        return '---';
+    }
+
+    public function getInteresadoDniAttribute(): string
+    {
+        if (! $this->interesado) {
+            return '---';
+        }
+
+        if ($this->interesado instanceof NaturalPerson) {
+            return $this->interesado->dni ?: $this->interesado->cedula ?: '---';
+        }
+
+        if ($this->interesado instanceof LegalEntity) {
+            return $this->interesado->ruc ?: '---';
+        }
+
+        if ($this->interesado instanceof User) {
+            return $this->interesado->dni ?: '---';
+        }
+
+        return '---';
     }
 
     public function getHasSignatureAttribute(): bool

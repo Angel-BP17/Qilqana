@@ -1,105 +1,156 @@
 <div class="modal fade" id="createChargeModal" tabindex="-1" aria-labelledby="createChargeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title fw-bold" id="createChargeModalLabel">
-                    <span class="material-symbols-outlined me-2">note_add</span>Registrar cargo
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-info text-white py-3">
+                <h5 class="modal-title fw-bold d-flex align-items-center" id="createChargeModalLabel">
+                    <span class="material-symbols-outlined me-2 fs-4">note_add</span>Registrar Cargos Manuales
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="POST" action="{{ route('charges.store') }}" id="createChargeFormManual" enctype="multipart/form-data">
                 @csrf
-                <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="tipo_interesado_manual" class="form-label fw-bold">Tipo de interesado</label>
-                            <select class="form-select" id="tipo_interesado_manual" name="tipo_interesado" required>
-                                <option value="">Seleccione</option>
-                                <option value="Persona Juridica">Persona Juridica</option>
-                                <option value="Persona Natural">Persona Natural</option>
-                                <option value="Trabajador UGEL">Trabajador UGEL</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6 assigned-user-field d-none">
-                            <label for="assigned_to" class="form-label fw-bold">Enviar a</label>
-                            <select class="form-select select2-user" id="assigned_to" name="assigned_to">
-                                <option value="">No enviar (quedara sin asignar)</option>
-                                @foreach ($users as $user)
-                                    <option value="{{ $user->id }}">{{ $user->name . ' ' . $user->last_name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    {{-- SECCIÓN: PERSONA JURÍDICA --}}
-                    <div class="persona-juridica-fields d-none mt-3">
-                        <div class="row g-3">
-                            <div class="col-md-12">
-                                <label for="ruc" class="form-label fw-bold">RUC</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="ruc" name="ruc" maxlength="11">
-                                    <button class="btn btn-outline-primary" type="button" id="lookup_charge_ruc_btn">Buscar</button>
+                <input type="hidden" name="cargo_para" value="otros">
+                <div class="modal-body px-4 py-3">
+                    
+                    {{-- SECCIÓN 1: BÚSQUEDA Y AGREGACIÓN DE DESTINATARIOS --}}
+                    <div class="card border-primary-subtle bg-light mb-4 shadow-sm">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="material-symbols-outlined text-primary me-2">group_add</span>
+                                <h6 class="text-primary fw-bold mb-0">Destinatarios del Cargo (Añadir múltiples interesados)</h6>
+                            </div>
+                            
+                            <div class="row g-3 mb-2">
+                                <div class="col-12 col-md-6">
+                                    <label for="tipo_interesado_manual" class="form-label fw-bold small text-muted text-uppercase">Clasificación</label>
+                                    <select class="form-select border-secondary-subtle" id="tipo_interesado_manual">
+                                        <option value="">Seleccione...</option>
+                                        <option value="Persona Natural">Persona Natural</option>
+                                        <option value="Persona Juridica">Persona Juridica</option>
+                                        <option value="Trabajador UGEL">Trabajador UGEL</option>
+                                    </select>
                                 </div>
-                                <div id="ruc_api_error" class="text-danger small mt-1 d-none"></div>
-                            </div>
-                            <div class="col-md-6 entity-details d-none">
-                                <label for="razon_social" class="form-label">Razon social</label>
-                                <input type="text" class="form-control" id="razon_social" name="razon_social" readonly>
-                            </div>
-                            <div class="col-md-6 entity-details d-none">
-                                <label for="district" class="form-label">Distrito</label>
-                                <input type="text" class="form-control" id="district" name="district" readonly>
-                            </div>
-                        </div>
-                    </div>
 
-                    {{-- SECCIÓN: PERSONA NATURAL --}}
-                    <div class="persona-natural-fields d-none mt-3">
-                        <div class="row g-3">
-                            <div class="col-md-12">
-                                <label for="dni" class="form-label fw-bold">DNI</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="dni" name="dni" maxlength="10">
-                                    <button class="btn btn-outline-primary" type="button" id="lookup_charge_dni_btn">Buscar</button>
+                                {{-- Selector de documento de Persona Natural --}}
+                                <div class="col-12 col-md-6 d-none" id="container_natural_doc_type_manual">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Tipo Documento</label>
+                                    <select class="form-select border-secondary-subtle" id="charge_natural_doc_type_manual">
+                                        <option value="DNI" selected>DNI</option>
+                                        <option value="CEDULA">CÉDULA</option>
+                                    </select>
                                 </div>
-                                <div id="dni_api_error" class="text-danger small mt-1 d-none"></div>
                             </div>
-                            <div class="col-md-4 natural-details d-none">
-                                <label for="nombres" class="form-label">Nombres</label>
-                                <input type="text" class="form-control" id="nombres" name="nombres">
+
+                            <div class="row g-3">
+                                {{-- Buscador Persona Natural --}}
+                                <div class="col-12 d-none mt-3" id="container_natural_person_manual">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Número de Identidad</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-secondary-subtle text-primary">
+                                            <span class="material-symbols-outlined fs-5">badge</span>
+                                        </span>
+                                        <input type="text" class="form-control border-secondary-subtle" id="lookup_natural_value_manual" placeholder="Ingrese número...">
+                                        <button class="btn btn-outline-primary fw-bold" type="button" id="btn_lookup_natural_manual">BUSCAR</button>
+                                    </div>
+                                    <div id="lookup_natural_error_manual" class="text-danger small mt-1 d-none"></div>
+                                </div>
+
+                                {{-- Buscador Persona Jurídica --}}
+                                <div class="col-12 d-none mt-3" id="container_legal_entity_manual">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Número RUC</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-secondary-subtle text-primary">
+                                            <span class="material-symbols-outlined fs-5">corporate_fare</span>
+                                        </span>
+                                        <input type="text" class="form-control border-secondary-subtle" id="lookup_legal_value_manual" placeholder="Ingrese RUC..." maxlength="11">
+                                        <button class="btn btn-outline-primary fw-bold" type="button" id="btn_lookup_legal_manual">BUSCAR</button>
+                                    </div>
+                                    <div id="lookup_legal_error_manual" class="text-danger small mt-1 d-none"></div>
+                                </div>
+
+                                {{-- Buscador Trabajador UGEL --}}
+                                <div class="col-12 d-none mt-3" id="container_ugel_user_manual">
+                                    <label class="form-label fw-bold small text-muted text-uppercase">Búsqueda de Trabajador</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-secondary-subtle text-primary">
+                                            <span class="material-symbols-outlined fs-5">engineering</span>
+                                        </span>
+                                        <select class="form-select select2-ajax-users-manual border-secondary-subtle" id="select_ugel_user_manual">
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-4 natural-details d-none">
-                                <label for="apellido_paterno" class="form-label">Ap. Paterno</label>
-                                <input type="text" class="form-control" id="apellido_paterno" name="apellido_paterno">
+
+                            {{-- Confirmación / Información del Destinatario Resuelto --}}
+                            <div id="manual_resolved_info" class="mt-3 d-none">
+                                <div class="alert alert-info border-info-subtle d-flex align-items-center justify-content-between mb-0 py-2">
+                                    <div class="d-flex align-items-center">
+                                        <span class="material-symbols-outlined text-info me-3 fs-3">check_circle</span>
+                                        <div>
+                                            <div id="manual_resolved_name" class="fw-bold text-dark small"></div>
+                                            <div id="manual_resolved_doc" class="small text-muted" style="font-size: 0.85em;"></div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-success btn-sm fw-bold px-3 d-flex align-items-center gap-1 shadow-sm" id="btn_add_destinatario_manual">
+                                        <span class="material-symbols-outlined fs-5">person_add</span>Agregar
+                                    </button>
+                                </div>
                             </div>
-                            <div class="col-md-4 natural-details d-none">
-                                <label for="apellido_materno" class="form-label">Ap. Materno</label>
-                                <input type="text" class="form-control" id="apellido_materno" name="apellido_materno">
+
+                            {{-- Lista de Destinatarios Agregados --}}
+                            <div id="manual_destinatarios_list_wrapper" class="mt-3 d-none">
+                                <label class="form-label fw-bold small text-muted text-uppercase mb-2">Destinatarios Agregados</label>
+                                <div class="list-group shadow-sm border border-secondary-subtle rounded-3 overflow-hidden bg-white" id="manual_destinatarios_agregados_lista">
+                                    {{-- Los items se insertan aquí y se enlazan con inputs ocultos para el submit --}}
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="row g-3 mt-2">
-                        <div class="col-md-8">
-                            <label for="asunto_manual" class="form-label fw-bold">Se remite</label>
-                            <input type="text" class="form-control text-uppercase" id="asunto_manual" name="asunto" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="document_date_manual" class="form-label fw-bold">Fecha del documento</label>
-                            <input type="date" class="form-control" id="document_date_manual" name="document_date" value="{{ date('Y-m-d') }}">
+                    {{-- SECCIÓN 2: DETALLES DEL DOCUMENTO --}}
+                    <div class="card border-secondary-subtle bg-light mb-2 shadow-sm">
+                        <div class="card-body p-3">
+                            <label class="form-label fw-bold small text-muted text-uppercase mb-3 d-flex align-items-center">
+                                <span class="material-symbols-outlined fs-5 me-1 text-secondary">description</span>
+                                Detalles del documento del cargo
+                            </label>
+                            <div class="row g-3 mb-3">
+                                <div class="col-12 col-md-8">
+                                    <label for="asunto_manual" class="form-label fw-bold small text-muted">Se remite (Asunto)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white"><span class="material-symbols-outlined fs-5 text-muted">forward_to_inbox</span></span>
+                                        <input type="text" class="form-control text-uppercase border-secondary-subtle" id="asunto_manual" name="asunto" required
+                                            placeholder="Ej: DOCUMENTOS ADJUNTOS">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label for="document_date_manual" class="form-label fw-bold small text-muted">Fecha Documento</label>
+                                    <input type="date" class="form-control border-secondary-subtle" id="document_date_manual" name="document_date"
+                                        value="{{ date('Y-m-d') }}">
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label for="document_file_manual" class="form-label fw-bold small text-muted">Documento de Cargo (PDF)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white"><span class="material-symbols-outlined fs-5 text-muted">picture_as_pdf</span></span>
+                                        <input type="file" class="form-control border-secondary-subtle" id="document_file_manual" name="document_file" accept=".pdf">
+                                    </div>
+                                    <div class="form-text">
+                                        Opcional. Tamaño máximo permitido: <strong>{{ (int) \App\Models\Setting::getValue('charges_max_file_size', '5120') / 1024 }}MB</strong>.
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="row g-3 mt-1">
-                        <div class="col-md-12">
-                            <label for="document_file_manual" class="form-label fw-bold">Documento del Cargo (PDF)</label>
-                            <input type="file" class="form-control" id="document_file_manual" name="document_file" accept=".pdf">
-                        </div>
-                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Guardar cargo</button>
+                <div class="modal-footer bg-light border-top px-4 py-3">
+                    <button type="button" class="btn btn-outline-secondary px-4 fw-medium" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success px-4 fw-bold shadow-sm d-flex align-items-center gap-1" id="btn_submit_manual">
+                        <span class="material-symbols-outlined fs-5">save</span>Guardar Cargos
+                    </button>
                 </div>
             </form>
         </div>

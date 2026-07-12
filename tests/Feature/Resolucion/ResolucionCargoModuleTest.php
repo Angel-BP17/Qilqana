@@ -4,7 +4,9 @@ namespace Tests\Feature\Resolucion;
 
 use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\Charge;
+use App\Models\NaturalPerson;
 use App\Models\Resolucion;
+use App\Models\ResolucionType;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -90,7 +92,7 @@ class ResolucionCargoModuleTest extends TestCase
         ]);
 
         $response->assertStatus(302);
-        $response->assertSessionHasErrors(['rd', 'fecha', 'asunto', 'nombres', 'apellido_paterno', 'apellido_materno', 'dni']);
+        $response->assertSessionHasErrors(['resolucion_type_id', 'rd', 'fecha', 'asunto', 'interesados']);
     }
 
     /**
@@ -109,14 +111,24 @@ class ResolucionCargoModuleTest extends TestCase
      */
     public function test_stage_4_creating_resolucion_no_longer_creates_charge_automatically()
     {
+        $type = ResolucionType::create([
+            'name' => 'Test Type',
+            'abreviacion' => 'TT',
+            'description' => 'Test',
+        ]);
+        $person = NaturalPerson::factory()->create();
+
         $data = [
+            'resolucion_type_id' => $type->id,
             'rd' => 'RD-2026-001',
             'fecha' => '2026-03-09',
             'asunto' => 'Nombramiento Test',
-            'nombres' => 'Juan',
-            'apellido_paterno' => 'Perez',
-            'apellido_materno' => 'Gomez',
-            'dni' => '77777777',
+            'interesados' => [
+                [
+                    'id' => $person->id,
+                    'type' => 'Persona Natural',
+                ],
+            ],
             'user_id' => $this->admin->id,
         ];
 

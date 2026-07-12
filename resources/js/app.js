@@ -2,11 +2,13 @@ import "bootstrap";
 import "./bootstrap";
 import * as bootstrap from "bootstrap";
 import SignaturePad from "signature_pad";
+import TomSelect from "tom-select";
 import { runResilient } from './modules/common/resilience';
 
 // Globales
 window.bootstrap = bootstrap;
 window.SignaturePad = SignaturePad;
+window.TomSelect = TomSelect;
 
 /**
  * Orquestador de Módulos Frontend

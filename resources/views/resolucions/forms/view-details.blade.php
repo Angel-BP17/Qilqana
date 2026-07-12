@@ -40,6 +40,18 @@
                                 <p class="text-muted small text-uppercase fw-bold mb-1">Procedencia</p>
                                 <span id="view_res_procedencia" class="text-dark"></span>
                             </div>
+                            <div class="col-md-12 d-none" id="view_res_document_wrapper">
+                                <hr class="my-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <p class="text-muted small text-uppercase fw-bold mb-0">Documento de la Resolución</p>
+                                    <a id="view_res_pdf_link" href="#" target="_blank" class="btn btn-outline-danger btn-sm fw-bold d-inline-flex align-items-center">
+                                        <span class="material-symbols-outlined fs-5 me-1">open_in_new</span> Abrir en pestaña nueva
+                                    </a>
+                                </div>
+                                <div class="border rounded overflow-hidden shadow-sm bg-white" style="height: 550px;">
+                                    <iframe id="view_res_pdf_iframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

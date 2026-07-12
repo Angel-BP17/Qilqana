@@ -24,7 +24,8 @@ class CreateResolucionChargeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // No specific validation rules needed for this request
+            'interesado_id' => ['nullable', 'integer'],
+            'interesado_type' => ['nullable', 'string', 'in:App\Models\NaturalPerson,App\Models\LegalEntity,App\Models\User,Persona Natural,Persona Juridica,Trabajador UGEL'],
         ];
     }
 }

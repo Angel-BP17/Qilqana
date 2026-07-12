@@ -163,16 +163,17 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Inicializar Select2 en los modales
-        if ($.fn.select2) {
-            $('.select2-resolucion-types').select2({
-                theme: 'bootstrap-5',
-                width: '100%',
-                dropdownParent: $('#createAsuntoModal')
+        let createSelect = null;
+        let editSelect = null;
+
+        if (window.TomSelect) {
+            createSelect = new TomSelect('#resolucion_types', {
+                plugins: ['remove_button'],
+                maxItems: null,
             });
-            $('.select2-resolucion-types-edit').select2({
-                theme: 'bootstrap-5',
-                width: '100%',
-                dropdownParent: $('#editAsuntoModal')
+            editSelect = new TomSelect('#edit_resolucion_types', {
+                plugins: ['remove_button'],
+                maxItems: null,
             });
         }
 
@@ -187,7 +188,11 @@
                 document.getElementById('edit_asunto_description').value = btn.dataset.description;
                 
                 const types = JSON.parse(btn.dataset.types);
-                $('#edit_resolucion_types').val(types).trigger('change');
+                if (editSelect) {
+                    editSelect.setValue(types);
+                } else {
+                    $('#edit_resolucion_types').val(types);
+                }
 
                 editModal.show();
             };
