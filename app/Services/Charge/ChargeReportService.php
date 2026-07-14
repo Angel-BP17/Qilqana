@@ -2,7 +2,6 @@
 
 namespace App\Services\Charge;
 
-use App\Filters\ChargeFilter;
 use App\Models\Charge;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -10,7 +9,7 @@ use Illuminate\Http\Response;
 
 class ChargeReportService
 {
-    public function __construct(protected ChargeFilter $filter) {}
+    public function __construct(protected ChargeService $chargeService) {}
 
     public function generateReport(string $title, string $type, $charges, array $filters): Response
     {
@@ -26,7 +25,7 @@ class ChargeReportService
     public function getSentReport(array $data, User $user, string $defaultPeriod): Response
     {
         $filters = $this->prepareFilters($data, $defaultPeriod);
-        $charges = $this->filter->getAllSentCharges($filters, $user);
+        $charges = $this->chargeService->getAllSentCharges($filters, $user);
 
         return $this->generateReport('REPORTE DE CARGOS ENVIADOS', 'sent', $charges, $filters);
     }
@@ -34,7 +33,7 @@ class ChargeReportService
     public function getCreatedReport(array $data, User $user, string $defaultPeriod): Response
     {
         $filters = $this->prepareFilters($data, $defaultPeriod);
-        $charges = $this->filter->getAllCreatedCharges($filters, $user);
+        $charges = $this->chargeService->getAllCreatedCharges($filters, $user);
 
         return $this->generateReport('REPORTE DE CARGOS CREADOS', 'created', $charges, $filters);
     }
@@ -70,7 +69,7 @@ class ChargeReportService
         $filters = $this->prepareFilters($data, $defaultPeriod);
         $filters['signature_status'] = $data['signature_status'] ?? null;
 
-        $charges = $this->filter->getAllReceivedCharges($filters, $user);
+        $charges = $this->chargeService->getAllReceivedCharges($filters, $user);
 
         return $this->generateReport('REPORTE DE CARGOS RECIBIDOS', 'received', $charges, $filters);
     }

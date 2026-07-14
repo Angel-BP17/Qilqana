@@ -2,7 +2,6 @@
 
 namespace App\Services\User;
 
-use App\Filters\UserFilter;
 use App\Models\NaturalPerson;
 use App\Models\User;
 use App\Services\User\Contracts\UserServiceInterface;
@@ -12,11 +11,13 @@ use Spatie\Permission\Models\Role;
 
 class UserService implements UserServiceInterface
 {
-    public function __construct(protected UserFilter $filter) {}
-
     public function getAll(array $data): array
     {
-        $users = $this->filter->applyFilters($data)->paginate(10);
+        $users = User::with('roles')
+            ->search($data['search'] ?? null)
+            ->filterByRole($data['role_id'] ?? null)
+            ->paginate(10);
+
         $roles = Role::all();
 
         return compact('users', 'roles');

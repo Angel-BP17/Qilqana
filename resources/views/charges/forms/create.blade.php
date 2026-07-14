@@ -13,7 +13,7 @@
                 <div class="modal-body px-4 py-3">
                     
                     {{-- SECCIÓN 1: BÚSQUEDA Y AGREGACIÓN DE DESTINATARIOS --}}
-                    <div class="card border-primary-subtle bg-light mb-4 shadow-sm">
+                    <div class="card form-section-card mb-4 shadow-sm" id="create_charge_sec_1">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center mb-3">
                                 <span class="material-symbols-outlined text-primary me-2">group_add</span>
@@ -108,7 +108,7 @@
                     </div>
 
                     {{-- SECCIÓN 2: DETALLES DEL DOCUMENTO --}}
-                    <div class="card border-secondary-subtle bg-light mb-2 shadow-sm">
+                    <div class="card form-section-card mb-2 shadow-sm" id="create_charge_sec_2">
                         <div class="card-body p-3">
                             <label class="form-label fw-bold small text-muted text-uppercase mb-3 d-flex align-items-center">
                                 <span class="material-symbols-outlined fs-5 me-1 text-secondary">description</span>
@@ -156,3 +156,75 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('createChargeFormManual');
+        if (!form) return;
+
+        const sec1 = document.getElementById('create_charge_sec_1');
+        const sec2 = document.getElementById('create_charge_sec_2');
+
+        // Función para validar si la sección 1 tiene al menos un destinatario agregado en el listado
+        const sec1HasDestinatarios = () => {
+            const list = document.getElementById('manual_destinatarios_agregados_lista');
+            if (!list) return false;
+            // Contamos los elementos con input hidden (ej. name="destinatarios[...]...")
+            const inputs = list.getElementsByTagName('input');
+            return inputs.length > 0;
+        };
+
+        // Campos obligatorios de la sección 2
+        const sec2Fields = () => [
+            document.getElementById('asunto_manual')
+        ];
+
+        function checkValidity() {
+            // Evaluar Sección 1
+            const sec1Valid = sec1HasDestinatarios();
+            
+            // Evaluar Sección 2
+            const sec2Valid = sec2Fields().every(field => field && field.value.trim() !== '' && field.checkValidity());
+
+            // Limpiar clases
+            [sec1, sec2].forEach(sec => {
+                if (sec) {
+                    sec.classList.remove('active-section', 'completed-section');
+                }
+            });
+
+            // Lógica progresiva
+            if (!sec1Valid) {
+                if (sec1) sec1.classList.add('active-section');
+            } else {
+                if (sec1) sec1.classList.add('completed-section');
+
+                if (!sec2Valid) {
+                    if (sec2) sec2.classList.add('active-section');
+                } else {
+                    if (sec2) sec2.classList.add('completed-section');
+                }
+            }
+        }
+
+        // Escuchar inputs y cambios
+        form.addEventListener('input', checkValidity);
+        form.addEventListener('change', checkValidity);
+
+        // Escuchar cambios dinámicos en la lista de destinatarios
+        const destList = document.getElementById('manual_destinatarios_agregados_lista');
+        if (destList) {
+            const observer = new MutationObserver(checkValidity);
+            observer.observe(destList, { childList: true });
+        }
+
+        // Ejecutar validación inicial
+        setTimeout(checkValidity, 500);
+
+        // Re-evaluar cuando se abra el modal
+        const modalEl = document.getElementById('createChargeModal');
+        if (modalEl) {
+            modalEl.addEventListener('shown.bs.modal', checkValidity);
+        }
+    });
+</script>

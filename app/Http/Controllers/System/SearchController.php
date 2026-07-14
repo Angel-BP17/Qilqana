@@ -132,7 +132,7 @@ class SearchController extends Controller
         return response()->json([
             'results' => $results->map(fn ($r) => [
                 'id' => $r->id,
-                'text' => '['.($r->type?->name ?? 'S/T').'] '.($r->type?->abreviacion ?? 'RD')." {$r->rd} - {$r->nombres_apellidos} ({$r->fecha->format('d/m/Y')})",
+                'text' => ($r->type?->abreviacion ?? 'RD')." {$r->rd} - {$r->nombres_apellidos} ({$r->fecha->format('d/m/Y')})",
             ]),
         ]);
     }

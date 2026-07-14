@@ -120,6 +120,17 @@ class Charge extends Model
         return (bool) ($this->signature?->signature_root);
     }
 
+    public function getSignatureContentAttribute(): ?string
+    {
+        $signatureRoot = $this->signature?->signature_root;
+
+        if ($signatureRoot && \Storage::disk('local')->exists($signatureRoot)) {
+            return \Storage::disk('local')->get($signatureRoot);
+        }
+
+        return null;
+    }
+
     public function getHasCartaPoderAttribute(): bool
     {
         return (bool) ($this->signature?->carta_poder_path);
@@ -148,5 +159,43 @@ class Charge extends Model
     public function getFileDocumentUrlAttribute(): string
     {
         return $this->document_path ? route('charges.file.document', $this) : '';
+    }
+
+    public function scopeFilterByPeriod(\Illuminate\Database\Eloquent\Builder $query, ?string $period): \Illuminate\Database\Eloquent\Builder
+    {
+        return $query->when($period, function ($q, $period) {
+            $q->where(function ($q2) use ($period) {
+                $q2->where('charge_period', $period)->orWhereNull('charge_period');
+            });
+        });
+    }
+
+    public function scopeFilterBySignatureStatus(\Illuminate\Database\Eloquent\Builder $query, ?string $status): \Illuminate\Database\Eloquent\Builder
+    {
+        return $query->when(in_array($status, ['pendiente', 'firmado', 'rechazado'], true), function ($q) use ($status) {
+            $q->whereHas('signature', fn ($s) => $s->where('signature_status', $status));
+        });
+    }
+
+    public function scopeSearch(\Illuminate\Database\Eloquent\Builder $query, ?string $search): \Illuminate\Database\Eloquent\Builder
+    {
+        return $query->when($search, function ($q, $search) {
+            $q->where(function ($q2) use ($search) {
+                $q2->where('n_charge', 'like', "%{$search}%")
+                    ->orWhere('asunto', 'like', "%{$search}%")
+                    ->orWhereHasMorph('interesado', [NaturalPerson::class, LegalEntity::class], function ($morphQuery, $type) use ($search) {
+                        if ($type === NaturalPerson::class) {
+                            $morphQuery->where('nombres', 'like', "%{$search}%")
+                                ->orWhere('apellido_paterno', 'like', "%{$search}%")
+                                ->orWhere('apellido_materno', 'like', "%{$search}%")
+                                ->orWhere('dni', 'like', "%{$search}%");
+                        } elseif ($type === LegalEntity::class) {
+                            $morphQuery->where('razon_social', 'like', "%{$search}%")
+                                ->orWhere('ruc', 'like', "%{$search}%")
+                                ->orWhere('district', 'like', "%{$search}%");
+                        }
+                    });
+            });
+        });
     }
 }

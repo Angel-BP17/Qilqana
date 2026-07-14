@@ -56,4 +56,15 @@ class LegalEntity extends Model
             })
             ->latestOfMany();
     }
+
+    public function scopeSearch(\Illuminate\Database\Eloquent\Builder $query, ?string $search): \Illuminate\Database\Eloquent\Builder
+    {
+        return $query->when($search, function ($query, $search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('ruc', 'like', "%{$search}%")
+                    ->orWhere('razon_social', 'like', "%{$search}%")
+                    ->orWhere('district', 'like', "%{$search}%");
+            });
+        });
+    }
 }

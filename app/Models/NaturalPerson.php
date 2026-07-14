@@ -37,4 +37,17 @@ class NaturalPerson extends Model
     {
         return $this->morphToMany(Resolucion::class, 'interesado', 'resolucion_interesados');
     }
+
+    public function scopeSearch(\Illuminate\Database\Eloquent\Builder $query, ?string $search): \Illuminate\Database\Eloquent\Builder
+    {
+        return $query->when($search, function ($query, $search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('dni', 'like', "%{$search}%")
+                    ->orWhere('cedula', 'like', "%{$search}%")
+                    ->orWhere('nombres', 'like', "%{$search}%")
+                    ->orWhere('apellido_paterno', 'like', "%{$search}%")
+                    ->orWhere('apellido_materno', 'like', "%{$search}%");
+            });
+        });
+    }
 }

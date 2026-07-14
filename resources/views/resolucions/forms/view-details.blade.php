@@ -24,8 +24,16 @@
                                 <p class="text-muted small text-uppercase fw-bold mb-1">DNI</p>
                                 <span id="view_res_dni" class="text-dark"></span>
                             </div>
+                            <div class="col-md-6">
+                                <p class="text-muted small text-uppercase fw-bold mb-1">Tipo de Resolución</p>
+                                <span id="view_res_resolucion_type" class="fw-semibold text-dark"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="text-muted small text-uppercase fw-bold mb-1">Tipo de Asunto</p>
+                                <span id="view_res_asunto_type" class="fw-semibold text-dark"></span>
+                            </div>
                             <div class="col-md-12">
-                                <p class="text-muted small text-uppercase fw-bold mb-1">Asunto</p>
+                                <p class="text-muted small text-uppercase fw-bold mb-1">Asunto/Resumen</p>
                                 <span id="view_res_asunto" class="text-dark"></span>
                             </div>
                             <div class="col-md-4">

@@ -36,6 +36,7 @@ class UserSeeder extends Seeder
             'users.create',
             'users.edit',
             'users.delete',
+            'resolucion marcar trabajada',
         ];
 
         foreach ($permissions as $permission) {
@@ -46,6 +47,10 @@ class UserSeeder extends Seeder
         }
 
         $roles = [
+            'PLANILLERO' => [
+                'modulo resoluciones',
+                'resolucion marcar trabajada',
+            ],
             'ADMINISTRADOR' => [
                 'modulo resoluciones',
                 'modulo cargos',
@@ -111,5 +116,16 @@ class UserSeeder extends Seeder
         ]);
 
         $user2->assignRole('REGISTRADOR');
+
+        $user3 = User::create([
+            'name' => 'PLANILLERO',
+            'last_name' => 'USER',
+            'dni' => '222222222',
+            'password' => Hash::make('123456'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $user3->assignRole('PLANILLERO');
     }
 }

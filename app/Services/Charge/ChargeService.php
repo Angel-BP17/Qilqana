@@ -2,7 +2,6 @@
 
 namespace App\Services\Charge;
 
-use App\Filters\ChargeFilter;
 use App\Models\Charge;
 use App\Models\LegalEntity;
 use App\Models\NaturalPerson;
@@ -22,7 +21,6 @@ class ChargeService implements ChargeServiceInterface
     use HasChargeLogic;
 
     public function __construct(
-        protected ChargeFilter $filter,
         protected ImageService $imageService
     ) {}
 
@@ -31,13 +29,13 @@ class ChargeService implements ChargeServiceInterface
         $user = $data['user'];
 
         $resolutionCharges = ($user?->hasRole('ADMINISTRADOR') || $user?->can('modulo resoluciones'))
-            ? $this->filter->getAllResolutionCharges($data['resolucion'], $user)
+            ? $this->getAllResolutionCharges($data['resolucion'], $user)
             : collect();
 
         return [
-            'sentCharges' => $this->filter->getAllSentCharges($data['sent'], $user),
-            'receivedCharges' => $this->filter->getAllReceivedCharges($data['received'], $user),
-            'createdCharges' => $this->filter->getAllCreatedCharges($data['created'], $user),
+            'sentCharges' => $this->getAllSentCharges($data['sent'], $user),
+            'receivedCharges' => $this->getAllReceivedCharges($data['received'], $user),
+            'createdCharges' => $this->getAllCreatedCharges($data['created'], $user),
             'resolutionCharges' => $resolutionCharges,
             'resolutionChargesCount' => $resolutionCharges->count(),
             'signedCount' => $this->countSignedCharges(),
@@ -467,5 +465,67 @@ class ChargeService implements ChargeServiceInterface
     private function usersToAssign($user): Collection
     {
         return User::where('id', '!=', $user?->id)->orderBy('name')->get();
+    }
+
+    public function getAllSentCharges(array $searchfilters, $user)
+    {
+        return Charge::with(['user', 'interesado', 'signature', 'signature.signer', 'signature.assignedTo', 'resolucions'])
+            ->where('user_id', $user?->id)
+            ->whereDoesntHave('resolucions')
+            ->filterByPeriod($searchfilters['period'] ?? null)
+            ->search($searchfilters['search'] ?? null)
+            ->filterBySignatureStatus($searchfilters['signature_status'] ?? null)
+            ->orderByDesc('created_at')
+            ->get();
+    }
+
+    public function getAllReceivedCharges(array $searchfilters, $user)
+    {
+        return Charge::with(['user', 'interesado', 'signature', 'signature.signer', 'signature.assignedTo', 'resolucions'])
+            ->whereDoesntHave('resolucions')
+            ->whereHas('signature', fn ($q) => $q->where('assigned_to', $user?->id))
+            ->where('interesado_type', User::class)
+            ->filterByPeriod($searchfilters['period'] ?? null)
+            ->when(
+                ($searchfilters['signature_status'] ?? null) !== 'rechazado',
+                fn ($q) => $q->whereHas('signature', fn ($s) => $s->where('signature_status', '!=', 'rechazado'))
+            )
+            ->search($searchfilters['search'] ?? null)
+            ->filterBySignatureStatus($searchfilters['signature_status'] ?? null)
+            ->orderByDesc('created_at')
+            ->get();
+    }
+
+    public function getAllCreatedCharges(array $searchfilters, $user)
+    {
+        return Charge::with(['user', 'interesado', 'signature', 'signature.signer', 'signature.assignedTo', 'resolucions'])
+            ->where('user_id', $user?->id)
+            ->whereDoesntHave('resolucions')
+            ->where('interesado_type', '!=', User::class)
+            ->filterByPeriod($searchfilters['period'] ?? null)
+            ->search($searchfilters['search'] ?? null)
+            ->filterBySignatureStatus($searchfilters['signature_status'] ?? null)
+            ->orderByDesc('created_at')
+            ->get();
+    }
+
+    public function getAllResolutionCharges(array $searchfilters, $user)
+    {
+        return Charge::with(['user', 'interesado', 'signature', 'signature.signer', 'signature.assignedTo', 'resolucions'])
+            ->whereHas('resolucions')
+            ->when(! $user?->hasRole('REGISTRADOR RESOLUCIONES'), function ($q) use ($user) {
+                $q->where(function ($q2) use ($user) {
+                    $q2->where(function ($q3) use ($user) {
+                        $q3->where('interesado_id', $user?->id)
+                            ->where('interesado_type', User::class);
+                    })->orWhereHas('signature', function ($q3) use ($user) {
+                        $q3->where('assigned_to', $user?->id);
+                    });
+                });
+            })
+            ->filterByPeriod($searchfilters['period'] ?? null)
+            ->search($searchfilters['search'] ?? null)
+            ->orderByDesc('created_at')
+            ->get();
     }
 }

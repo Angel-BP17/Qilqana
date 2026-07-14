@@ -185,3 +185,77 @@
 #charges-tabs .nav-link.active {
     color: #212529;
 }
+
+/* --- MEJORA DE CONTRASTE EN MODALES E INPUTS --- */
+.modal-content {
+    background-color: #f8fafc !important; /* Fondo moderno gris-azul claro para el modal */
+}
+
+.modal-body .card {
+    background-color: #ffffff !important; /* Tarjetas blancas elevadas */
+    border-width: 1px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Bordes nítidos y legibles para inputs y selects */
+.form-control,
+.form-select {
+    border-color: #94a3b8 !important; /* Gris de alto contraste */
+    color: #1e293b !important; /* Texto principal oscuro */
+    background-color: #ffffff !important;
+}
+
+/* Placeholders con contraste óptimo */
+.form-control::placeholder {
+    color: #64748b !important;
+    opacity: 0.85;
+}
+
+/* Efecto focus claro */
+.form-control:focus,
+.form-select:focus {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25) !important;
+}
+
+/* Inputs deshabilitados legibles y diferenciados */
+.form-control:disabled,
+.form-select:disabled,
+.form-control[readonly],
+.form-select[readonly] {
+    background-color: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    color: #64748b !important;
+    cursor: not-allowed;
+}
+
+/* Estilos de input-group-text (prefijos de iconos) con contraste */
+.input-group-text {
+    background-color: #e2e8f0 !important;
+    border-color: #94a3b8 !important;
+    color: #334155 !important;
+    font-weight: 500;
+}
+
+/* --- ENFOQUE PROGRESIVO DE SECCIONES EN FORMULARIOS --- */
+.form-section-card {
+    transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+    border: 1px solid #cbd5e1 !important; /* Borde gris estándar */
+    background-color: #ffffff !important;
+}
+
+/* Sección actualmente activa / en curso de digitación */
+.form-section-card.active-section {
+    background-color: #f0f9ff !important; /* Celeste muy suave */
+    border-color: #0ea5e9 !important;     /* Celeste corporativo */
+    box-shadow: 0 10px 15px -3px rgba(14, 165, 233, 0.08), 0 4px 6px -4px rgba(14, 165, 233, 0.08) !important;
+}
+
+/* Sección que ya ha sido completada */
+.form-section-card.completed-section {
+    background-color: #ffffff !important;
+    border-color: #86efac !important;     /* Verde éxito suave */
+    box-shadow: none !important;
+}
+
+

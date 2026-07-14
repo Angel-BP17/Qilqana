@@ -2,7 +2,6 @@
 
 namespace App\Services\Resolucion;
 
-use App\Filters\ResolucionFilter;
 use App\Models\Charge;
 use App\Models\LegalEntity;
 use App\Models\NaturalPerson;
@@ -17,22 +16,21 @@ class ResolucionService implements ResolucionServiceInterface
 {
     use HasChargeLogic;
 
-    public function __construct(protected ResolucionFilter $filter) {}
-
     public function getAll(array $data): array
     {
         if (empty($data['search']) && empty($data['periodo']) && empty($data['resolucion_type_id']) && empty($data['asunto_type_id']) && empty($data['level_modality_id']) && empty($data['desde']) && empty($data['hasta'])) {
-            return [
+            $chargePeriod = $this->getChargePeriod();
+            $stats = $this->getStats($chargePeriod);
+
+            return array_merge([
                 'resoluciones' => new LengthAwarePaginator([], 0, 20),
                 'ultimoRegistro' => Resolucion::latest('id')->value('rd'),
                 'periodos' => Resolucion::select('periodo')->distinct()->orderBy('periodo', 'asc')->pluck('periodo'),
-                'chargePeriod' => $this->getChargePeriod(),
-                'totalResolucionesPeriodo' => 0,
-                'pendientesResolucionesPeriodo' => 0,
-            ];
+                'chargePeriod' => $chargePeriod,
+            ], $stats);
         }
 
-        $resoluciones = $this->filter->applyFilters($data)->paginate(20);
+        $resoluciones = Resolucion::filter($data)->paginate(20);
         $ultimoRegistro = Resolucion::latest('id')->value('rd');
 
         $periodos = Resolucion::select('periodo')
@@ -51,7 +49,7 @@ class ResolucionService implements ResolucionServiceInterface
 
     public function getFilterQuery(array $filters)
     {
-        return $this->filter->applyFilters($filters);
+        return Resolucion::filter($filters);
     }
 
     public function create(array $data): bool

@@ -7,17 +7,88 @@
                 <span class="badge bg-primary">Firmados: {{ $receivedSigned }}</span>
             </x-slot:left>
 
-            <form class="d-flex flex-wrap gap-2 flex-grow-1 flex-xl-grow-0 justify-content-xl-end" action="{{ route('charges.index') }}" method="GET">
-                <div class="flex-grow-1" style="min-width: 200px; max-width: 350px;">
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-end-0">
-                            <span class="material-symbols-outlined text-muted">search</span>
-                        </span>
-                        <input type="text" class="form-control border-start-0" name="received_search"
-                            placeholder="No de cargo, RUC, DNI..." value="{{ request('received_search') }}">
+            <div class="d-none d-md-flex flex-grow-1 flex-xl-grow-0 justify-content-xl-end gap-2">
+                <form class="d-flex flex-wrap gap-2 flex-grow-1 flex-xl-grow-0 justify-content-xl-end" action="{{ route('charges.index') }}" method="GET">
+                    <div class="flex-grow-1" style="min-width: 200px; max-width: 350px;">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0">
+                                <span class="material-symbols-outlined text-muted">search</span>
+                            </span>
+                            <input type="text" class="form-control border-start-0" name="received_search"
+                                placeholder="No de cargo, RUC, DNI..." value="{{ request('received_search') }}">
+                        </div>
                     </div>
+                    <div style="width: 130px;">
+                        <select name="received_signature_status" class="form-select" onchange="this.form.submit()">
+                            <option value="">Estado</option>
+                            <option value="pendiente" @selected(request('received_signature_status') === 'pendiente')>Pendientes</option>
+                            <option value="firmado" @selected(request('received_signature_status') === 'firmado')>Firmados</option>
+                            <option value="rechazado" @selected(request('received_signature_status') === 'rechazado')>Rechazados</option>
+                        </select>
+                    </div>
+                    <div style="width: 110px;">
+                        <select name="received_period" class="form-select" onchange="this.form.submit()">
+                            <option value="">Periodo</option>
+                            @foreach ($periodOptions ?? [] as $period)
+                                <option value="{{ $period }}" @selected(($receivedPeriod ?? request('received_period')) === $period)>
+                                    {{ $period }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <button class="btn btn-light" type="submit" title="Filtrar">
+                        <span class="material-symbols-outlined">filter_alt</span>
+                        <span class="d-md-none d-xxl-inline">Filtrar</span>
+                    </button>
+                </form>
+                <form action="{{ route('charges.reports.received') }}" method="GET" target="_blank" class="flex-grow-1 flex-xl-grow-0">
+                    @if (request('received_search'))
+                        <input type="hidden" name="received_search" value="{{ request('received_search') }}">
+                    @endif
+                    @if (request('received_signature_status'))
+                        <input type="hidden" name="received_signature_status" value="{{ request('received_signature_status') }}">
+                    @endif
+                    @if ($receivedPeriod)
+                        <input type="hidden" name="received_period" value="{{ $receivedPeriod }}">
+                    @endif
+                    <button class="btn btn-light w-100" type="submit" @disabled($receivedCharges->isEmpty())>
+                        <span class="material-symbols-outlined me-1">picture_as_pdf</span>
+                        <span class="d-none d-sm-inline">Reporte PDF</span>
+                        <span class="d-sm-none">PDF</span>
+                    </button>
+                </form>
+            </div>
+            <div class="d-md-none d-flex gap-2 w-100">
+                <button class="btn btn-light flex-grow-1" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#received-filters">
+                    <span class="material-symbols-outlined me-1">filter_alt</span> Filtros
+                </button>
+                <button class="btn btn-light flex-grow-1" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#received-pdf">
+                    <span class="material-symbols-outlined me-1">picture_as_pdf</span> PDF
+                </button>
+            </div>
+        </x-card-header>
+
+        {{-- Filtros y PDF para móvil --}}
+        <div class="collapse d-md-none px-3 pt-3 pb-3 border-bottom" id="received-filters">
+            <form class="d-flex flex-column gap-2" action="{{ route('charges.index') }}" method="GET">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0">
+                        <span class="material-symbols-outlined text-muted">search</span>
+                    </span>
+                    <input type="text" class="form-control border-start-0" name="received_search"
+                        placeholder="No de cargo, RUC, DNI..." value="{{ request('received_search') }}">
                 </div>
-                <div style="width: 120px;">
+                <div>
+                    <select name="received_signature_status" class="form-select" onchange="this.form.submit()">
+                        <option value="">Estado</option>
+                        <option value="pendiente" @selected(request('received_signature_status') === 'pendiente')>Pendientes</option>
+                        <option value="firmado" @selected(request('received_signature_status') === 'firmado')>Firmados</option>
+                        <option value="rechazado" @selected(request('received_signature_status') === 'rechazado')>Rechazados</option>
+                    </select>
+                </div>
+                <div>
                     <select name="received_period" class="form-select" onchange="this.form.submit()">
                         <option value="">Periodo</option>
                         @foreach ($periodOptions ?? [] as $period)
@@ -27,25 +98,27 @@
                         @endforeach
                     </select>
                 </div>
-                <button class="btn btn-primary" type="submit" title="Filtrar">
-                    <span class="material-symbols-outlined">filter_alt</span>
-                    <span class="d-md-none d-xxl-inline">Filtrar</span>
+                <button class="btn btn-light w-100" type="submit" title="Filtrar">
+                    <span class="material-symbols-outlined me-1">filter_alt</span> Filtrar
                 </button>
             </form>
-            <form action="{{ route('charges.reports.received') }}" method="GET" target="_blank" class="flex-grow-1 flex-xl-grow-0">
+        </div>
+        <div class="collapse d-md-none px-3 pt-3 pb-3 border-bottom" id="received-pdf">
+            <form action="{{ route('charges.reports.received') }}" method="GET" target="_blank">
                 @if (request('received_search'))
                     <input type="hidden" name="received_search" value="{{ request('received_search') }}">
+                @endif
+                @if (request('received_signature_status'))
+                    <input type="hidden" name="received_signature_status" value="{{ request('received_signature_status') }}">
                 @endif
                 @if ($receivedPeriod)
                     <input type="hidden" name="received_period" value="{{ $receivedPeriod }}">
                 @endif
                 <button class="btn btn-light w-100" type="submit" @disabled($receivedCharges->isEmpty())>
-                    <span class="material-symbols-outlined me-1">picture_as_pdf</span>
-                    <span class="d-none d-sm-inline">Reporte PDF</span>
-                    <span class="d-sm-none">PDF</span>
+                    <span class="material-symbols-outlined me-1">picture_as_pdf</span> Descargar Reporte PDF
                 </button>
             </form>
-        </x-card-header>
+        </div>
 
         <div class="card-body p-0">
             {{-- VISTA MÓVIL --}}

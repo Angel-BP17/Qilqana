@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Catalogs;
 
-use App\Filters\NaturalPersonFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\NaturalPerson\ImportNaturalPersonRequest;
 use App\Imports\NaturalPeopleImport;
@@ -13,14 +12,14 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class NaturalPersonController extends Controller
 {
-    public function index(Request $request, NaturalPersonFilter $filter)
+    public function index(Request $request)
     {
         $this->authorize('viewAny', NaturalPerson::class);
 
-        $query = NaturalPerson::query();
-        $filter->apply($query, $request->only('search'));
-
-        $naturalPeople = $query->orderByDesc('created_at')->paginate(10)->withQueryString();
+        $naturalPeople = NaturalPerson::search($request->input('search'))
+            ->orderByDesc('created_at')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('natural-people.index', compact('naturalPeople'));
     }

@@ -81,43 +81,26 @@
                                     <div class="text-muted small text-uppercase"><span
                                             class="material-symbols-outlined me-1">history_edu</span>Ultimo RD</div>
                                     <div class="fs-3 fw-bold mb-1">{{ $ultimoRegistro }}</div>
-                                    <div class="text-muted small">Registro mas reciente</div>
                                 </div>
                                 <span class="badge bg-primary rounded-pill px-3 py-2">RD</span>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-6 col-lg-2">
+                <div class="col-12 col-md-6 col-lg-3">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body py-3">
                             <div class="text-muted small text-uppercase"><span
-                                    class="material-symbols-outlined me-1">calendar_today</span>Periodo</div>
+                                    class="material-symbols-outlined me-1">calendar_today</span>Periodo actual</div>
                             @if ($hasChargePeriod)
                                 <div class="fs-3 fw-bold mb-1">{{ $chargePeriod }}</div>
-                                <div class="text-muted small">Actual</div>
                             @else
                                 <div class="text-muted mt-2 small">Falta configurar</div>
                             @endif
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-6 col-lg-2">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body py-3">
-                            <div class="text-muted small text-uppercase"><span
-                                    class="material-symbols-outlined me-1">fact_check</span>Total
-                            </div>
-                            @if ($hasChargePeriod)
-                                <div class="fs-3 fw-bold mb-1">{{ $totalResolucionesPeriodo }}</div>
-                                <div class="text-muted small">En {{ $chargePeriod }}</div>
-                            @else
-                                <div class="text-muted mt-2 small">Falta configurar</div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6 col-lg-2">
+                <div class="col-12 col-md-6 col-lg-3">
                     <div class="card border-0 shadow-sm h-100">
                         <div class="card-body py-3">
                             <div class="text-muted small text-uppercase"><span
@@ -125,7 +108,6 @@
                             </div>
                             @if ($hasChargePeriod)
                                 <div class="fs-3 fw-bold mb-1">{{ $pendientesResolucionesPeriodo }}</div>
-                                <div class="text-muted small">En {{ $chargePeriod }}</div>
                             @else
                                 <div class="text-muted mt-2 small">Falta configurar</div>
                             @endif
@@ -367,25 +349,27 @@
                                             </div>
 
                                             <div class="d-flex flex-wrap gap-2 pt-2 border-top align-items-center">
-                                                 @if (!$resolucion->is_worked)
-                                                     <form method="POST" action="{{ route('resolucions.work', $resolucion) }}" class="d-inline m-0 form-work-resolution">
-                                                         @csrf
-                                                         @method('PATCH')
-                                                         <button type="submit" class="btn btn-outline-success btn-sm d-flex align-items-center" title="Marcar como trabajada" aria-label="Marcar como trabajada">
-                                                             <span class="material-symbols-outlined fs-6 me-1" aria-hidden="true">task_alt</span> Trabajar
-                                                         </button>
-                                                     </form>
-                                                 @else
-                                                     <span class="badge bg-success-subtle text-success border border-success-subtle d-inline-flex align-items-center py-1 px-2" title="Resolución Trabajada">
-                                                         <span class="material-symbols-outlined fs-6 me-1">done_all</span> Trabajada
-                                                     </span>
-                                                 @endif
+                                                  @if ($resolucion->is_worked)
+                                                      <span class="badge bg-success-subtle text-success border border-success-subtle d-inline-flex align-items-center py-1 px-2" title="Resolución Trabajada">
+                                                          <span class="material-symbols-outlined fs-6 me-1">done_all</span> Trabajada
+                                                      </span>
+                                                  @elseif (Auth::user()->can('resolucion marcar trabajada'))
+                                                      <form method="POST" action="{{ route('resolucions.work', $resolucion) }}" class="d-inline m-0 form-work-resolution">
+                                                          @csrf
+                                                          @method('PATCH')
+                                                          <button type="submit" class="btn btn-outline-success btn-sm d-flex align-items-center" title="Marcar como trabajada" aria-label="Marcar como trabajada">
+                                                              <span class="material-symbols-outlined fs-6 me-1" aria-hidden="true">task_alt</span> Trabajar
+                                                          </button>
+                                                      </form>
+                                                  @endif
 
                                                 <button type="button" class="btn btn-outline-info btn-sm btn-view-res-details d-flex align-items-center"
                                                     title="Ver detalles" aria-label="Ver detalles completos de la resolución {{ $resolucion->rd }}"
                                                     data-rd="{{ $resolucion->rd }}"
                                                     data-interesado="{{ $resolucion->nombres_apellidos }}"
                                                     data-dni="{{ $resolucion->dni }}"
+                                                    data-resolucion_type="{{ $resolucion->type?->name ?? '---' }}"
+                                                    data-asunto_type="{{ $resolucion->asuntoType?->name ?? '---' }}"
                                                     data-asunto="{{ $resolucion->asunto }}"
                                                     data-fecha="{{ $resolucion->formatted_fecha }}"
                                                     data-periodo="{{ $resolucion->periodo }}"
@@ -541,22 +525,23 @@
                                                 </td>
                                                 <td class="text-center">
                                                     @include('charges.partials.status-badge', ['status' => $resolucion->signature_status])
-                                                                                        @if (!Auth::user()->hasRole('VISUALIZADOR'))
+                                                </td>
+                                                @if (!Auth::user()->hasRole('VISUALIZADOR'))
                                                     <td class="text-end pe-3">
                                                         <div class="d-flex justify-content-end align-items-center gap-1">
-                                                            @if (!$resolucion->is_worked)
-                                                                <form method="POST" action="{{ route('resolucions.work', $resolucion) }}" class="d-inline m-0 form-work-resolution">
-                                                                    @csrf
-                                                                    @method('PATCH')
-                                                                    <button type="submit" class="btn btn-outline-success btn-sm d-flex align-items-center" title="Marcar como trabajada">
-                                                                        <span class="material-symbols-outlined fs-5">task_alt</span>
-                                                                    </button>
-                                                                </form>
-                                                            @else
-                                                                <span class="badge bg-success-subtle text-success border border-success-subtle d-inline-flex align-items-center py-1 px-2" title="Resolución Trabajada">
-                                                                    <span class="material-symbols-outlined fs-6 me-1">done_all</span> Trabajada
-                                                                </span>
-                                                            @endif
+                                                             @if ($resolucion->is_worked)
+                                                                 <span class="badge bg-success-subtle text-success border border-success-subtle d-inline-flex align-items-center py-1 px-2" title="Resolución Trabajada">
+                                                                     <span class="material-symbols-outlined fs-6 me-1">done_all</span> Trabajada
+                                                                 </span>
+                                                             @elseif (Auth::user()->can('resolucion marcar trabajada'))
+                                                                 <form method="POST" action="{{ route('resolucions.work', $resolucion) }}" class="d-inline m-0 form-work-resolution">
+                                                                     @csrf
+                                                                     @method('PATCH')
+                                                                     <button type="submit" class="btn btn-outline-success btn-sm d-flex align-items-center" title="Marcar como trabajada">
+                                                                         <span class="material-symbols-outlined fs-5">task_alt</span>
+                                                                     </button>
+                                                                 </form>
+                                                             @endif
 
                                                             {{-- Acción: Ver Detalles --}}
                                                             <button type="button" class="btn btn-outline-info btn-sm btn-view-res-details"
@@ -564,6 +549,8 @@
                                                                 data-rd="{{ $resolucion->rd }}"
                                                                 data-interesado="{{ $resolucion->nombres_apellidos }}"
                                                                 data-dni="{{ $resolucion->dni }}"
+                                                                data-resolucion_type="{{ $resolucion->type?->name ?? '---' }}"
+                                                                data-asunto_type="{{ $resolucion->asuntoType?->name ?? '---' }}"
                                                                 data-asunto="{{ $resolucion->asunto }}"
                                                                 data-fecha="{{ $resolucion->formatted_fecha }}"
                                                                 data-periodo="{{ $resolucion->periodo }}"

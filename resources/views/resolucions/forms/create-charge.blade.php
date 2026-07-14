@@ -26,7 +26,7 @@
                     @endif
 
                     {{-- SECCIÓN 1: RESOLUCIONES VINCULADAS --}}
-                    <div class="card border-primary-subtle bg-light-subtle mb-4">
+                    <div class="card form-section-card mb-4" id="create_charge_res_sec_1">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center mb-3">
                                 <span class="material-symbols-outlined text-primary me-2">link</span>
@@ -92,7 +92,7 @@
                     </div>
 
                     {{-- SECCIÓN 2: ¿PARA QUIÉNES DESEA CREAR LOS CARGOS? --}}
-                    <div class="card border-primary-subtle bg-light-subtle mb-4">
+                    <div class="card form-section-card mb-4" id="create_charge_res_sec_2">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center mb-3">
                                 <span class="material-symbols-outlined text-primary me-2">group</span>
@@ -126,7 +126,7 @@
                     </div>
 
                     {{-- SECCIÓN 3: IDENTIFICACIÓN DEL INTERESADO --}}
-                    <div class="card border-primary-subtle bg-light-subtle mb-4" id="recipient_manual_section">
+                    <div class="card form-section-card mb-4" id="recipient_manual_section">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center mb-3">
                                 <span class="material-symbols-outlined text-primary me-2">person_pin</span>
@@ -222,7 +222,7 @@
                     </div>
 
                     {{-- SECCIÓN 4: DETALLES DEL DOCUMENTO --}}
-                    <div class="card border-primary-subtle bg-light-subtle mb-4">
+                    <div class="card form-section-card mb-4" id="create_charge_res_sec_4">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center mb-3">
                                 <span class="material-symbols-outlined text-primary me-2">edit_document</span>
@@ -270,3 +270,119 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('createChargeForm');
+        if (!form) return;
+
+        const sec1 = document.getElementById('create_charge_res_sec_1');
+        const sec2 = document.getElementById('create_charge_res_sec_2');
+        const sec3 = document.getElementById('recipient_manual_section');
+        const sec4 = document.getElementById('create_charge_res_sec_4');
+
+        // Función para validar si la sección 1 tiene al menos una resolución agregada
+        const sec1HasResolutions = () => {
+            const container = document.getElementById('hidden_resolutions_inputs');
+            if (!container) return false;
+            const inputs = container.getElementsByTagName('input');
+            return inputs.length > 0;
+        };
+
+        // Función para validar la sección 2 (siempre es válida porque tiene radios y uno está seleccionado por defecto)
+        const sec2Valid = () => {
+            const checked = form.querySelector('input[name="cargo_para"]:checked');
+            return !!checked;
+        };
+
+        // Función para validar la sección 3
+        const sec3Valid = () => {
+            // Si la sección de destinatario manual está oculta (porque es para interesados de la resolución), se considera válida
+            if (sec3 && (sec3.style.display === 'none' || sec3.classList.contains('d-none'))) {
+                return true;
+            }
+            // Si está visible, requiere tener al menos un destinatario agregado en el listado
+            const container = document.getElementById('hidden_destinatarios_inputs');
+            if (!container) return false;
+            const inputs = container.getElementsByTagName('input');
+            return inputs.length > 0;
+        };
+
+        // Campos obligatorios de la sección 4
+        const sec4Fields = () => [
+            document.getElementById('asunto')
+        ];
+
+        function checkValidity() {
+            // Evaluar validez de cada sección
+            const s1Valid = sec1HasResolutions();
+            const s2Valid = sec2Valid();
+            const s3Valid = sec3Valid();
+            const s4Valid = sec4Fields().every(field => field && field.value.trim() !== '' && field.checkValidity());
+
+            // Limpiar clases
+            [sec1, sec2, sec3, sec4].forEach(sec => {
+                if (sec) {
+                    sec.classList.remove('active-section', 'completed-section');
+                }
+            });
+
+            // Lógica progresiva en cascada
+            if (!s1Valid) {
+                if (sec1) sec1.classList.add('active-section');
+            } else {
+                if (sec1) sec1.classList.add('completed-section');
+
+                if (!s2Valid) {
+                    if (sec2) sec2.classList.add('active-section');
+                } else {
+                    if (sec2) sec2.classList.add('completed-section');
+
+                    // Validar si la sección 3 está visible y requiere atención
+                    const isSec3Visible = sec3 && sec3.style.display !== 'none' && !sec3.classList.contains('d-none');
+                    if (isSec3Visible && !s3Valid) {
+                        if (sec3) sec3.classList.add('active-section');
+                    } else {
+                        if (isSec3Visible && sec3) {
+                            sec3.classList.add('completed-section');
+                        }
+
+                        if (!s4Valid) {
+                            if (sec4) sec4.classList.add('active-section');
+                        } else {
+                            if (sec4) sec4.classList.add('completed-section');
+                        }
+                    }
+                }
+            }
+        }
+
+        // Escuchar inputs y cambios
+        form.addEventListener('input', checkValidity);
+        form.addEventListener('change', () => setTimeout(checkValidity, 50));
+
+        // Observar cambios dinámicos en la lista de resoluciones
+        const resContainer = document.getElementById('hidden_resolutions_inputs');
+        if (resContainer) {
+            const observer = new MutationObserver(checkValidity);
+            observer.observe(resContainer, { childList: true });
+        }
+
+        // Observar cambios dinámicos en la lista de destinatarios
+        const destContainer = document.getElementById('hidden_destinatarios_inputs');
+        if (destContainer) {
+            const observer = new MutationObserver(checkValidity);
+            observer.observe(destContainer, { childList: true });
+        }
+
+        // Ejecutar validación inicial
+        setTimeout(checkValidity, 500);
+
+        // Re-evaluar cuando se abra el modal
+        const modalEl = document.getElementById('createChargeModal');
+        if (modalEl) {
+            modalEl.addEventListener('shown.bs.modal', checkValidity);
+        }
+    });
+</script>
+

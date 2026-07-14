@@ -50,7 +50,6 @@
                         <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle mb-1">{{ $charge->resolucion?->type?->abreviacion ?? 'RD' }} {{ $charge->resolucion?->rd }}</span>
                                     <div class="small text-muted d-flex align-items-center">
                                         <span class="material-symbols-outlined fs-6 me-1">receipt_long</span>
                                         Cargo #{{ $charge->n_charge }}
@@ -109,7 +108,6 @@
                         <tr>
                             <th>#</th>
                             <th>No. cargo</th>
-                            <th>Res.</th>
                             <th>Período</th>
                             <th>Nombres y apellidos/Razón social</th>
                             <th>DNI/RUC</th>
@@ -123,15 +121,14 @@
                             <tr>
                                 <td>{{ $key + 1 }}</td>
                                 <td>{{ $charge->n_charge }}</td>
-                                <td class="fw-bold">{{ $charge->resolucion?->type?->abreviacion ?? 'RD' }} {{ $charge->resolucion?->rd }}</td>
                                 <td>{{ $charge->resolucion?->periodo }}</td>
-                                <td style="max-width: 250px;">
+                                <td style="max-width: 200px;">
                                     <div class="fw-semibold text-truncate" title="{{ $charge->interesado_label }}">
                                         {{ $charge->interesado_label }}
                                     </div>
                                 </td>
                                 <td>{{ $charge->interesado_dni }}</td>
-                                <td style="max-width: 200px;" class="text-truncate">{{ $charge->asunto }}</td>
+                                <td style="max-width: 450px;" class="text-truncate" title="{{ $charge->asunto }}">{{ $charge->asunto }}</td>
                                 <td>@include('charges.partials.status-badge', [
                                     'status' => $charge->signature?->signature_status,
                                 ])</td>

@@ -179,7 +179,11 @@
         document.addEventListener('DOMContentLoaded', function() {
             const checkNotifications = async () => {
                 try {
-                    const response = await fetch("{{ route('notifications.pending-charges') }}");
+                    const response = await fetch("{{ route('notifications.pending-charges') }}", {
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
                     if (!response.ok) return;
                     const data = await response.json();
                     
@@ -237,6 +241,7 @@
                                         method: 'POST',
                                         headers: {
                                             'Content-Type': 'application/json',
+                                            'Accept': 'application/json',
                                             'X-CSRF-TOKEN': '{{ csrf_token() }}'
                                         }
                                     });

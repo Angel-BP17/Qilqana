@@ -187,12 +187,12 @@ class ResolucionController extends Controller
         $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Encabezados
-        $headers = ['RD', 'Fecha', 'Nombres y Apellidos', 'DNI', 'Asunto', 'Periodo', 'Procedencia'];
+        // Encabezados: ID - RD - FECHA - NOMBREYAPELLIDO - DNI O RUC - TIPO DE ASUNTO - NIVEL - PERIODO - FIRMA
+        $headers = ['ID', 'RD', 'FECHA', 'NOMBREYAPELLIDO', 'DNI O RUC', 'TIPO DE ASUNTO', 'NIVEL', 'PERIODO', 'FIRMA'];
         foreach ($headers as $index => $header) {
             $sheet->setCellValue([$index + 1, 1], $header);
         }
-
+ 
         // Estilos para encabezados
         $headerStyle = [
             'font' => ['bold' => true],
@@ -202,28 +202,41 @@ class ResolucionController extends Controller
                 'startColor' => ['argb' => 'FFD9D9D9'],
             ],
         ];
-        $sheet->getStyle('A1:G1')->applyFromArray($headerStyle);
-
+        $sheet->getStyle('A1:I1')->applyFromArray($headerStyle);
+ 
         // Datos por fragmentos (Chunks) para ahorrar memoria
         $row = 2;
         $query->chunk(200, function ($resoluciones) use (&$sheet, &$row) {
             foreach ($resoluciones as $resolucion) {
-                $sheet->setCellValue('A'.$row, $resolucion->rd);
-
+                $sheet->setCellValue('A'.$row, $resolucion->id);
+                $sheet->setCellValue('B'.$row, $resolucion->rd);
+ 
                 $fechaFormateada = $resolucion->fecha ? Carbon::parse($resolucion->fecha)->format('d/m/Y') : '';
-                $sheet->setCellValue('B'.$row, $fechaFormateada);
-
-                $sheet->setCellValue('C'.$row, $resolucion->nombres_apellidos);
-                $sheet->setCellValue('D'.$row, $resolucion->dni ?? '');
-                $sheet->setCellValue('E'.$row, $resolucion->asunto);
-                $sheet->setCellValue('F'.$row, $resolucion->periodo);
-                $sheet->setCellValue('G'.$row, $resolucion->procedencia);
+                $sheet->setCellValue('C'.$row, $fechaFormateada);
+ 
+                $sheet->setCellValue('D'.$row, $resolucion->nombres_apellidos);
+ 
+                // Unificar DNI y RUC de la resolución
+                $dniList = array_filter(explode(', ', $resolucion->dni ?? ''));
+                $rucList = array_filter(explode(', ', $resolucion->ruc ?? ''));
+                $combined = array_merge($dniList, $rucList);
+                $dniOrRucVal = implode(', ', $combined);
+                $sheet->setCellValue('E'.$row, $dniOrRucVal);
+ 
+                $sheet->setCellValue('F'.$row, $resolucion->asuntoType?->name ?? '---');
+                $sheet->setCellValue('G'.$row, $resolucion->levelModality?->name ?? '---');
+                $sheet->setCellValue('H'.$row, $resolucion->periodo);
+ 
+                $status = $resolucion->signature_status;
+                $firmaText = $status === 'firmado' ? 'FIRMADO' : ($status === 'rechazado' ? 'RECHAZADO' : 'PENDIENTE');
+                $sheet->setCellValue('I'.$row, $firmaText);
+ 
                 $row++;
             }
         });
-
+ 
         // Autoajustar columnas
-        foreach (range('A', 'G') as $columnID) {
+        foreach (range('A', 'I') as $columnID) {
             $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
 
@@ -258,6 +271,10 @@ class ResolucionController extends Controller
 
     public function markAsWorked(Resolucion $resolucion)
     {
+        if (!auth()->user()->can('resolucion marcar trabajada')) {
+            abort(403, 'No tiene permiso para realizar esta acción.');
+        }
+
         $resolucion->update(['is_worked' => true]);
 
         return redirect()->back()->with('success', 'Resolución marcada como trabajada correctamente.');

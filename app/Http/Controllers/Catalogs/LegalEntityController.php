@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Catalogs;
 
-use App\Filters\LegalEntityFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LegalEntity\ImportLegalEntityRequest;
 use App\Imports\LegalEntitiesImport;
@@ -14,14 +13,16 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class LegalEntityController extends Controller
 {
-    public function index(Request $request, LegalEntityFilter $filter)
+    public function index(Request $request)
     {
         $this->authorize('viewAny', LegalEntity::class);
 
-        $query = LegalEntity::with(['representative.naturalPerson']);
-        $filter->apply($query, $request->only('search'));
+        $legalEntities = LegalEntity::with(['representative.naturalPerson'])
+            ->search($request->input('search'))
+            ->orderBy('razon_social')
+            ->paginate(10)
+            ->withQueryString();
 
-        $legalEntities = $query->orderBy('razon_social')->paginate(10)->withQueryString();
         $representatives = Representative::with('naturalPerson')->get()->sortBy(function ($rep) {
             return $rep->naturalPerson?->nombres;
         });

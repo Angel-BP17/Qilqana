@@ -53,4 +53,24 @@ class User extends Authenticatable
     {
         return $this->morphToMany(Resolucion::class, 'interesado', 'resolucion_interesados');
     }
+
+    public function scopeSearch(\Illuminate\Database\Eloquent\Builder $query, ?string $search): \Illuminate\Database\Eloquent\Builder
+    {
+        return $query->when($search, function ($query, $search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('last_name', 'LIKE', "%{$search}%")
+                    ->orWhere('dni', 'LIKE', "%{$search}%")
+                    ->orWhereRaw("CONCAT(name, ' ', last_name) LIKE ?", ["%{$search}%"])
+                    ->orWhereRaw("CONCAT(last_name, ' ', name) LIKE ?", ["%{$search}%"]);
+            });
+        });
+    }
+
+    public function scopeFilterByRole(\Illuminate\Database\Eloquent\Builder $query, $roleId): \Illuminate\Database\Eloquent\Builder
+    {
+        return $query->when($roleId, function ($q, $roleId) {
+            $q->whereHas('roles', fn ($q2) => $q2->where('id', $roleId));
+        });
+    }
 }
