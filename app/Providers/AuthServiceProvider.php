@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-// use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Gate;
 use App\Models\Charge;
 use App\Models\LegalEntity;
 use App\Models\NaturalPerson;
@@ -35,6 +35,8 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Gate::before(function ($user, $ability) {
+            return $user->hasRole('ADMINISTRADOR') ? true : null;
+        });
     }
 }
