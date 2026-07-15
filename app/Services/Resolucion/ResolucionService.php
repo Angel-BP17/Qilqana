@@ -210,8 +210,8 @@ class ResolucionService implements ResolucionServiceInterface
                 // 3. Sincronizar campos de texto
                 $resolucion->syncInteresadosData();
 
-                // Propagar en cascada a resoluciones con el mismo rd y fecha
-                if (isset($resolucion->document_path)) {
+                // Propagar en cascada a resoluciones con el mismo rd y fecha (solo si tiene fecha no nula)
+                if (isset($resolucion->document_path) && !is_null($resolucion->fecha)) {
                     Resolucion::where('rd', $resolucion->rd)
                         ->whereDate('fecha', Carbon::parse($resolucion->fecha)->toDateString())
                         ->update(['document_path' => $resolucion->document_path]);
