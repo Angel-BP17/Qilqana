@@ -171,12 +171,15 @@ class ResolucionService implements ResolucionServiceInterface
 
             return DB::transaction(function () use ($data, $resolucion) {
                 if (array_key_exists('document_file', $data)) {
-                    if ($resolucion->document_path) {
-                        \Illuminate\Support\Facades\Storage::disk('local')->delete($resolucion->document_path);
-                    }
+                    $oldPath = $resolucion->document_path;
                     $resolucion->document_path = null;
                     if (! empty($data['document_file'])) {
                         $resolucion->document_path = $data['document_file']->store('private/resolutions_documents', 'local');
+                    }
+
+                    // Evitar borrar el archivo si alguna otra resolución "gemela" lo sigue compartiendo
+                    if ($oldPath && !Resolucion::where('id', '!=', $resolucion->id)->where('document_path', $oldPath)->exists()) {
+                        \Illuminate\Support\Facades\Storage::disk('local')->delete($oldPath);
                     }
                 }
 
@@ -206,6 +209,13 @@ class ResolucionService implements ResolucionServiceInterface
 
                 // 3. Sincronizar campos de texto
                 $resolucion->syncInteresadosData();
+
+                // Propagar en cascada a resoluciones con el mismo rd y fecha
+                if (isset($resolucion->document_path)) {
+                    Resolucion::where('rd', $resolucion->rd)
+                        ->whereDate('fecha', Carbon::parse($resolucion->fecha)->toDateString())
+                        ->update(['document_path' => $resolucion->document_path]);
+                }
 
                 return true;
             });
@@ -317,7 +327,10 @@ class ResolucionService implements ResolucionServiceInterface
             $model = Resolucion::findOrFail($id);
 
             if ($model->document_path) {
-                \Illuminate\Support\Facades\Storage::disk('local')->delete($model->document_path);
+                // Solo eliminamos el archivo físico si ningún otro registro de resolución lo está usando
+                if (!Resolucion::where('id', '!=', $model->id)->where('document_path', $model->document_path)->exists()) {
+                    \Illuminate\Support\Facades\Storage::disk('local')->delete($model->document_path);
+                }
             }
 
             return (bool) $model->delete();
