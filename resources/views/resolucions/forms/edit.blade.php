@@ -9,6 +9,7 @@
     @method('PUT')
     <input type="hidden" name="action_origin" value="edit">
     <input type="hidden" name="edit_resolucion_id" id="edit_resolucion_id_hidden" value="">
+    <input type="hidden" name="delete_document" id="edit_delete_document_input" value="0">
     <div class="modal-body px-4">
         {{-- Alert para errores de validación de Laravel --}}
         @if ($errors->any())
@@ -240,6 +241,10 @@
                     <div class="col-12">
                         <label for="edit_resolution_file" class="form-label small text-muted fw-bold text-uppercase">Documento de Resolución (PDF)</label>
                         <div id="edit_resolution_pdf_container" class="d-none"></div>
+                        <div id="edit_resolution_pdf_deleted_feedback" class="alert alert-danger py-2 mb-2 d-none d-flex align-items-center">
+                            <span class="material-symbols-outlined me-2">warning</span>
+                            <span class="small fw-bold text-uppercase">El documento PDF actual ha sido marcado para eliminar.</span>
+                        </div>
                         <div class="input-group">
                             <span class="input-group-text bg-white"><span class="material-symbols-outlined fs-5 text-muted">picture_as_pdf</span></span>
                             <input type="file" class="form-control border-secondary-subtle" id="edit_resolution_file" name="document_file" accept=".pdf">

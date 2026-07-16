@@ -62,6 +62,7 @@ class UpdateResolucionRequest extends FormRequest
                 'mimes:pdf',
                 'max:' . ((int) \App\Models\Setting::getValue('charges_max_file_size', '5') * 1024),
             ],
+            'delete_document' => 'nullable|boolean',
         ];
     }
 }

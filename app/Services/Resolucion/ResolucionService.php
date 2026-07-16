@@ -170,7 +170,15 @@ class ResolucionService implements ResolucionServiceInterface
             }
 
             return DB::transaction(function () use ($data, $resolucion) {
-                if (array_key_exists('document_file', $data)) {
+                if (!empty($data['delete_document'])) {
+                    $oldPath = $resolucion->document_path;
+                    $resolucion->document_path = null;
+
+                    // Evitar borrar el archivo si alguna otra resolución "gemela" lo sigue compartiendo
+                    if ($oldPath && !Resolucion::where('id', '!=', $resolucion->id)->where('document_path', $oldPath)->exists()) {
+                        \Illuminate\Support\Facades\Storage::disk('local')->delete($oldPath);
+                    }
+                } elseif (array_key_exists('document_file', $data)) {
                     $oldPath = $resolucion->document_path;
                     $resolucion->document_path = null;
                     if (! empty($data['document_file'])) {
@@ -211,7 +219,7 @@ class ResolucionService implements ResolucionServiceInterface
                 $resolucion->syncInteresadosData();
 
                 // Propagar en cascada a resoluciones con el mismo rd y fecha (solo si tiene fecha no nula)
-                if (isset($resolucion->document_path) && !is_null($resolucion->fecha)) {
+                if (!is_null($resolucion->fecha)) {
                     Resolucion::where('rd', $resolucion->rd)
                         ->whereDate('fecha', Carbon::parse($resolucion->fecha)->toDateString())
                         ->update(['document_path' => $resolucion->document_path]);

@@ -436,6 +436,7 @@
                                                             data-level_modality_id="{{ $resolucion->level_modality_id ?? '' }}"
                                                             data-procedencia="{{ $resolucion->procedencia ?? '' }}"
                                                             data-asunto="{{ $resolucion->asunto }}"
+                                                            data-document-url="{{ $resolucion->file_document_url }}"
                                                             data-interesados="{{ $resolucion->naturalPeople->map(fn($p) => ['id' => $p->id, 'type' => 'Persona Natural', 'text' => "{$p->nombres} {$p->apellido_paterno} {$p->apellido_materno}", 'identity' => $p->dni ?: $p->cedula])
                                                                 ->merge($resolucion->legalEntities->map(fn($e) => ['id' => $e->id, 'type' => 'Persona Juridica', 'text' => $e->razon_social, 'identity' => $e->ruc]))
                                                                 ->merge($resolucion->users->map(fn($u) => ['id' => $u->id, 'type' => 'Trabajador UGEL', 'text' => "{$u->name} {$u->last_name}", 'identity' => $u->dni]))

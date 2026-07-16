@@ -418,6 +418,10 @@ export const ResolucionsManagement = {
             if (!typeSelect || !asuntoSelect) return;
 
             const loadAsuntos = async (resolutionTypeId, selectedAsuntoId = null) => {
+                if (!selectedAsuntoId && asuntoSelect.dataset.selected) {
+                    selectedAsuntoId = asuntoSelect.dataset.selected;
+                }
+
                 asuntoSelect.innerHTML = '<option value="">Cargando asuntos...</option>';
                 asuntoSelect.disabled = true;
 
@@ -450,6 +454,7 @@ export const ResolucionsManagement = {
             };
 
             typeSelect.addEventListener('change', (e) => {
+                asuntoSelect.dataset.selected = ''; // Limpiar seleccionado ante cambios manuales
                 loadAsuntos(e.target.value);
             });
 
@@ -508,12 +513,30 @@ export const ResolucionsManagement = {
         $(modalEl).on('show.bs.modal', () => {
             const fileInput = document.getElementById('edit_resolution_file');
             if (fileInput) fileInput.value = '';
+
+            // Reiniciar estado de eliminación de PDF
+            const deleteInput = document.getElementById('edit_delete_document_input');
+            if (deleteInput) deleteInput.value = '0';
+
+            const deletedFeedback = document.getElementById('edit_resolution_pdf_deleted_feedback');
+            if (deletedFeedback) deletedFeedback.classList.add('d-none');
         });
 
         $('#createResolutionModal').on('show.bs.modal', () => {
             const fileInput = document.getElementById('create_resolution_file');
             if (fileInput) fileInput.value = '';
         });
+
+        // Escuchar selección de archivo nuevo en edición para anular marcado de eliminación
+        const fileInputEdit = document.getElementById('edit_resolution_file');
+        if (fileInputEdit) {
+            fileInputEdit.addEventListener('change', () => {
+                const deleteInput = document.getElementById('edit_delete_document_input');
+                const deletedFeedback = document.getElementById('edit_resolution_pdf_deleted_feedback');
+                if (deleteInput) deleteInput.value = '0';
+                if (deletedFeedback) deletedFeedback.classList.add('d-none');
+            });
+        }
 
         document.querySelectorAll('.btn-edit-resolution').forEach(btn => {
             btn.onclick = () => {
@@ -530,18 +553,42 @@ export const ResolucionsManagement = {
                     if (el) el.value = btn.dataset[f] || '';
                 });
 
-                // Manejar botón de visualizar PDF en la edición
+                // Manejar botón de visualizar y eliminar PDF en la edición
                 const pdfContainer = document.getElementById('edit_resolution_pdf_container');
                 if (pdfContainer) {
                     if (btn.dataset.documentUrl) {
                         pdfContainer.innerHTML = `
-                            <div class="mb-2">
+                            <div class="mb-2 d-flex align-items-center gap-2">
                                 <a href="${btn.dataset.documentUrl}" target="_blank" class="btn btn-outline-primary btn-sm fw-bold d-inline-flex align-items-center">
                                     <span class="material-symbols-outlined fs-5 me-1">picture_as_pdf</span> Ver PDF Actual
                                 </a>
+                                <button type="button" id="edit_btn_delete_pdf" class="btn btn-outline-danger btn-sm fw-bold d-inline-flex align-items-center">
+                                    <span class="material-symbols-outlined fs-5 me-1">delete</span> Eliminar PDF
+                                </button>
                             </div>
                         `;
                         pdfContainer.classList.remove('d-none');
+
+                        // Configurar doble confirmación del botón de eliminar PDF
+                        const btnDeletePdf = document.getElementById('edit_btn_delete_pdf');
+                        const deleteInput = document.getElementById('edit_delete_document_input');
+                        const deletedFeedback = document.getElementById('edit_resolution_pdf_deleted_feedback');
+
+                        if (btnDeletePdf && deleteInput && deletedFeedback) {
+                            let clickCount = 0;
+                            btnDeletePdf.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                clickCount++;
+                                if (clickCount === 1) {
+                                    btnDeletePdf.className = "btn btn-danger btn-sm fw-bold d-inline-flex align-items-center";
+                                    btnDeletePdf.innerHTML = `<span class="material-symbols-outlined fs-5 me-1">warning</span> ¿Confirmar eliminación?`;
+                                } else if (clickCount === 2) {
+                                    deleteInput.value = '1';
+                                    pdfContainer.classList.add('d-none');
+                                    deletedFeedback.classList.remove('d-none');
+                                }
+                            });
+                        }
                     } else {
                         pdfContainer.innerHTML = '';
                         pdfContainer.classList.add('d-none');
