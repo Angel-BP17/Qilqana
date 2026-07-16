@@ -236,8 +236,9 @@
                                 e.stopPropagation(); // Evitar que se cierre el dropdown
                                 e.preventDefault();
                                 const notifId = this.dataset.id;
+                                const url = "{{ route('notifications.read', ':id') }}".replace(':id', notifId);
                                 try {
-                                    const resRead = await fetch(`/notifications/${notifId}/read`, {
+                                    const resRead = await fetch(url, {
                                         method: 'POST',
                                         headers: {
                                             'Content-Type': 'application/json',
