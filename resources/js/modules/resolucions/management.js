@@ -454,7 +454,9 @@ export const ResolucionsManagement = {
             };
 
             typeSelect.addEventListener('change', (e) => {
-                asuntoSelect.dataset.selected = ''; // Limpiar seleccionado ante cambios manuales
+                if (e.isTrusted) {
+                    asuntoSelect.dataset.selected = ''; // Limpiar seleccionado ante cambios manuales
+                }
                 loadAsuntos(e.target.value);
             });
 
