@@ -402,11 +402,13 @@ export const ResolucionsManagement = {
             }
         });
 
-        $(document).on('shown.bs.modal', '#createResolutionModal, #editResolutionModal', function (e) {
-            const prefix = e.target.id === 'createResolutionModal' ? 'create' : 'edit';
-            const manager = prefix === 'create' ? self.createInteresadosManager : self.editInteresadosManager;
-            if (manager) {
-                manager.initWorkerSelect2();
+        document.addEventListener('shown.bs.modal', function (e) {
+            if (e.target.id === 'createResolutionModal' || e.target.id === 'editResolutionModal') {
+                const prefix = e.target.id === 'createResolutionModal' ? 'create' : 'edit';
+                const manager = prefix === 'create' ? self.createInteresadosManager : self.editInteresadosManager;
+                if (manager) {
+                    manager.initWorkerSelect2();
+                }
             }
         });
     },
@@ -512,7 +514,7 @@ export const ResolucionsManagement = {
         const form = document.getElementById('editResolutionForm');
 
         // Limpiar archivo al abrir modal de edición y de creación
-        $(modalEl).on('show.bs.modal', () => {
+        modalEl.addEventListener('show.bs.modal', () => {
             const fileInput = document.getElementById('edit_resolution_file');
             if (fileInput) fileInput.value = '';
 
@@ -524,7 +526,7 @@ export const ResolucionsManagement = {
             if (deletedFeedback) deletedFeedback.classList.add('d-none');
         });
 
-        $('#createResolutionModal').on('show.bs.modal', () => {
+        document.getElementById('createResolutionModal')?.addEventListener('show.bs.modal', () => {
             const fileInput = document.getElementById('create_resolution_file');
             if (fileInput) fileInput.value = '';
         });
@@ -649,9 +651,15 @@ export const ResolucionsManagement = {
     },
 
     setupFileLabel: function() {
-        $(document).on('change', '.custom-file-input', function() {
-            let fileName = $(this).val().split('\\').pop();
-            $(this).next('.custom-file-label').addClass("selected").html(fileName);
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('custom-file-input')) {
+                const fileName = e.target.value.split('\\').pop();
+                const label = e.target.nextElementSibling;
+                if (label && label.classList.contains('custom-file-label')) {
+                    label.classList.add('selected');
+                    label.innerHTML = fileName;
+                }
+            }
         });
     },
 
@@ -667,16 +675,6 @@ export const ResolucionsManagement = {
             if (!form) return;
             form.addEventListener('submit', function(e) {
                 console.log(`[Resolucions submit] Iniciando envío de formulario: ${item.name}`);
-                const mgr = item.manager();
-                const totalInteresados = mgr ? mgr.interesados.length : 0;
-                console.log(`[Resolucions submit] Interesados agregados en la lista del modal: ${totalInteresados}`);
-
-                if (mgr && totalInteresados === 0) {
-                    console.warn(`[Resolucions submit] Bloqueado: Se intentó guardar sin interesados.`);
-                    e.preventDefault();
-                    alert('Debe agregar al menos un interesado a la lista antes de guardar la resolución.');
-                    return;
-                }
 
                 console.log(`[Resolucions submit] Validación aprobada. Deshabilitando botón de submit en el siguiente tick.`);
                 const btn = this.querySelector('button[type="submit"]');
@@ -709,14 +707,207 @@ export const ResolucionsManagement = {
     setupSubfilter: function() {
         const input = document.getElementById('subfilter-input');
         if (!input) return;
-        input.addEventListener('input', function() {
-            const query = this.value.toLowerCase().trim();
-            const rows = document.querySelectorAll('.table tbody tr:not(.empty-row)');
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(query) ? '' : 'none';
+
+        let debounceTimer = null;
+
+        const getFilterParams = () => {
+            const params = new URLSearchParams();
+            
+            // Filtros de la cabecera
+            const headerForm = document.getElementById('resolutionSearchForm');
+            if (headerForm) {
+                new FormData(headerForm).forEach((value, key) => {
+                    if (value) params.set(key, value);
+                });
+            }
+            
+            // Filtros del subfiltro (búsqueda general)
+            const subfilterForm = document.getElementById('subfilterForm');
+            if (subfilterForm) {
+                new FormData(subfilterForm).forEach((value, key) => {
+                    if (value) params.set(key, value);
+                });
+            }
+            
+            // Filtros avanzados del modal
+            const modalFilterForm = document.getElementById('modalFilterForm');
+            if (modalFilterForm) {
+                new FormData(modalFilterForm).forEach((value, key) => {
+                    if (value) params.set(key, value);
+                });
+            }
+            
+            return params;
+        };
+
+        const performAjaxSearch = (url) => {
+            const tableSection = document.querySelector('section.table-responsive');
+            const mobileSection = document.querySelector('section.d-md-none');
+            const paginationContainer = document.getElementById('pagination-container');
+            
+            if (tableSection) tableSection.style.opacity = '0.5';
+            if (mobileSection) mobileSection.style.opacity = '0.5';
+            
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                const newTable = doc.querySelector('section.table-responsive');
+                if (tableSection && newTable) {
+                    tableSection.innerHTML = newTable.innerHTML;
+                    tableSection.style.opacity = '1';
+                }
+                
+                const newMobile = doc.querySelector('section.d-md-none');
+                if (mobileSection && newMobile) {
+                    mobileSection.innerHTML = newMobile.innerHTML;
+                    mobileSection.style.opacity = '1';
+                }
+                
+                const newPagination = doc.getElementById('pagination-container');
+                if (paginationContainer) {
+                    if (newPagination) {
+                        paginationContainer.innerHTML = newPagination.innerHTML;
+                        paginationContainer.classList.remove('d-none');
+                    } else {
+                        paginationContainer.innerHTML = '';
+                        paginationContainer.classList.add('d-none');
+                    }
+                }
+
+                // Actualizar el botón de limpiar filtros en la cabecera
+                const headerButtons = document.querySelector('#resolutionSearchForm .d-flex.gap-2');
+                const newHeaderButtons = doc.querySelector('#resolutionSearchForm .d-flex.gap-2');
+                if (headerButtons && newHeaderButtons) {
+                    headerButtons.innerHTML = newHeaderButtons.innerHTML;
+                }
+                
+                // Re-inicializar listeners directos
+                ResolucionsManagement.setupEditModal();
+                ResolucionsManagement.setupDeleteModal();
+                
+                // Re-inicializar eventos en la nueva paginación
+                bindPaginationEvents();
+                
+                // Actualizar URL
+                window.history.replaceState(null, '', url);
+            })
+            .catch(error => {
+                console.error('[Resolucions AJAX] Error:', error);
+                if (tableSection) tableSection.style.opacity = '1';
+                if (mobileSection) mobileSection.style.opacity = '1';
             });
+        };
+
+        const bindPaginationEvents = () => {
+            const paginationContainer = document.getElementById('pagination-container');
+            if (!paginationContainer) return;
+            
+            paginationContainer.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    performAjaxSearch(this.href);
+                });
+            });
+        };
+
+        // Escuchar cambios de escritura en el subfiltro (con debounce)
+        input.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const params = getFilterParams();
+                const url = window.location.pathname + '?' + params.toString();
+                performAjaxSearch(url);
+            }, 300);
         });
+
+        // Interceptar submit del formulario del subfiltro
+        const subfilterForm = document.getElementById('subfilterForm');
+        if (subfilterForm) {
+            subfilterForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                clearTimeout(debounceTimer);
+                const params = getFilterParams();
+                const url = window.location.pathname + '?' + params.toString();
+                performAjaxSearch(url);
+            });
+        }
+
+        // Interceptar submit del formulario de la cabecera (RD y Asunto)
+        const headerForm = document.getElementById('resolutionSearchForm');
+        if (headerForm) {
+            headerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                clearTimeout(debounceTimer);
+                const params = getFilterParams();
+                const url = window.location.pathname + '?' + params.toString();
+                performAjaxSearch(url);
+            });
+        }
+
+        // Interceptar submit del formulario del modal de filtros avanzados
+        const modalFilterForm = document.getElementById('modalFilterForm');
+        if (modalFilterForm) {
+            modalFilterForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                clearTimeout(debounceTimer);
+                const params = getFilterParams();
+                const url = window.location.pathname + '?' + params.toString();
+                
+                // Ocultar modal usando Bootstrap API
+                const modalEl = document.getElementById('filterResolutionModal');
+                if (modalEl) {
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+                }
+
+                performAjaxSearch(url);
+            });
+        }
+
+        // Interceptar clics en el botón de limpiar filtros (para que sea AJAX y limpie inputs)
+        document.addEventListener('click', (e) => {
+            const cleanLink = e.target.closest('a[title="Limpiar todos los filtros"]');
+            if (cleanLink) {
+                e.preventDefault();
+                // Limpiar inputs del DOM
+                input.value = '';
+                const searchRd = document.querySelector('input[name="search_rd"]');
+                if (searchRd) searchRd.value = '';
+                const searchAsunto = document.querySelector('input[name="search_asunto"]');
+                if (searchAsunto) searchAsunto.value = '';
+                
+                // Resetear campos del modal de filtros avanzados
+                const filterDesde = document.getElementById('filter_desde');
+                if (filterDesde) filterDesde.value = '';
+                const filterHasta = document.getElementById('filter_hasta');
+                if (filterHasta) filterHasta.value = '';
+                const filterPeriodo = document.getElementById('filter_periodo');
+                if (filterPeriodo) filterPeriodo.value = '';
+                const filterResType = document.getElementById('filter_resolution_type');
+                if (filterResType) filterResType.value = '';
+                const filterAsuntoType = document.getElementById('filter_asunto_type');
+                if (filterAsuntoType) {
+                    filterAsuntoType.value = '';
+                    filterAsuntoType.dataset.selected = '';
+                    filterAsuntoType.innerHTML = '<option value="">Seleccione tipo de resolución primero...</option>';
+                    filterAsuntoType.disabled = true;
+                }
+                const filterLevel = document.getElementById('filter_level_modality');
+                if (filterLevel) filterLevel.value = '';
+
+                performAjaxSearch(cleanLink.href);
+            }
+        });
+
+        // Inicializar eventos de la paginación al cargar la página por primera vez
+        bindPaginationEvents();
     },
 
     setupSelectInteresadoModal: function() {

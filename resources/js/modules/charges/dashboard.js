@@ -100,7 +100,9 @@ export const DashboardModule = {
                     if (resSelectEl.tomselect) {
                         resSelectEl.tomselect.setValue(ids);
                     } else {
-                        $(resSelectEl).val(ids);
+                        Array.from(resSelectEl.options).forEach(opt => {
+                            opt.selected = ids.includes(parseInt(opt.value));
+                        });
                     }
                 }
 

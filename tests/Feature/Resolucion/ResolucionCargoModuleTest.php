@@ -84,15 +84,15 @@ class ResolucionCargoModuleTest extends TestCase
      */
     public function test_stage_2_resolucion_validation_rules()
     {
-        // El FormRequest de Resolucion espera estos campos.
-        // Si fallan, debe redirigir de vuelta con errores.
+        // Dado que se han removido las validaciones de obligatoriedad a petición del cliente,
+        // solo formatos específicos de tipo incorrecto (como una fecha inválida) arrojarán error.
         $response = $this->actingAs($this->admin)->post(route('resolucions.store'), [
             'rd' => '',
             'fecha' => 'invalida',
         ]);
 
         $response->assertStatus(302);
-        $response->assertSessionHasErrors(['resolucion_type_id', 'rd', 'fecha', 'asunto', 'interesados']);
+        $response->assertSessionHasErrors(['fecha']);
     }
 
     /**

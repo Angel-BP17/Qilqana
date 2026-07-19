@@ -9,6 +9,7 @@ use App\Models\Representative;
 use App\Models\Resolucion;
 use App\Models\Setting;
 use App\Models\User;
+use App\Notifications\PendingChargeNotification;
 use App\Services\Charge\Contracts\ChargeServiceInterface;
 use App\Services\Support\ImageService;
 use App\Traits\HasChargeLogic;
@@ -372,9 +373,9 @@ class ChargeService implements ChargeServiceInterface
             'signature_requested_at' => now(),
         ]);
 
-        $assignedUser = \App\Models\User::find($assignedTo);
+        $assignedUser = User::find($assignedTo);
         if ($assignedUser) {
-            $assignedUser->notify(new \App\Notifications\PendingChargeNotification($charge));
+            $assignedUser->notify(new PendingChargeNotification($charge));
         }
     }
 

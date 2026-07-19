@@ -10,6 +10,7 @@ use App\Http\Requests\Charge\SignChargeRequest;
 use App\Http\Requests\Charge\UpdateChargeRequest;
 use App\Models\Charge;
 use App\Models\Setting;
+use App\Notifications\PendingChargeNotification;
 use App\Services\Charge\ChargeReportService;
 use App\Services\Charge\ChargeService;
 use Illuminate\Http\Request;
@@ -212,36 +213,37 @@ class ChargeController extends Controller
     public function pendingNotifications()
     {
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['count' => 0, 'charges' => []]);
         }
 
         $notifications = $user->unreadNotifications()
-            ->where('type', \App\Notifications\PendingChargeNotification::class)
+            ->where('type', PendingChargeNotification::class)
             ->get();
 
         $data = $notifications->map(function ($notif) {
             $chargeData = $notif->data;
+
             return [
                 'id' => $notif->id, // ID de la notificación para poder marcarla como leída
                 'charge_id' => $chargeData['charge_id'] ?? null,
                 'label' => $chargeData['label'] ?? 'Cargo Pendiente',
                 'asunto' => \Str::limit($chargeData['asunto'] ?? '', 50),
                 'created_at' => $notif->created_at->diffForHumans(null, true),
-                'url' => route('charges.index')
+                'url' => route('charges.index'),
             ];
         });
 
         return response()->json([
             'count' => $notifications->count(),
-            'charges' => $data
+            'charges' => $data,
         ]);
     }
 
     public function markNotificationAsRead(Request $request, $id)
     {
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['success' => false], 401);
         }
 

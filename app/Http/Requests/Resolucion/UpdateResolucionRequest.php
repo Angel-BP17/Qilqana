@@ -2,10 +2,9 @@
 
 namespace App\Http\Requests\Resolucion;
 
-use Carbon\Carbon;
+use App\Models\Setting;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class UpdateResolucionRequest extends FormRequest
 {
@@ -25,29 +24,18 @@ class UpdateResolucionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'resolucion_type_id' => 'required|exists:resolucion_types,id',
-            'asunto_type_id' => [
-                'nullable',
-                Rule::exists('asunto_type_resolucion_type', 'asunto_type_id')
-                    ->where('resolucion_type_id', $this->resolucion_type_id),
-            ],
-            'rd' => [
-                'required',
-                'string',
-                Rule::unique('resolucions')->where(function ($query) {
-                    return $query->where('periodo', Carbon::parse($this->fecha)->year)
-                        ->where('resolucion_type_id', $this->resolucion_type_id);
-                })->ignore($this->route('resolucion')),
-            ],
-            'fecha' => 'required|date',
-            'asunto' => 'required|string',
+            'resolucion_type_id' => 'nullable|integer',
+            'asunto_type_id' => 'nullable|integer',
+            'rd' => 'nullable|string',
+            'fecha' => 'nullable|date',
+            'asunto' => 'nullable|string',
             'procedencia' => 'nullable|string|max:255',
-            'level_modality_id' => 'nullable|exists:level_modalities,id',
+            'level_modality_id' => 'nullable|integer',
 
             // Múltiples Interesados
             'interesados' => 'nullable|array',
             'interesados.*.id' => 'nullable|integer',
-            'interesados.*.type' => 'required_with:interesados|string|in:NaturalPerson,LegalEntity,User,Persona Natural,Persona Juridica,Trabajador UGEL',
+            'interesados.*.type' => 'nullable|string|in:NaturalPerson,LegalEntity,User,Persona Natural,Persona Juridica,Trabajador UGEL',
             'interesados.*.dni' => 'nullable|string|max:10',
             'interesados.*.cedula' => 'nullable|string|max:20',
             'interesados.*.nombres' => 'nullable|string|max:255',
@@ -60,7 +48,7 @@ class UpdateResolucionRequest extends FormRequest
                 'nullable',
                 'file',
                 'mimes:pdf',
-                'max:' . ((int) \App\Models\Setting::getValue('charges_max_file_size', '5') * 1024),
+                'max:'.((int) Setting::getValue('charges_max_file_size', '5') * 1024),
             ],
             'delete_document' => 'nullable|boolean',
         ];

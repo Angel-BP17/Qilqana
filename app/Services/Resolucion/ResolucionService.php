@@ -6,11 +6,13 @@ use App\Models\Charge;
 use App\Models\LegalEntity;
 use App\Models\NaturalPerson;
 use App\Models\Resolucion;
+use App\Models\User;
 use App\Services\Resolucion\Contracts\ResolucionServiceInterface;
 use App\Traits\HasChargeLogic;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ResolucionService implements ResolucionServiceInterface
 {
@@ -18,7 +20,7 @@ class ResolucionService implements ResolucionServiceInterface
 
     public function getAll(array $data): array
     {
-        if (empty($data['search']) && empty($data['periodo']) && empty($data['resolucion_type_id']) && empty($data['asunto_type_id']) && empty($data['level_modality_id']) && empty($data['desde']) && empty($data['hasta'])) {
+        if (empty($data['search']) && empty($data['search_rd']) && empty($data['search_asunto']) && empty($data['periodo']) && empty($data['resolucion_type_id']) && empty($data['asunto_type_id']) && empty($data['level_modality_id']) && empty($data['desde']) && empty($data['hasta'])) {
             $chargePeriod = $this->getChargePeriod();
             $stats = $this->getStats($chargePeriod);
 
@@ -55,7 +57,7 @@ class ResolucionService implements ResolucionServiceInterface
     public function create(array $data): bool
     {
         try {
-            $data['periodo'] = Carbon::parse($data['fecha'])->year;
+            $data['periodo'] = ! empty($data['fecha']) ? Carbon::parse($data['fecha'])->year : null;
             $data['rd'] = mb_strtoupper(trim($data['rd'] ?? ''), 'UTF-8');
 
             if (isset($data['procedencia'])) {
@@ -157,7 +159,7 @@ class ResolucionService implements ResolucionServiceInterface
             $resolucion = Resolucion::findOrFail($id);
 
             if (isset($data['fecha'])) {
-                $data['periodo'] = Carbon::parse($data['fecha'])->year;
+                $data['periodo'] = ! empty($data['fecha']) ? Carbon::parse($data['fecha'])->year : null;
             }
             if (isset($data['rd'])) {
                 $data['rd'] = mb_strtoupper(trim($data['rd']), 'UTF-8');
@@ -170,13 +172,13 @@ class ResolucionService implements ResolucionServiceInterface
             }
 
             return DB::transaction(function () use ($data, $resolucion) {
-                if (!empty($data['delete_document'])) {
+                if (! empty($data['delete_document'])) {
                     $oldPath = $resolucion->document_path;
                     $resolucion->document_path = null;
 
                     // Evitar borrar el archivo si alguna otra resolución "gemela" lo sigue compartiendo
-                    if ($oldPath && !Resolucion::where('id', '!=', $resolucion->id)->where('document_path', $oldPath)->exists()) {
-                        \Illuminate\Support\Facades\Storage::disk('local')->delete($oldPath);
+                    if ($oldPath && ! Resolucion::where('id', '!=', $resolucion->id)->where('document_path', $oldPath)->exists()) {
+                        Storage::disk('local')->delete($oldPath);
                     }
                 } elseif (array_key_exists('document_file', $data)) {
                     $oldPath = $resolucion->document_path;
@@ -186,8 +188,8 @@ class ResolucionService implements ResolucionServiceInterface
                     }
 
                     // Evitar borrar el archivo si alguna otra resolución "gemela" lo sigue compartiendo
-                    if ($oldPath && !Resolucion::where('id', '!=', $resolucion->id)->where('document_path', $oldPath)->exists()) {
-                        \Illuminate\Support\Facades\Storage::disk('local')->delete($oldPath);
+                    if ($oldPath && ! Resolucion::where('id', '!=', $resolucion->id)->where('document_path', $oldPath)->exists()) {
+                        Storage::disk('local')->delete($oldPath);
                     }
                 }
 
@@ -219,7 +221,7 @@ class ResolucionService implements ResolucionServiceInterface
                 $resolucion->syncInteresadosData();
 
                 // Propagar en cascada a resoluciones con el mismo rd y fecha (solo si tiene fecha no nula)
-                if (!is_null($resolucion->fecha)) {
+                if (! is_null($resolucion->fecha)) {
                     Resolucion::where('rd', $resolucion->rd)
                         ->whereDate('fecha', Carbon::parse($resolucion->fecha)->toDateString())
                         ->update(['document_path' => $resolucion->document_path]);
@@ -242,12 +244,12 @@ class ResolucionService implements ResolucionServiceInterface
             return DB::transaction(function () use ($resolucion, $user, $interesadoId, $interesadoType) {
                 if ($interesadoType) {
                     $typeMap = [
-                        'Persona Natural' => \App\Models\NaturalPerson::class,
-                        'Persona Juridica' => \App\Models\LegalEntity::class,
-                        'Trabajador UGEL' => \App\Models\User::class,
-                        'App\Models\NaturalPerson' => \App\Models\NaturalPerson::class,
-                        'App\Models\LegalEntity' => \App\Models\LegalEntity::class,
-                        'App\Models\User' => \App\Models\User::class,
+                        'Persona Natural' => NaturalPerson::class,
+                        'Persona Juridica' => LegalEntity::class,
+                        'Trabajador UGEL' => User::class,
+                        'App\Models\NaturalPerson' => NaturalPerson::class,
+                        'App\Models\LegalEntity' => LegalEntity::class,
+                        'App\Models\User' => User::class,
                     ];
                     $interesadoClass = $typeMap[$interesadoType] ?? $interesadoType;
                 } else {
@@ -336,8 +338,8 @@ class ResolucionService implements ResolucionServiceInterface
 
             if ($model->document_path) {
                 // Solo eliminamos el archivo físico si ningún otro registro de resolución lo está usando
-                if (!Resolucion::where('id', '!=', $model->id)->where('document_path', $model->document_path)->exists()) {
-                    \Illuminate\Support\Facades\Storage::disk('local')->delete($model->document_path);
+                if (! Resolucion::where('id', '!=', $model->id)->where('document_path', $model->document_path)->exists()) {
+                    Storage::disk('local')->delete($model->document_path);
                 }
             }
 

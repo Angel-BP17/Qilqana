@@ -78,7 +78,7 @@ class CreateChargeRequest extends FormRequest
             }
 
             if ($this->input('cargo_para') === 'otros') {
-                if (empty($this->input('destinatarios')) || !is_array($this->input('destinatarios'))) {
+                if (empty($this->input('destinatarios')) || ! is_array($this->input('destinatarios'))) {
                     $validator->errors()->add('destinatarios', 'Debe añadir al menos un destinatario a la lista.');
                 }
             }

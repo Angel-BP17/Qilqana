@@ -139,7 +139,8 @@
                                         <div class="d-flex flex-wrap gap-2 justify-content-md-end">
 
                                             <form method="GET" action="{{ route('resoluciones.pdf') }}" target="_blank">
-                                                <input type="hidden" name="search" value="{{ request('search') }}">
+                                                <input type="hidden" name="search_rd" value="{{ request('search_rd') }}">
+                                                <input type="hidden" name="search_asunto" value="{{ request('search_asunto') }}">
                                                 <input type="hidden" name="periodo" value="{{ request('periodo') }}">
                                                 <input type="hidden" name="resolucion_type_id" value="{{ request('resolucion_type_id') }}">
                                                 <input type="hidden" name="asunto_type_id" value="{{ request('asunto_type_id') }}">
@@ -150,7 +151,7 @@
                                                     <span class="material-symbols-outlined">picture_as_pdf</span> PDF
                                                 </button>
                                             </form>
-                                            <a href="{{ route('resoluciones.excel') }}?search={{ request('search') }}&periodo={{ request('periodo') }}&resolucion_type_id={{ request('resolucion_type_id') }}&asunto_type_id={{ request('asunto_type_id') }}&level_modality_id={{ request('level_modality_id') }}&desde={{ request('desde') }}&hasta={{ request('hasta') }}"
+                                            <a href="{{ route('resoluciones.excel') }}?search_rd={{ request('search_rd') }}&search_asunto={{ request('search_asunto') }}&periodo={{ request('periodo') }}&resolucion_type_id={{ request('resolucion_type_id') }}&asunto_type_id={{ request('asunto_type_id') }}&level_modality_id={{ request('level_modality_id') }}&desde={{ request('desde') }}&hasta={{ request('hasta') }}"
                                                 class="btn btn-success d-flex align-items-center">
                                                 <span class="material-symbols-outlined me-1">table_chart</span> Excel
                                             </a>
@@ -216,6 +217,7 @@
                                     <form method="GET" action="{{ route('resolucions.index') }}"
                                         id="resolutionSearchForm" class="h-100">
                                         {{-- Conservar filtros activos al buscar texto --}}
+                                        <input type="hidden" name="search" value="{{ request('search') }}">
                                         <input type="hidden" name="periodo" value="{{ request('periodo') }}">
                                         <input type="hidden" name="resolucion_type_id" value="{{ request('resolucion_type_id') }}">
                                         <input type="hidden" name="asunto_type_id" value="{{ request('asunto_type_id') }}">
@@ -224,11 +226,21 @@
                                         <input type="hidden" name="hasta" value="{{ request('hasta') }}">
 
                                         <div class="row g-2 align-items-end">
-                                            <div class="col-12 col-md-8">
-                                                <label class="form-label mb-1 text-white-50 small fw-bold text-uppercase">Buscar</label>
+                                            <div class="col-12 col-md-4">
+                                                <label class="form-label mb-1 text-white-50 small fw-bold text-uppercase">Buscar por RD</label>
                                                 <div class="input-group shadow-sm">
-                                                    <input type="text" name="search" class="form-control border-0"
-                                                        placeholder="Buscar por interesado, RD, asunto..." value="{{ request('search') }}">
+                                                    <input type="text" name="search_rd" class="form-control border-0"
+                                                        placeholder="Buscar por número RD..." value="{{ request('search_rd') }}">
+                                                    <button type="submit" class="btn btn-dark d-flex align-items-center">
+                                                        <span class="material-symbols-outlined fs-5">search</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-4">
+                                                <label class="form-label mb-1 text-white-50 small fw-bold text-uppercase">Buscar por Asunto</label>
+                                                <div class="input-group shadow-sm">
+                                                    <input type="text" name="search_asunto" class="form-control border-0"
+                                                        placeholder="Buscar por texto de asunto..." value="{{ request('search_asunto') }}">
                                                     <button type="submit" class="btn btn-dark d-flex align-items-center">
                                                         <span class="material-symbols-outlined fs-5">search</span>
                                                     </button>
@@ -241,7 +253,7 @@
                                                         data-bs-toggle="modal" data-bs-target="#filterResolutionModal">
                                                         <span class="material-symbols-outlined me-1">tune</span> Filtros
                                                     </button>
-                                                    @if (request()->filled('search') || request()->filled('periodo') || request()->filled('resolucion_type_id') || request()->filled('asunto_type_id') || request()->filled('level_modality_id') || request()->filled('desde') || request()->filled('hasta'))
+                                                    @if (request()->filled('search') || request()->filled('search_rd') || request()->filled('search_asunto') || request()->filled('periodo') || request()->filled('resolucion_type_id') || request()->filled('asunto_type_id') || request()->filled('level_modality_id') || request()->filled('desde') || request()->filled('hasta'))
                                                         <a href="{{ route('resolucions.index') }}"
                                                             class="btn btn-light shadow-sm text-dark d-flex align-items-center justify-content-center"
                                                             title="Limpiar todos los filtros">
@@ -258,31 +270,40 @@
                     </div>
 
                     <div class="card-body p-0">
-                        @if (request()->filled('search') || request()->filled('periodo') || request()->filled('resolucion_type_id') || request()->filled('asunto_type_id') || request()->filled('level_modality_id') || request()->filled('desde') || request()->filled('hasta'))
+                        @if (request()->filled('search') || request()->filled('search_rd') || request()->filled('search_asunto') || request()->filled('periodo') || request()->filled('resolucion_type_id') || request()->filled('asunto_type_id') || request()->filled('level_modality_id') || request()->filled('desde') || request()->filled('hasta'))
                             <div class="px-3 py-3 border-bottom bg-light bg-opacity-50">
-                                <div class="row align-items-center">
-                                    <div class="col-12 col-md-4">
-                                        <div class="input-group input-group-sm shadow-sm">
-                                            <span class="input-group-text bg-white border-end-0">
-                                                <span class="material-symbols-outlined text-muted">filter_alt</span>
-                                            </span>
-                                            <input type="text" id="subfilter-input"
-                                                class="form-control border-start-0 ps-0"
-                                                placeholder="Sub-filtrar resultados actuales...">
+                                <form method="GET" action="{{ route('resolucions.index') }}" id="subfilterForm">
+                                    <input type="hidden" name="search_rd" value="{{ request('search_rd') }}">
+                                    <input type="hidden" name="search_asunto" value="{{ request('search_asunto') }}">
+                                    <input type="hidden" name="periodo" value="{{ request('periodo') }}">
+                                    <input type="hidden" name="resolucion_type_id" value="{{ request('resolucion_type_id') }}">
+                                    <input type="hidden" name="asunto_type_id" value="{{ request('asunto_type_id') }}">
+                                    <input type="hidden" name="level_modality_id" value="{{ request('level_modality_id') }}">
+                                    <input type="hidden" name="desde" value="{{ request('desde') }}">
+                                    <input type="hidden" name="hasta" value="{{ request('hasta') }}">
+
+                                    <div class="row align-items-center">
+                                        <div class="col-12 col-md-5">
+                                            <div class="input-group input-group-sm shadow-sm">
+                                                <span class="input-group-text bg-white border-end-0">
+                                                    <span class="material-symbols-outlined text-muted">filter_alt</span>
+                                                </span>
+                                                <input type="text" id="subfilter-input" name="search"
+                                                    class="form-control border-start-0 border-end-0 ps-0"
+                                                    placeholder="Buscar por interesado, DNI, procedencia..." value="{{ request('search') }}">
+                                                <button type="submit" class="btn btn-dark d-flex align-items-center">
+                                                    <span class="material-symbols-outlined fs-5">search</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-7 mt-2 mt-md-0">
+                                            <small class="text-muted d-flex align-items-center gap-1" id="subfilter-info">
+                                                <span class="material-symbols-outlined fs-6 text-info">info</span>
+                                                Búsqueda general de texto completo en todas las páginas de resultados.
+                                            </small>
                                         </div>
                                     </div>
-                                    <div
-                                        class="col-12 col-md-8 mt-2 mt-md-0 d-flex align-items-center justify-content-between">
-                                        <small class="text-muted" id="subfilter-info">
-                                            <span class="material-symbols-outlined me-1">info</span>
-                                            Buscando en los {{ $resoluciones->count() }} resultados de esta página.
-                                        </small>
-                                        <div id="subfilter-results-info" class="d-none">
-                                            <span class="badge bg-info rounded-pill" id="subfilter-counter">0</span>
-                                            <small class="text-info fw-semibold ms-1">coincidencias</small>
-                                        </div>
-                                    </div>
-                                </div>
+                                </form>
                             </div>
 
                             <!-- Contenedor para "Sin resultados locales" -->
@@ -772,8 +793,10 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
                     <form method="GET" action="{{ route('resolucions.index') }}" id="modalFilterForm">
-                        {{-- Conservar la búsqueda rápida actual --}}
+                        {{-- Conservar la búsqueda rápida y general --}}
                         <input type="hidden" name="search" value="{{ request('search') }}">
+                        <input type="hidden" name="search_rd" value="{{ request('search_rd') }}">
+                        <input type="hidden" name="search_asunto" value="{{ request('search_asunto') }}">
 
                         <div class="modal-body px-4 py-3">
                             {{-- Filtro de Rango de Fechas --}}

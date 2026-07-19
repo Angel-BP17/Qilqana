@@ -107,4 +107,43 @@ class ResolucionServiceTest extends TestCase
             'level_modality_id' => $modality->id,
         ]);
     }
+
+    /** @test */
+    public function it_filters_resoluciones_by_rd_and_asunto()
+    {
+        Resolucion::create([
+            'rd' => 'RD-ABC-123',
+            'fecha' => '2026-01-01',
+            'periodo' => '2026',
+            'asunto' => 'NOMBRAMIENTO DE PERSONAL DOCENTE',
+            'nombres_apellidos' => 'Juan Perez',
+            'dni' => '12345678',
+        ]);
+
+        Resolucion::create([
+            'rd' => 'RD-XYZ-789',
+            'fecha' => '2026-01-02',
+            'periodo' => '2026',
+            'asunto' => 'CESACIÓN DE FUNCIONES DE ADMINISTRATIVO',
+            'nombres_apellidos' => 'Maria Lopez',
+            'dni' => '87654321',
+        ]);
+
+        // Filtrar por RD que coincide con la primera
+        $resultsRd = $this->service->getAll(['search_rd' => 'ABC']);
+        $this->assertEquals(1, $resultsRd['resoluciones']->total());
+        $this->assertEquals('RD-ABC-123', $resultsRd['resoluciones']->first()->rd);
+
+        // Filtrar por Asunto que coincide con la segunda
+        $resultsAsunto = $this->service->getAll(['search_asunto' => 'CESACIÓN']);
+        $this->assertEquals(1, $resultsAsunto['resoluciones']->total());
+        $this->assertEquals('RD-XYZ-789', $resultsAsunto['resoluciones']->first()->rd);
+
+        // Filtrar por combinación que no coincide con ninguna
+        $resultsCombined = $this->service->getAll([
+            'search_rd' => 'ABC',
+            'search_asunto' => 'CESACIÓN',
+        ]);
+        $this->assertEquals(0, $resultsCombined['resoluciones']->total());
+    }
 }

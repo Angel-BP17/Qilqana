@@ -29,7 +29,7 @@
                         <label class="form-label small text-muted fw-bold text-uppercase">Tipo de Resolución</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light"><span class="material-symbols-outlined fs-5">category</span></span>
-                            <select name="resolucion_type_id" class="form-select border-primary-subtle bg-white" id="create_resolution_type" required>
+                            <select name="resolucion_type_id" class="form-select border-primary-subtle bg-white" id="create_resolution_type">
                                 <option value="">Seleccione tipo...</option>
                                 @foreach ($types as $type)
                                     <option value="{{ $type->id }}">{{ $type->name }}</option>
@@ -216,7 +216,7 @@
                         <div class="input-group">
                             <span class="input-group-text bg-light"><span class="material-symbols-outlined fs-5">tag</span></span>
                             <input type="text" class="form-control text-uppercase fw-bold" name="rd" id="create_resolution_rd"
-                                placeholder="EJ: 001 O 001-2026" value="{{ old('rd') }}" required>
+                                placeholder="EJ: 001 O 001-2026" value="{{ old('rd') }}">
                         </div>
                     </div>
                     <div class="col-12 col-md-4">
@@ -224,7 +224,7 @@
                         <div class="input-group">
                             <span class="input-group-text bg-light"><span class="material-symbols-outlined fs-5">calendar_today</span></span>
                             <input type="date" class="form-control" name="fecha" id="create_resolution_fecha"
-                                value="{{ old('date', date('Y-m-d')) }}" required>
+                                value="{{ old('date', date('Y-m-d')) }}">
                         </div>
                     </div>
                 </div>
@@ -234,7 +234,7 @@
                         <label class="form-label small text-muted fw-bold text-uppercase">Categoría del Asunto</label>
                         <div class="input-group">
                             <span class="input-group-text bg-light"><span class="material-symbols-outlined fs-5">subject</span></span>
-                            <select name="asunto_type_id" class="form-select border-primary-subtle bg-white" id="create_asunto_type" disabled required>
+                            <select name="asunto_type_id" class="form-select border-primary-subtle bg-white" id="create_asunto_type" disabled>
                                 <option value="">Seleccione tipo de resolución primero...</option>
                             </select>
                         </div>
@@ -260,7 +260,7 @@
                     <div class="col-12">
                         <label for="create_resolution_asunto" class="form-label small text-muted fw-bold text-uppercase">Asunto / Resumen</label>
                         <textarea class="form-control text-uppercase" name="asunto" id="create_resolution_asunto" rows="2"
-                            placeholder="INGRESE DETALLES ADICIONALES (OPCIONAL)" required>{{ old('asunto') }}</textarea>
+                            placeholder="INGRESE DETALLES ADICIONALES (OPCIONAL)">{{ old('asunto') }}</textarea>
                     </div>
                 </div>
 
@@ -325,40 +325,13 @@
         ];
 
         function checkValidity() {
-            // Evaluar Sección 1
-            const sec1Valid = sec1Fields().every(field => field && field.value.trim() !== '' && field.checkValidity());
-            
-            // Evaluar Sección 2
-            const sec2Valid = sec2HasInteresados();
-
-            // Evaluar Sección 3
-            const sec3Valid = sec3Fields().every(field => field && field.value.trim() !== '' && field.checkValidity());
-
-            // Limpiar clases
+            // Se han quitado las validaciones obligatorias. Todas las secciones se muestran activas.
             [sec1, sec2, sec3].forEach(sec => {
                 if (sec) {
-                    sec.classList.remove('active-section', 'completed-section');
+                    sec.classList.add('active-section');
+                    sec.classList.remove('completed-section');
                 }
             });
-
-            // Lógica de enfoque progresivo en cascada
-            if (!sec1Valid) {
-                if (sec1) sec1.classList.add('active-section');
-            } else {
-                if (sec1) sec1.classList.add('completed-section');
-
-                if (!sec2Valid) {
-                    if (sec2) sec2.classList.add('active-section');
-                } else {
-                    if (sec2) sec2.classList.add('completed-section');
-
-                    if (!sec3Valid) {
-                        if (sec3) sec3.classList.add('active-section');
-                    } else {
-                        if (sec3) sec3.classList.add('completed-section');
-                    }
-                }
-            }
         }
 
         // Escuchar inputs y cambios

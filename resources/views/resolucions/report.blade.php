@@ -103,11 +103,17 @@
             <td style="width: 70%; border: none; padding: 0; text-align: center; vertical-align: middle;">
                 <div style="font-size: 16px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px;">REPORTE DE RESOLUCIONES</div>
                 <div style="font-size: 11px; color: #555;">Fecha de generación: {{ now()->format('d/m/Y h:i A') }}</div>
-                @if ($filtros['search'] || $filtros['periodo'])
+                @if (($filtros['search'] ?? null) || ($filtros['search_rd'] ?? null) || ($filtros['search_asunto'] ?? null) || $filtros['periodo'])
                     <div style="font-size: 11px; text-align: center; margin-top: 5px;">
                         <strong>Filtros aplicados:</strong>
-                        @if ($filtros['search'])
+                        @if ($filtros['search'] ?? null)
                             Búsqueda: "{{ $filtros['search'] }}"
+                        @endif
+                        @if ($filtros['search_rd'] ?? null)
+                            RD: "{{ $filtros['search_rd'] }}"
+                        @endif
+                        @if ($filtros['search_asunto'] ?? null)
+                            Asunto: "{{ $filtros['search_asunto'] }}"
                         @endif
                         @if ($filtros['periodo'])
                             | Periodo: {{ $filtros['periodo'] }}

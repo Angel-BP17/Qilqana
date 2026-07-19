@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -161,7 +162,7 @@ class Charge extends Model
         return $this->document_path ? route('charges.file.document', $this) : '';
     }
 
-    public function scopeFilterByPeriod(\Illuminate\Database\Eloquent\Builder $query, ?string $period): \Illuminate\Database\Eloquent\Builder
+    public function scopeFilterByPeriod(Builder $query, ?string $period): Builder
     {
         return $query->when($period, function ($q, $period) {
             $q->where(function ($q2) use ($period) {
@@ -170,14 +171,14 @@ class Charge extends Model
         });
     }
 
-    public function scopeFilterBySignatureStatus(\Illuminate\Database\Eloquent\Builder $query, ?string $status): \Illuminate\Database\Eloquent\Builder
+    public function scopeFilterBySignatureStatus(Builder $query, ?string $status): Builder
     {
         return $query->when(in_array($status, ['pendiente', 'firmado', 'rechazado'], true), function ($q) use ($status) {
             $q->whereHas('signature', fn ($s) => $s->where('signature_status', $status));
         });
     }
 
-    public function scopeSearch(\Illuminate\Database\Eloquent\Builder $query, ?string $search): \Illuminate\Database\Eloquent\Builder
+    public function scopeSearch(Builder $query, ?string $search): Builder
     {
         return $query->when($search, function ($q, $search) {
             $q->where(function ($q2) use ($search) {

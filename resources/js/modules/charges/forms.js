@@ -27,7 +27,7 @@ export const FormModule = {
         if (!typeSelect) return;
 
         // Limpiar estado al abrir modal
-        $('#createChargeModal').on('show.bs.modal', () => {
+        document.getElementById('createChargeModal')?.addEventListener('show.bs.modal', () => {
             this.clearChargeRecipient();
             this.clearAllAddedRecipients();
             document.getElementById('lookup_charge_natural_value').value = '';
@@ -49,7 +49,10 @@ export const FormModule = {
             const resResults = document.getElementById('resolutions_results_container');
             if (resResults) resResults.classList.add('d-none');
 
-            $('#resolutions_help_text').html('<span class="material-symbols-outlined fs-6 align-middle me-1">info</span>Filtre por fecha o escriba para buscar resoluciones sin cargo en el sistema.');
+            const helpText = document.getElementById('resolutions_help_text');
+            if (helpText) {
+                helpText.innerHTML = '<span class="material-symbols-outlined fs-6 align-middle me-1">info</span>Filtre por fecha o escriba para buscar resoluciones sin cargo en el sistema.';
+            }
             this.clearAllSelectedResolutions();
 
             // Sincronizar selector de destinatarios por defecto
@@ -248,12 +251,18 @@ export const FormModule = {
                 const hasActiveFilters = desde || hasta;
                 
                 if (!query && !hasActiveFilters) {
-                    $('#resolutions_help_text').html('<span class="text-danger fw-bold"><span class="material-symbols-outlined fs-6 align-middle me-1">warning</span>Ingrese al menos un criterio o filtre por fecha para buscar.</span>');
+                    const helpText = document.getElementById('resolutions_help_text');
+                    if (helpText) {
+                        helpText.innerHTML = '<span class="text-danger fw-bold"><span class="material-symbols-outlined fs-6 align-middle me-1">warning</span>Ingrese al menos un criterio o filtre por fecha para buscar.</span>';
+                    }
                     return;
                 }
 
                 if (query && query.length < 2) {
-                    $('#resolutions_help_text').html('<span class="text-danger fw-bold"><span class="material-symbols-outlined fs-6 align-middle me-1">warning</span>La búsqueda por texto requiere al menos 2 caracteres.</span>');
+                    const helpText = document.getElementById('resolutions_help_text');
+                    if (helpText) {
+                        helpText.innerHTML = '<span class="text-danger fw-bold"><span class="material-symbols-outlined fs-6 align-middle me-1">warning</span>La búsqueda por texto requiere al menos 2 caracteres.</span>';
+                    }
                     return;
                 }
 
@@ -302,14 +311,23 @@ export const FormModule = {
                         });
 
                         resultsContainer.classList.remove('d-none');
-                        $('#resolutions_help_text').html(`<span class="text-success"><span class="material-symbols-outlined fs-6 align-middle me-1">check_circle</span>Se encontraron ${data.results.length} resoluciones. Seleccione las que desea vincular.</span>`);
+                        const helpText = document.getElementById('resolutions_help_text');
+                        if (helpText) {
+                            helpText.innerHTML = `<span class="text-success"><span class="material-symbols-outlined fs-6 align-middle me-1">check_circle</span>Se encontraron ${data.results.length} resoluciones. Seleccione las que desea vincular.</span>`;
+                        }
                     } else {
                         resultsContainer.classList.add('d-none');
-                        $('#resolutions_help_text').html('<span class="text-warning fw-bold"><span class="material-symbols-outlined fs-6 align-middle me-1">search_off</span>No se encontraron resoluciones sin cargo con ese criterio.</span>');
+                        const helpText = document.getElementById('resolutions_help_text');
+                        if (helpText) {
+                            helpText.innerHTML = '<span class="text-warning fw-bold"><span class="material-symbols-outlined fs-6 align-middle me-1">search_off</span>No se encontraron resoluciones sin cargo con ese criterio.</span>';
+                        }
                     }
                 } catch (error) {
                     console.error('Error buscando resoluciones:', error);
-                    $('#resolutions_help_text').html('<span class="text-danger"><span class="material-symbols-outlined fs-6 align-middle me-1">error</span>Error de conexión. Intente nuevamente.</span>');
+                    const helpText = document.getElementById('resolutions_help_text');
+                    if (helpText) {
+                        helpText.innerHTML = '<span class="text-danger"><span class="material-symbols-outlined fs-6 align-middle me-1">error</span>Error de conexión. Intente nuevamente.</span>';
+                    }
                 } finally {
                     btnSearch.disabled = false;
                     btnSearch.innerHTML = 'Buscar';
@@ -634,18 +652,35 @@ export const FormModule = {
         typeSelect.addEventListener('change', toggle);
         toggle();
 
-        if ($.fn.select2) {
-            $('.select2-user').select2({ theme: 'bootstrap-5', dropdownParent: $('#createChargeModal'), width: '100%' });
+        if (window.TomSelect) {
+            const selectEl = document.getElementById('select_ugel_user_manual');
+            if (selectEl && !selectEl.tomselect) {
+                new TomSelect(selectEl, {
+                    placeholder: 'Seleccione un trabajador...'
+                });
+            }
         }
     },
 
     initStaticSelect2: function() {
-        if (!$.fn.select2) return;
-        $('.select2-user-edit, .select2-resolutions-edit').select2({
-            theme: 'bootstrap-5',
-            dropdownParent: $('#editChargeModal'),
-            width: '100%'
-        });
+        if (!window.TomSelect) return;
+
+        const userSelect = document.getElementById('edit_assigned_to');
+        if (userSelect && !userSelect.tomselect) {
+            new TomSelect(userSelect, {
+                placeholder: 'Seleccione un destinatario...'
+            });
+        }
+
+        const resSelect = document.getElementById('edit_resolucion_ids');
+        if (resSelect && !resSelect.tomselect) {
+            new TomSelect(resSelect, {
+                plugins: ['remove_button'],
+                maxItems: null,
+                closeOnSelect: false,
+                placeholder: 'Seleccione una o más resoluciones...'
+            });
+        }
 
         // Toggle para edición
         const editSelect = document.getElementById('edit_tipo_interesado');

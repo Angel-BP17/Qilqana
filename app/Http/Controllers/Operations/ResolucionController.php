@@ -9,7 +9,9 @@ use App\Http\Requests\Resolucion\DeleteResolucionRequest;
 use App\Http\Requests\Resolucion\ImportResolucionRequest;
 use App\Http\Requests\Resolucion\UpdateResolucionRequest;
 use App\Imports\ResolucionesImport;
+use App\Models\LegalEntity;
 use App\Models\LevelModality;
+use App\Models\NaturalPerson;
 use App\Models\Resolucion;
 use App\Models\ResolucionType;
 use App\Models\User;
@@ -31,7 +33,7 @@ class ResolucionController extends Controller
 
     public function index(Request $request)
     {
-        $data = $this->service->getAll($request->only(['search', 'periodo', 'resolucion_type_id', 'asunto_type_id', 'level_modality_id', 'desde', 'hasta']));
+        $data = $this->service->getAll($request->only(['search', 'search_rd', 'search_asunto', 'periodo', 'resolucion_type_id', 'asunto_type_id', 'level_modality_id', 'desde', 'hasta']));
         $data['types'] = ResolucionType::orderBy('name')->get();
         $data['users'] = User::orderBy('name')->get();
         $data['level_modalities'] = LevelModality::orderBy('name')->get();
@@ -64,12 +66,12 @@ class ResolucionController extends Controller
         if ($interesadoId && $interesadoType) {
             // Mapear tipo amigable a clase si viene en formato texto
             $typeMap = [
-                'Persona Natural' => \App\Models\NaturalPerson::class,
-                'Persona Juridica' => \App\Models\LegalEntity::class,
-                'Trabajador UGEL' => \App\Models\User::class,
-                'App\Models\NaturalPerson' => \App\Models\NaturalPerson::class,
-                'App\Models\LegalEntity' => \App\Models\LegalEntity::class,
-                'App\Models\User' => \App\Models\User::class,
+                'Persona Natural' => NaturalPerson::class,
+                'Persona Juridica' => LegalEntity::class,
+                'Trabajador UGEL' => User::class,
+                'App\Models\NaturalPerson' => NaturalPerson::class,
+                'App\Models\LegalEntity' => LegalEntity::class,
+                'App\Models\User' => User::class,
             ];
             $interesadoClass = $typeMap[$interesadoType] ?? $interesadoType;
 
@@ -170,6 +172,8 @@ class ResolucionController extends Controller
 
         $filtros = [
             'search' => $request->search,
+            'search_rd' => $request->search_rd,
+            'search_asunto' => $request->search_asunto,
             'periodo' => $request->periodo,
         ];
 
@@ -192,7 +196,7 @@ class ResolucionController extends Controller
         foreach ($headers as $index => $header) {
             $sheet->setCellValue([$index + 1, 1], $header);
         }
- 
+
         // Estilos para encabezados
         $headerStyle = [
             'font' => ['bold' => true],
@@ -203,38 +207,38 @@ class ResolucionController extends Controller
             ],
         ];
         $sheet->getStyle('A1:I1')->applyFromArray($headerStyle);
- 
+
         // Datos por fragmentos (Chunks) para ahorrar memoria
         $row = 2;
         $query->chunk(200, function ($resoluciones) use (&$sheet, &$row) {
             foreach ($resoluciones as $resolucion) {
                 $sheet->setCellValue('A'.$row, $resolucion->id);
                 $sheet->setCellValue('B'.$row, $resolucion->rd);
- 
+
                 $fechaFormateada = $resolucion->fecha ? Carbon::parse($resolucion->fecha)->format('d/m/Y') : '';
                 $sheet->setCellValue('C'.$row, $fechaFormateada);
- 
+
                 $sheet->setCellValue('D'.$row, $resolucion->nombres_apellidos);
- 
+
                 // Unificar DNI y RUC de la resolución
                 $dniList = array_filter(explode(', ', $resolucion->dni ?? ''));
                 $rucList = array_filter(explode(', ', $resolucion->ruc ?? ''));
                 $combined = array_merge($dniList, $rucList);
                 $dniOrRucVal = implode(', ', $combined);
                 $sheet->setCellValue('E'.$row, $dniOrRucVal);
- 
+
                 $sheet->setCellValue('F'.$row, $resolucion->asuntoType?->name ?? '---');
                 $sheet->setCellValue('G'.$row, $resolucion->levelModality?->name ?? '---');
                 $sheet->setCellValue('H'.$row, $resolucion->periodo);
- 
+
                 $status = $resolucion->signature_status;
                 $firmaText = $status === 'firmado' ? 'FIRMADO' : ($status === 'rechazado' ? 'RECHAZADO' : 'PENDIENTE');
                 $sheet->setCellValue('I'.$row, $firmaText);
- 
+
                 $row++;
             }
         });
- 
+
         // Autoajustar columnas
         foreach (range('A', 'I') as $columnID) {
             $sheet->getColumnDimension($columnID)->setAutoSize(true);
@@ -271,7 +275,7 @@ class ResolucionController extends Controller
 
     public function markAsWorked(Resolucion $resolucion)
     {
-        if (!auth()->user()->can('resolucion marcar trabajada')) {
+        if (! auth()->user()->can('resolucion marcar trabajada')) {
             abort(403, 'No tiene permiso para realizar esta acción.');
         }
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -155,7 +156,7 @@ class Resolucion extends Model
     public function getCanCreateChargeAttribute(): bool
     {
         $totalInteresados = $this->naturalPeople()->count() + $this->legalEntities()->count() + $this->users()->count();
-        
+
         $cargosActivos = $this->charges()->whereHas('signature', function ($q) {
             $q->where('signature_status', '!=', 'rechazado');
         })->count();
@@ -191,20 +192,20 @@ class Resolucion extends Model
         return $this->document_path ? route('resolucions.file.document', $this) : '';
     }
 
-    public function scopeFilter(\Illuminate\Database\Eloquent\Builder $query, array $filters): \Illuminate\Database\Eloquent\Builder
+    public function scopeFilter(Builder $query, array $filters): Builder
     {
         return $query->with([
-                'charges.signature', 
-                'charges.signature.signer', 
-                'charges.signature.assignedTo', 
-                'charges.interesado', 
-                'type', 
-                'naturalPeople', 
-                'legalEntities', 
-                'users', 
-                'asuntoType', 
-                'levelModality'
-            ])
+            'charges.signature',
+            'charges.signature.signer',
+            'charges.signature.assignedTo',
+            'charges.interesado',
+            'type',
+            'naturalPeople',
+            'legalEntities',
+            'users',
+            'asuntoType',
+            'levelModality',
+        ])
             ->when($filters['search'] ?? null, function ($q, $search) {
                 $q->where(function ($q2) use ($search) {
                     $q2->where('nombres_apellidos', 'like', "%$search%")
@@ -213,6 +214,12 @@ class Resolucion extends Model
                         ->orWhere('procedencia', 'like', "%$search%")
                         ->orWhere('dni', 'like', "%$search%");
                 });
+            })
+            ->when($filters['search_rd'] ?? null, function ($q, $searchRd) {
+                $q->where('rd', 'like', "%$searchRd%");
+            })
+            ->when($filters['search_asunto'] ?? null, function ($q, $searchAsunto) {
+                $q->where('asunto', 'like', "%$searchAsunto%");
             })
             ->when($filters['periodo'] ?? null, fn ($q, $periodo) => $q->where('periodo', $periodo))
             ->when($filters['resolucion_type_id'] ?? null, fn ($q, $typeId) => $q->where('resolucion_type_id', $typeId))

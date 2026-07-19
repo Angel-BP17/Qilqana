@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -54,7 +55,7 @@ class User extends Authenticatable
         return $this->morphToMany(Resolucion::class, 'interesado', 'resolucion_interesados');
     }
 
-    public function scopeSearch(\Illuminate\Database\Eloquent\Builder $query, ?string $search): \Illuminate\Database\Eloquent\Builder
+    public function scopeSearch(Builder $query, ?string $search): Builder
     {
         return $query->when($search, function ($query, $search) {
             $query->where(function ($q) use ($search) {
@@ -67,7 +68,7 @@ class User extends Authenticatable
         });
     }
 
-    public function scopeFilterByRole(\Illuminate\Database\Eloquent\Builder $query, $roleId): \Illuminate\Database\Eloquent\Builder
+    public function scopeFilterByRole(Builder $query, $roleId): Builder
     {
         return $query->when($roleId, function ($q, $roleId) {
             $q->whereHas('roles', fn ($q2) => $q2->where('id', $roleId));
